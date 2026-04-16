@@ -512,6 +512,19 @@ button {
 .card.unplayable {
     opacity: 0.5;
     cursor: not-allowed;
+    filter: grayscale(0.7);
+}
+
+.card.selected {
+    border-color: #27ae60 !important;
+    box-shadow: 0 0 20px rgba(39, 174, 96, 0.6) !important;
+    transform: scale(1.05);
+    cursor: default;
+}
+
+.reward-cards .card.selected {
+    border-color: #27ae60 !important;
+    box-shadow: 0 0 30px rgba(39, 174, 96, 0.8) !important;
 }
 
 .card-cost {

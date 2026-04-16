@@ -412,12 +412,18 @@ function generateMap() {
     
     gameState.map.nodes = [];
     
-    // 先检查每行是否已经有完成的节点
+    // 先检查每行是否已经有完成的节点（只检查当前楼层的节点）
+    const currentFloor = gameState.map.floor - 1;  // 楼层从 1 开始，数组从 0 开始
     const rowHasCompleted = new Set();
     gameState.map.completedNodes.forEach(nodeId => {
         const [row] = nodeId.split('-').map(Number);
-        rowHasCompleted.add(row);
+        // 只添加当前楼层的行
+        if (row === currentFloor) {
+            rowHasCompleted.add(row);
+        }
     });
+    
+    console.log(`[generateMap] Floor ${gameState.map.floor}, currentFloor index: ${currentFloor}, rowHasCompleted:`, rowHasCompleted);
     
     // 如果当前层还没有路径，生成多条新路径；否则使用保存的路径
     let paths = gameState.map.paths;
@@ -430,13 +436,17 @@ function generateMap() {
     }
     
     // 如果还没有保存节点类型，生成并保存
+    console.log(`[generateMap] Floor: ${gameState.map.floor}, nodeTypes:`, gameState.map.nodeTypes);
     if (!gameState.map.nodeTypes) {
+        console.log('[generateMap] Generating new node types for floor', gameState.map.floor);
         gameState.map.nodeTypes = {};
-        for (let row = 0; row < rows - 1; row++) {  // 不包括 Boss 行
+        for (let row = 0; row < rows - 1; row++) {
             for (let col = 0; col < nodesPerRow; col++) {
                 gameState.map.nodeTypes[`${row}-${col}`] = nodeTypes[randomInt(0, nodeTypes.length - 1)];
             }
         }
+    } else {
+        console.log('[generateMap] Using existing node types');
     }
     
     for (let row = 0; row < rows; row++) {
@@ -500,31 +510,53 @@ function generateMap() {
             if (gameState.map.completedNodes.has(nodeId)) {
                 // 已完成的节点
                 nodeEl.classList.add('completed');
-            } else if (rowHasCompleted.has(row)) {
-                // 该行已经有完成的节点，其他节点全部锁定
-                nodeEl.classList.add('locked');
             } else if (row === 0 && isOnAnyPath) {
-                // 第一行可达的节点默认可用
-                nodeEl.classList.add('available');
-            } else if (isOnAnyPath && row > 0) {
-                // 第 1 行及以后的可达节点，检查是否有任何一个前驱节点已完成
-                let hasAnyPrevCompleted = false;
-                for (let path of paths) {
-                    const pathIndex = path.findIndex(p => p.row === row && p.col === col);
-                    if (pathIndex > 0) {
-                        const prevNode = path[pathIndex - 1];
-                        const prevNodeId = `${prevNode.row}-${prevNode.col}`;
-                        if (gameState.map.completedNodes.has(prevNodeId)) {
-                            hasAnyPrevCompleted = true;
-                            break;
-                        }
+                // 第一行可达的节点：检查当前行是否有其他节点已完成，如有则锁定
+                let rowHasCompleted = false;
+                for (let c = 0; c < nodesPerRow; c++) {
+                    if (gameState.map.completedNodes.has(`0-${c}`)) {
+                        rowHasCompleted = true;
+                        break;
                     }
                 }
-                
-                if (hasAnyPrevCompleted) {
-                    nodeEl.classList.add('available');
-                } else {
+                if (rowHasCompleted) {
                     nodeEl.classList.add('locked');
+                } else {
+                    nodeEl.classList.add('available');
+                }
+            } else if (isOnAnyPath && row > 0) {
+                // 第 1 行及以后的可达节点
+                // 先检查同行是否有其他节点已完成，如有则锁定（只能完成同行一个节点）
+                let rowHasCompletedOther = false;
+                for (let c = 0; c < nodesPerRow; c++) {
+                    const completedNodeId = `${row}-${c}`;
+                    if (completedNodeId !== nodeId && gameState.map.completedNodes.has(completedNodeId)) {
+                        rowHasCompletedOther = true;
+                        break;
+                    }
+                }
+                if (rowHasCompletedOther) {
+                    nodeEl.classList.add('locked');
+                } else {
+                    // 检查是否有任何一个前驱节点已完成
+                    let hasAnyPrevCompleted = false;
+                    for (let path of paths) {
+                        const pathIndex = path.findIndex(p => p.row === row && p.col === col);
+                        if (pathIndex > 0) {
+                            const prevNode = path[pathIndex - 1];
+                            const prevNodeId = `${prevNode.row}-${prevNode.col}`;
+                            if (gameState.map.completedNodes.has(prevNodeId)) {
+                                hasAnyPrevCompleted = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (hasAnyPrevCompleted) {
+                        nodeEl.classList.add('available');
+                    } else {
+                        nodeEl.classList.add('locked');
+                    }
                 }
             } else {
                 // 不可达的节点全部锁定
@@ -575,6 +607,13 @@ function generateReachablePaths(rows, nodesPerRow) {
             }
         }
     }
+    
+    // 强制让第 0 行的所有节点都可达（确保玩家有真正的选择）
+    for (let col = 0; col < nodesPerRow; col++) {
+        reachableNodes.add(`0-${col}`);
+    }
+    
+    console.log(`[generateReachablePaths] Reachable nodes:`, Array.from(reachableNodes));
     
     // 步骤 2：增加路径密度 - 为多个起始点生成多条路径
     // 不仅为首行节点生成路径，还为中间行的多个节点生成路径
@@ -834,6 +873,9 @@ function enterNode(node) {
             }
         }
     }
+    
+    // 标记当前节点为进行中（添加到 completedNodes 但保持 available 状态）
+    gameState.map.inProgressNode = node.id;
     
     // 进入对应场景
     switch (node.type) {
@@ -1413,12 +1455,30 @@ function winBattle() {
             <div class="card-desc">${cardData.desc}</div>
         `;
         cardEl.addEventListener('click', () => {
+            // 如果已经选择过卡牌，忽略点击
+            if (cardEl.classList.contains('selected')) return;
+            
             addCardToDeck(cardId);
+            
+            // 标记当前卡牌为已选择
+            cardEl.classList.add('selected');
+            
+            // 禁用其他卡牌
+            const allCards = rewardCardsContainer.querySelectorAll('.card');
+            allCards.forEach(otherCard => {
+                if (otherCard !== cardEl) {
+                    otherCard.classList.add('unplayable');
+                    otherCard.style.pointerEvents = 'none';
+                    otherCard.style.opacity = '0.5';
+                }
+            });
+            
             if (isBoss) {
                 // Boss战需要选择遗物后才继续
                 return;
             }
-            // 非 Boss 战胜利，返回地图，但不清空路径和节点类型（同一层内保持不变）
+            // 非 Boss 战胜利，返回地图
+            gameState.map.inProgressNode = null;  // 清空进行中节点
             showScreen('map-screen');
             generateMap();
         });
@@ -1455,9 +1515,12 @@ function winBattle() {
             gameState.player.hp = gameState.player.maxHp;
             document.getElementById('player-hp').textContent = `${gameState.player.hp}/${gameState.player.maxHp}`;
             
-            // 清空路径和节点类型数据，让下一层生成新数据
+            // 清空所有地图数据，让下一层生成全新数据
+            gameState.map.inProgressNode = null;  // 清空进行中节点
             gameState.map.paths = [];
             gameState.map.nodeTypes = null;
+            gameState.map.completedNodes = new Set();  // 清空完成的节点
+            gameState.map.nodes = [];  // 清空节点列表
             
             if (gameState.map.floor > 3) {
                 gameOver(true);
@@ -1488,7 +1551,7 @@ function addCardToDeck(cardId) {
     gameState.stats.cardsAdded++;
     
     // 获取卡牌信息
-    const card = CARDS[cardId];
+    const card = CARD_DB[cardId];
     
     // 添加视觉反馈：显示提示文字
     const rewardScreen = document.querySelector('.reward-screen');
