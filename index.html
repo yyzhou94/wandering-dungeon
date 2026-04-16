@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>流浪地牢 - 卡牌构筑 Roguelike</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- 主菜单 -->
+        <div id="main-menu" class="screen active">
+            <h1>⚔️ 流浪地牢</h1>
+            <p class="subtitle">Roguelike 卡牌构筑游戏</p>
+            <div class="menu-buttons">
+                <button id="start-game" class="btn-primary">开始游戏</button>
+                <button id="select-class" class="btn-secondary">选择职业</button>
+                <button id="view-stats" class="btn-secondary">游戏统计</button>
+            </div>
+            <div class="high-score">
+                最高分: <span id="menu-high-score">0</span>
+            </div>
+        </div>
+
+        <!-- 职业选择 -->
+        <div id="class-select" class="screen">
+            <h2>选择你的职业</h2>
+            <div class="class-list">
+                <div class="class-card selected" data-class="warrior">
+                    <div class="class-icon">⚔️</div>
+                    <h3>战士</h3>
+                    <p>高生命值，稳扎稳打</p>
+                    <div class="class-stats">
+                        <span>❤️ 80</span>
+                        <span>⚡ 3</span>
+                    </div>
+                </div>
+                <div class="class-card" data-class="mage">
+                    <div class="class-icon">🔮</div>
+                    <h3>法师</h3>
+                    <p>高能量，强力法术</p>
+                    <div class="class-stats">
+                        <span>❤️ 60</span>
+                        <span>⚡ 4</span>
+                    </div>
+                </div>
+                <div class="class-card" data-class="rogue">
+                    <div class="class-icon">🗡️</div>
+                    <h3>盗贼</h3>
+                    <p>快速连击，灵活机动</p>
+                    <div class="class-stats">
+                        <span>❤️ 65</span>
+                        <span>⚡ 3</span>
+                    </div>
+                </div>
+            </div>
+            <button id="confirm-class" class="btn-primary">确认选择</button>
+            <button id="back-to-menu" class="btn-secondary">返回主菜单</button>
+        </div>
+
+        <!-- 地图界面 -->
+        <div id="map-screen" class="screen">
+            <div class="map-header">
+                <div class="player-info">
+                    <span id="map-player-hp">❤️ 80/80</span>
+                    <span id="map-player-gold">💰 0</span>
+                </div>
+                <span id="map-floor">第 1 层</span>
+                <button id="view-relics" class="btn-small">查看遗物</button>
+            </div>
+            <div id="map-nodes" class="map-nodes">
+                <!-- 动态生成 -->
+            </div>
+        </div>
+
+        <!-- 战斗界面 -->
+        <div id="battle-screen" class="screen">
+            <div class="battle-header">
+                <span id="battle-floor">第 1 层</span>
+                <button id="view-deck" class="btn-small">查看牌组</button>
+            </div>
+            <div class="battle-area">
+                <div class="enemy-area">
+                    <div class="enemy">
+                        <div class="enemy-sprite">👹</div>
+                        <div class="enemy-name">哥布林</div>
+                        <div class="enemy-hp-bar">
+                            <div id="enemy-hp-fill" class="hp-fill" style="width: 100%"></div>
+                        </div>
+                        <div class="enemy-stats">
+                            <span id="enemy-hp">30/30</span>
+                            <span id="enemy-intent">⚔️ 攻击 8</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="player-area">
+                    <div class="player-avatar" id="player-avatar">⚔️</div>
+                    <div class="player-stats">
+                        <span class="stat"><span class="stat-icon">❤️</span> <span id="player-hp">80/80</span></span>
+                        <span class="stat"><span class="stat-icon">🛡️</span> <span id="player-block">0</span></span>
+                        <span class="stat"><span class="stat-icon">⚡</span> <span id="player-energy">3/3</span></span>
+                    </div>
+                    <div class="potion-bar" id="potion-bar">
+                        <!-- 药水槽 -->
+                    </div>
+                </div>
+            </div>
+            <div class="hand-area">
+                <div class="hand-info">
+                    <span id="deck-count">牌库: 10</span>
+                    <span id="discard-count">弃牌: 0</span>
+                </div>
+                <div id="hand-cards" class="hand-cards">
+                    <!-- 手牌 -->
+                </div>
+                <button id="end-turn" class="btn-primary">结束回合</button>
+                <button id="abandon-run" class="btn-danger" style="margin-top: 10px;">放弃游戏</button>
+            </div>
+        </div>
+
+        <!-- 奖励界面 -->
+        <div id="reward-screen" class="screen">
+            <h2>🎉 战斗胜利!</h2>
+            <div class="rewards">
+                <div class="reward-section">
+                    <h3>获得金币</h3>
+                    <div id="reward-gold" class="reward-gold">💰 15</div>
+                </div>
+                <div class="reward-section">
+                    <h3>选择一张卡牌加入牌组</h3>
+                    <div id="reward-cards" class="reward-cards">
+                        <!-- 奖励卡牌 -->
+                    </div>
+                    <button id="skip-card" class="btn-secondary">跳过</button>
+                </div>
+                <div id="relic-reward" class="reward-section" style="display: none;">
+                    <h3>获得遗物</h3>
+                    <div id="reward-relic" class="reward-relic">
+                        <!-- 奖励遗物 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 遗物列表界面 -->
+        <div id="relics-screen" class="screen">
+            <h2>🎒 我的遗物</h2>
+            <div id="relics-list" class="relics-list">
+                <!-- 动态生成 -->
+            </div>
+            <button id="close-relics" class="btn-secondary">返回</button>
+        </div>
+
+        <!-- 商店界面 -->
+        <div id="shop-screen" class="screen">
+            <h2>🏪 神秘商店</h2>
+            <div class="shop-gold">💰 <span id="shop-gold">0</span></div>
+            <div class="shop-items">
+                <div class="shop-section">
+                    <h3>卡牌</h3>
+                    <div id="shop-cards" class="shop-cards">
+                        <!-- 商品卡牌 -->
+                    </div>
+                </div>
+                <div class="shop-section">
+                    <h3>遗物</h3>
+                    <div id="shop-relics" class="shop-relics">
+                        <!-- 商品遗物 -->
+                    </div>
+                </div>
+                <div class="shop-section">
+                    <h3>药水</h3>
+                    <div id="shop-potions" class="shop-potions">
+                        <!-- 商品药水 -->
+                    </div>
+                </div>
+            </div>
+            <button id="leave-shop" class="btn-secondary">离开商店</button>
+        </div>
+
+        <!-- 休息处 -->
+        <div id="rest-screen" class="screen">
+            <h2>🔥 篝火</h2>
+            <p class="rest-desc">温暖的火焰让你感到安心...</p>
+            <div class="rest-options">
+                <button id="rest-heal">
+                    <span class="option-icon">😴</span>
+                    <span>休息 (恢复30%生命)</span>
+                </button>
+                <button id="rest-upgrade">
+                    <span class="option-icon">🔨</span>
+                    <span>锻造 (升级卡牌)</span>
+                </button>
+            </div>
+            <button id="leave-rest" class="btn-secondary">离开</button>
+        </div>
+
+        <!-- 事件界面 -->
+        <div id="event-screen" class="screen">
+            <h2 id="event-title">神秘事件</h2>
+            <div id="event-sprite" class="event-sprite">❓</div>
+            <p id="event-description">你遇到了一个神秘的事件...</p>
+            <div id="event-choices" class="event-choices">
+                <!-- 事件选项 -->
+            </div>
+        </div>
+
+        <!-- 牌组查看弹窗 -->
+        <div id="deck-modal" class="modal">
+            <div class="modal-content">
+                <h2>当前牌组</h2>
+                <div id="deck-list" class="deck-list">
+                    <!-- 牌组列表 -->
+                </div>
+                <div id="relics-list" class="relics-list">
+                    <!-- 遗物列表 -->
+                </div>
+                <button id="close-deck" class="btn-secondary">关闭</button>
+            </div>
+        </div>
+
+        <!-- 游戏结束 -->
+        <div id="game-over" class="screen">
+            <h1 id="game-over-title" class="victory">🎉 胜利!</h1>
+            <div class="game-over-stats">
+                <p>到达层数: <span id="final-floor">3</span></p>
+                <p>击败敌人: <span id="final-kills">12</span></p>
+                <p>获得金币: <span id="final-gold">150</span></p>
+            </div>
+            <button id="return-menu" class="btn-primary">返回主菜单</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
