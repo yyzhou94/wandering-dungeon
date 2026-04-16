@@ -503,6 +503,14 @@ button {
     position: relative;
 }
 
+.card.selected {
+    border-color: #27ae60;
+    box-shadow: 0 0 20px rgba(39, 174, 96, 0.6);
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: scale(0.95);
+}
+
 .card:hover {
     transform: translateY(-10px);
     border-color: #e94560;
@@ -512,19 +520,6 @@ button {
 .card.unplayable {
     opacity: 0.5;
     cursor: not-allowed;
-    filter: grayscale(0.7);
-}
-
-.card.selected {
-    border-color: #27ae60 !important;
-    box-shadow: 0 0 20px rgba(39, 174, 96, 0.6) !important;
-    transform: scale(1.05);
-    cursor: default;
-}
-
-.reward-cards .card.selected {
-    border-color: #27ae60 !important;
-    box-shadow: 0 0 30px rgba(39, 174, 96, 0.8) !important;
 }
 
 .card-cost {
@@ -680,16 +675,6 @@ button {
 
 .shop-item {
     position: relative;
-    cursor: pointer;
-    pointer-events: auto;
-    transition: transform 0.2s ease;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
-    padding: 10px;
-}
-
-.shop-item:hover {
-    transform: scale(1.05);
 }
 
 .shop-item .price {
@@ -706,12 +691,6 @@ button {
 
 .shop-item .card {
     margin-bottom: 10px;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-
-.shop-item:hover .card {
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
 }
 
 .relic-item {

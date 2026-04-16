@@ -412,18 +412,12 @@ function generateMap() {
     
     gameState.map.nodes = [];
     
-    // 先检查每行是否已经有完成的节点（只检查当前楼层的节点）
-    const currentFloor = gameState.map.floor - 1;  // 楼层从 1 开始，数组从 0 开始
+    // 先检查每行是否已经有完成的节点
     const rowHasCompleted = new Set();
     gameState.map.completedNodes.forEach(nodeId => {
         const [row] = nodeId.split('-').map(Number);
-        // 只添加当前楼层的行
-        if (row === currentFloor) {
-            rowHasCompleted.add(row);
-        }
+        rowHasCompleted.add(row);
     });
-    
-    console.log(`[generateMap] Floor ${gameState.map.floor}, currentFloor index: ${currentFloor}, rowHasCompleted:`, rowHasCompleted);
     
     // 如果当前层还没有路径，生成多条新路径；否则使用保存的路径
     let paths = gameState.map.paths;
@@ -436,17 +430,13 @@ function generateMap() {
     }
     
     // 如果还没有保存节点类型，生成并保存
-    console.log(`[generateMap] Floor: ${gameState.map.floor}, nodeTypes:`, gameState.map.nodeTypes);
     if (!gameState.map.nodeTypes) {
-        console.log('[generateMap] Generating new node types for floor', gameState.map.floor);
         gameState.map.nodeTypes = {};
-        for (let row = 0; row < rows - 1; row++) {
+        for (let row = 0; row < rows - 1; row++) {  // 不包括 Boss 行
             for (let col = 0; col < nodesPerRow; col++) {
                 gameState.map.nodeTypes[`${row}-${col}`] = nodeTypes[randomInt(0, nodeTypes.length - 1)];
             }
         }
-    } else {
-        console.log('[generateMap] Using existing node types');
     }
     
     for (let row = 0; row < rows; row++) {
@@ -510,53 +500,31 @@ function generateMap() {
             if (gameState.map.completedNodes.has(nodeId)) {
                 // 已完成的节点
                 nodeEl.classList.add('completed');
+            } else if (rowHasCompleted.has(row)) {
+                // 该行已经有完成的节点，其他节点全部锁定
+                nodeEl.classList.add('locked');
             } else if (row === 0 && isOnAnyPath) {
-                // 第一行可达的节点：检查当前行是否有其他节点已完成，如有则锁定
-                let rowHasCompleted = false;
-                for (let c = 0; c < nodesPerRow; c++) {
-                    if (gameState.map.completedNodes.has(`0-${c}`)) {
-                        rowHasCompleted = true;
-                        break;
-                    }
-                }
-                if (rowHasCompleted) {
-                    nodeEl.classList.add('locked');
-                } else {
-                    nodeEl.classList.add('available');
-                }
+                // 第一行可达的节点默认可用
+                nodeEl.classList.add('available');
             } else if (isOnAnyPath && row > 0) {
-                // 第 1 行及以后的可达节点
-                // 先检查同行是否有其他节点已完成，如有则锁定（只能完成同行一个节点）
-                let rowHasCompletedOther = false;
-                for (let c = 0; c < nodesPerRow; c++) {
-                    const completedNodeId = `${row}-${c}`;
-                    if (completedNodeId !== nodeId && gameState.map.completedNodes.has(completedNodeId)) {
-                        rowHasCompletedOther = true;
-                        break;
-                    }
-                }
-                if (rowHasCompletedOther) {
-                    nodeEl.classList.add('locked');
-                } else {
-                    // 检查是否有任何一个前驱节点已完成
-                    let hasAnyPrevCompleted = false;
-                    for (let path of paths) {
-                        const pathIndex = path.findIndex(p => p.row === row && p.col === col);
-                        if (pathIndex > 0) {
-                            const prevNode = path[pathIndex - 1];
-                            const prevNodeId = `${prevNode.row}-${prevNode.col}`;
-                            if (gameState.map.completedNodes.has(prevNodeId)) {
-                                hasAnyPrevCompleted = true;
-                                break;
-                            }
+                // 第 1 行及以后的可达节点，检查是否有任何一个前驱节点已完成
+                let hasAnyPrevCompleted = false;
+                for (let path of paths) {
+                    const pathIndex = path.findIndex(p => p.row === row && p.col === col);
+                    if (pathIndex > 0) {
+                        const prevNode = path[pathIndex - 1];
+                        const prevNodeId = `${prevNode.row}-${prevNode.col}`;
+                        if (gameState.map.completedNodes.has(prevNodeId)) {
+                            hasAnyPrevCompleted = true;
+                            break;
                         }
                     }
-                    
-                    if (hasAnyPrevCompleted) {
-                        nodeEl.classList.add('available');
-                    } else {
-                        nodeEl.classList.add('locked');
-                    }
+                }
+                
+                if (hasAnyPrevCompleted) {
+                    nodeEl.classList.add('available');
+                } else {
+                    nodeEl.classList.add('locked');
                 }
             } else {
                 // 不可达的节点全部锁定
@@ -607,13 +575,6 @@ function generateReachablePaths(rows, nodesPerRow) {
             }
         }
     }
-    
-    // 强制让第 0 行的所有节点都可达（确保玩家有真正的选择）
-    for (let col = 0; col < nodesPerRow; col++) {
-        reachableNodes.add(`0-${col}`);
-    }
-    
-    console.log(`[generateReachablePaths] Reachable nodes:`, Array.from(reachableNodes));
     
     // 步骤 2：增加路径密度 - 为多个起始点生成多条路径
     // 不仅为首行节点生成路径，还为中间行的多个节点生成路径
@@ -873,9 +834,6 @@ function enterNode(node) {
             }
         }
     }
-    
-    // 标记当前节点为进行中（添加到 completedNodes 但保持 available 状态）
-    gameState.map.inProgressNode = node.id;
     
     // 进入对应场景
     switch (node.type) {
@@ -1414,6 +1372,9 @@ function endTurn() {
 function winBattle() {
     gameState.stats.enemiesKilled++;
     
+    // 重置 Boss 战卡牌选择标志
+    window.bossCardSelected = false;
+    
     // 燃烧之血效果
     if (gameState.player.relics.includes('burning_blood')) {
         healPlayer(6);
@@ -1454,33 +1415,38 @@ function winBattle() {
             <div class="card-name">${cardData.name}</div>
             <div class="card-desc">${cardData.desc}</div>
         `;
-        cardEl.addEventListener('click', () => {
-            // 如果已经选择过卡牌，忽略点击
-            if (cardEl.classList.contains('selected')) return;
+        cardEl.addEventListener('click', function() {
+            // 如果已经选择过卡牌，显示提示并返回
+            if (window.bossCardSelected) {
+                showFloatingText('你已经选择过一张卡牌了!', document.querySelector('.reward-screen'), '#e74c3c');
+                return;
+            }
+            
+            // 标记为已选择
+            window.bossCardSelected = true;
+            
+            // 禁用所有卡牌
+            document.querySelectorAll('.reward-cards .card').forEach(card => {
+                card.classList.add('unplayable');
+                card.style.cursor = 'not-allowed';
+            });
+            
+            // 高亮已选择的卡牌
+            this.classList.add('selected');
+            this.style.borderColor = '#27ae60';
+            this.style.boxShadow = '0 0 20px rgba(39, 174, 96, 0.6)';
             
             addCardToDeck(cardId);
             
-            // 标记当前卡牌为已选择
-            cardEl.classList.add('selected');
-            
-            // 禁用其他卡牌
-            const allCards = rewardCardsContainer.querySelectorAll('.card');
-            allCards.forEach(otherCard => {
-                if (otherCard !== cardEl) {
-                    otherCard.classList.add('unplayable');
-                    otherCard.style.pointerEvents = 'none';
-                    otherCard.style.opacity = '0.5';
-                }
-            });
-            
             if (isBoss) {
-                // Boss战需要选择遗物后才继续
+                // Boss 战需要选择遗物后才继续
                 return;
             }
-            // 非 Boss 战胜利，返回地图
-            gameState.map.inProgressNode = null;  // 清空进行中节点
-            showScreen('map-screen');
-            generateMap();
+            // 非 Boss 战胜利，返回地图，但不清空路径和节点类型（同一层内保持不变）
+            setTimeout(() => {
+                showScreen('map-screen');
+                generateMap();
+            }, 1500);
         });
         rewardCardsContainer.appendChild(cardEl);
     });
@@ -1505,9 +1471,8 @@ function winBattle() {
         relicEl.title = relicData.desc;
         relicEl.addEventListener('click', () => {
             addRelic(randomRelic);
-            // 显示获得提示
-            alert(`🎉 获得遗物：${relicData.name}\n\n${relicData.desc}`);
-            console.log('遗物已选择:', randomRelic);
+            alert('获得遗物：' + relicData.name + '!\n\n' + relicData.desc);
+            
             // 进入下一层
             gameState.map.floor++;
             
@@ -1515,12 +1480,11 @@ function winBattle() {
             gameState.player.hp = gameState.player.maxHp;
             document.getElementById('player-hp').textContent = `${gameState.player.hp}/${gameState.player.maxHp}`;
             
-            // 清空所有地图数据，让下一层生成全新数据
-            gameState.map.inProgressNode = null;  // 清空进行中节点
+            // 清空路径、节点类型和已完成节点数据，让下一层生成新数据
             gameState.map.paths = [];
             gameState.map.nodeTypes = null;
-            gameState.map.completedNodes = new Set();  // 清空完成的节点
-            gameState.map.nodes = [];  // 清空节点列表
+            gameState.map.completedNodes.clear();  // 清空已完成节点，否则新层的第一行会被锁定
+            gameState.map.currentNode = null;
             
             if (gameState.map.floor > 3) {
                 gameOver(true);
@@ -1553,34 +1517,20 @@ function addCardToDeck(cardId) {
     // 获取卡牌信息
     const card = CARD_DB[cardId];
     
-    // 添加视觉反馈：显示提示文字
-    const rewardScreen = document.querySelector('.reward-screen');
-    const feedback = document.createElement('div');
-    feedback.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 1.5em;
-        color: #27ae60;
-        font-weight: bold;
-        text-shadow: 0 0 20px rgba(39, 174, 96, 0.8);
-        pointer-events: none;
-        z-index: 1000;
-        animation: fadeUp 1s ease-out forwards;
-    `;
-    feedback.textContent = `✅ 已加入：${card.name}`;
-    document.body.appendChild(feedback);
-    
-    // 1 秒后移除反馈
-    setTimeout(() => {
-        feedback.remove();
-    }, 1000);
+    // 使用 alert 提示
+    alert('卡牌 ' + card.name + ' 已加入牌组!');
     
     // 永恒羽毛效果
     if (gameState.player.relics.includes('eternal_feather')) {
         healPlayer(3);
     }
+}
+
+// 添加浮动文字提示
+function showFloatingTextWithDelay(text, target, color, delay) {
+    setTimeout(() => {
+        showFloatingText(text, target, color);
+    }, delay);
 }
 
 function addRelic(relicId) {
@@ -1796,7 +1746,9 @@ function upgradeCard(cardId) {
     }
     
     hideDeckModal();
-    alert(`锻造成功！\n${cardData.name} → ${CARD_DB[upgradedCardId].name}\n费用从 ${cardData.cost} 降至 ${CARD_DB[upgradedCardId].cost}`);
+    
+    // 使用 alert 提示锻造结果
+    alert('锻造成功！\n\n' + cardData.name + ' -> ' + CARD_DB[upgradedCardId].name + '\n费用：' + cardData.cost + ' -> ' + CARD_DB[upgradedCardId].cost);
     
     setTimeout(() => {
         showScreen('map-screen');
@@ -1833,10 +1785,10 @@ function handleEventChoice(choice) {
                 const relicId = Object.keys(RELIC_DB)[randomInt(0, Object.keys(RELIC_DB).length - 1)];
                 const relicData = RELIC_DB[relicId];
                 addRelic(relicId);
-                alert(`🎉 获得遗物：${relicData.name}\n\n${relicData.desc}`);
+                alert('🎉 打开宝箱获得遗物：' + relicData.name + '!\n\n' + relicData.desc);
             } else {
                 gameState.player.hp -= 10;
-                alert('宝箱是陷阱！你受到了 10 点伤害');
+                alert('宝箱是陷阱！-10 生命');
             }
             break;
         case 'altar_sacrifice':
@@ -1844,11 +1796,11 @@ function handleEventChoice(choice) {
             const relicId1 = Object.keys(RELIC_DB)[randomInt(0, Object.keys(RELIC_DB).length - 1)];
             const relicData1 = RELIC_DB[relicId1];
             addRelic(relicId1);
-            alert(`🎉 献祭成功！获得遗物：${relicData1.name}\n\n${relicData1.desc}`);
+            alert('🎉 献祭成功！获得遗物：' + relicData1.name + '!\n\n' + relicData1.desc);
             break;
         case 'altar_pray':
             healPlayer(20);
-            alert('祈祷让你恢复了 20 点生命');
+            alert('祈祷成功！+20 生命');
             break;
         case 'merchant_buy':
             if (gameState.player.gold >= choice.gold) {
@@ -1856,9 +1808,9 @@ function handleEventChoice(choice) {
                 const relicId2 = Object.keys(RELIC_DB)[randomInt(0, Object.keys(RELIC_DB).length - 1)];
                 const relicData2 = RELIC_DB[relicId2];
                 addRelic(relicId2);
-                alert(`🎉 购买成功！获得遗物：${relicData2.name}\n\n${relicData2.desc}`);
+                alert('🎉 购买成功！获得遗物：' + relicData2.name + '!\n\n' + relicData2.desc);
             } else {
-                alert('金币不足！');
+                alert('金币不足!');
                 return;
             }
             break;
@@ -1867,22 +1819,22 @@ function handleEventChoice(choice) {
                 const relicId3 = Object.keys(RELIC_DB)[randomInt(0, Object.keys(RELIC_DB).length - 1)];
                 const relicData3 = RELIC_DB[relicId3];
                 addRelic(relicId3);
-                alert(`🎉 偷窃成功！获得遗物：${relicData3.name}\n\n${relicData3.desc}`);
+                alert('🎉 偷窃成功！获得遗物：' + relicData3.name + '!\n\n' + relicData3.desc);
             } else {
                 gameState.player.hp -= 15;
-                alert('被发现了！你受到了 15 点伤害');
+                alert('偷窃失败！被发现了！-15 生命');
             }
             break;
         case 'fountain_drink':
             healPlayer(Math.floor(gameState.player.maxHp * 0.3));
-            alert('泉水让你感觉焕然一新');
+            alert('泉水治愈了你！恢复了 ' + Math.floor(gameState.player.maxHp * 0.3) + ' 点生命');
             break;
         case 'fountain_fill':
             if (gameState.player.potions.length < 3) {
                 gameState.player.potions.push('health_potion');
-                alert('你装满了一瓶生命药水');
+                alert('获得生命药水！');
             } else {
-                alert('你的药水栏已满');
+                alert('药水栏已满！');
                 return;
             }
             break;
@@ -1890,8 +1842,10 @@ function handleEventChoice(choice) {
             break;
     }
     
-    showScreen('map-screen');
-    generateMap();
+    setTimeout(() => {
+        showScreen('map-screen');
+        generateMap();
+    }, 500);  // 短暂延迟后返回地图
 }
 
 // ==================== 牌组查看 ====================
