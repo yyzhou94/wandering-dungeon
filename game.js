@@ -85,10 +85,46 @@ const ENEMY_DB = {
     demon: { name: '恶魔', hp: 70, icon: '👿', pattern: 'aggressive', damage: 14 },
     dragon: { name: '幼龙', hp: 80, icon: '🐉', pattern: 'caster', damage: 18 },
     
+    // 精英敌人（新增）
+    elite_orc: { name: '精英兽人', hp: 70, icon: '👹⚡', pattern: 'aggressive', damage: 14 },
+    elite_demon: { name: '精英恶魔', hp: 95, icon: '👿⚡', pattern: 'aggressive', damage: 17 },
+    elite_dragon: { name: '精英幼龙', hp: 110, icon: '🐉⚡', pattern: 'caster', damage: 21 },
+    
     // Boss
     boss_goblin_king: { name: '哥布林王', hp: 120, icon: '👑', pattern: 'boss', damage: 15 },
     boss_lich: { name: '巫妖', hp: 150, icon: '💀', pattern: 'boss', damage: 18 },
     boss_dragon: { name: '远古巨龙', hp: 200, icon: '🐲', pattern: 'boss', damage: 22 }
+};
+
+// 分层节点类型配置（新增）
+const FLOOR_NODE_CONFIG = {
+    1: {
+        // 第一层：教学与适应
+        battles: 0.50,      // 50% 战斗
+        shops: 0.12,        // 12% 商店
+        rests: 0.06,        // 6% 休息
+        events: 0.12,       // 12% 事件
+        elites: 0,          // 0% 精英
+        boss: 0.06          // 6% Boss
+    },
+    2: {
+        // 第二层：深化与挑战
+        battles: 0.56,      // 56% 战斗
+        shops: 0.12,        // 12% 商店
+        rests: 0.06,        // 6% 休息
+        events: 0.12,       // 12% 事件
+        elites: 0.06,       // 6% 精英
+        boss: 0.06          // 6% Boss
+    },
+    3: {
+        // 第三层：终极考验
+        battles: 0.62,      // 62% 战斗
+        shops: 0.06,        // 6% 商店
+        rests: 0,           // 0% 休息
+        events: 0.06,       // 6% 事件
+        elites: 0.19,       // 19% 精英
+        boss: 0.06          // 6% Boss
+    }
 };
 
 // 遗物数据库
@@ -387,9 +423,20 @@ function generateMap() {
     document.getElementById('map-player-gold').textContent = `💰 ${gameState.player.gold}`;
     document.getElementById('map-floor').textContent = `第 ${floor} 层`;
     
-    // 添加地图说明
+    // 添加地图说明（优化版）
     const mapInfo = document.createElement('div');
     mapInfo.className = 'map-info';
+    
+    // 根据楼层显示不同的提示
+    let floorHint = '';
+    if (floor === 1) {
+        floorHint = '🌱 第一层：熟悉机制，谨慎探索';
+    } else if (floor === 2) {
+        floorHint = '⚔️ 第二层：策略规划，资源管理';
+    } else {
+        floorHint = '🔥 第三层：极限考验，全力以赴！';
+    }
+    
     mapInfo.innerHTML = `
         <div class="legend">
             <span>⚔️ 战斗</span>
@@ -397,18 +444,19 @@ function generateMap() {
             <span>🔥 休息</span>
             <span>❓ 事件</span>
             <span>👑 BOSS</span>
+            <span>⚡ 精英</span>
         </div>
         <div class="path-legend">
             <span>● 可选路径</span>
         </div>
-        <p class="hint">点击发光的节点开始探索，可在多条路径中自由选择推进路线</p>
+        <p class="hint">${floorHint}</p>
     `;
     nodesContainer.appendChild(mapInfo);
     
-    // 生成地图节点
-    const nodeTypes = ['battle', 'battle', 'shop', 'rest', 'event'];
+    // 生成节点类型（使用分层配置）
+    const nodeTypes = getFloorNodeTypes(floor);
     const rows = 4;  // 4 行：3 行普通 + 1 行 Boss
-    const nodesPerRow = 4; // 从 3 扩展到 4 列，增加路径选择
+    const nodesPerRow = 4;
     
     gameState.map.nodes = [];
     
@@ -429,7 +477,7 @@ function generateMap() {
         gameState.map.path = paths[0];
     }
     
-    // 如果还没有保存节点类型，生成并保存
+    // 如果还没有保存节点类型，生成并保存（使用分层配置）
     if (!gameState.map.nodeTypes) {
         gameState.map.nodeTypes = {};
         for (let row = 0; row < rows - 1; row++) {  // 不包括 Boss 行
@@ -463,12 +511,14 @@ function generateMap() {
             nodeEl.className = `map-node ${type}`;
             nodeEl.dataset.nodeId = nodeId;
             
+            // 更新图标映射（添加精英）
             const icons = {
                 battle: '⚔️',
                 shop: '🏪',
                 rest: '🔥',
                 event: '❓',
-                boss: '👑'
+                boss: '👑',
+                elite: '⚡'
             };
             
             nodeEl.innerHTML = `
@@ -542,6 +592,48 @@ function generateMap() {
     setTimeout(() => {
         generatePathLines(nodesContainer, paths);
     }, 100);
+}
+
+// 新增：根据楼层获取节点类型配置
+function getFloorNodeTypes(floor) {
+    const config = FLOOR_NODE_CONFIG[floor] || FLOOR_NODE_CONFIG[1];
+    const types = [];
+    
+    // 根据配置比例生成节点类型数组
+    const totalNodes = 12; // 3 行 × 4 列 = 12 个普通节点
+    const counts = {
+        battle: Math.floor(totalNodes * config.battles),
+        shop: Math.floor(totalNodes * config.shops),
+        rest: Math.floor(totalNodes * config.rests),
+        event: Math.floor(totalNodes * config.events),
+        elite: Math.floor(totalNodes * config.elites)
+    };
+    
+    // 确保总数为 12，调整战斗数量
+    const currentTotal = Object.values(counts).reduce((a, b) => a + b, 0);
+    counts.battle += (totalNodes - currentTotal);
+    
+    // 生成类型数组
+    for (let i = 0; i < counts.battle; i++) types.push('battle');
+    for (let i = 0; i < counts.shop; i++) types.push('shop');
+    for (let i = 0; i < counts.rest; i++) types.push('rest');
+    for (let i = 0; i < counts.event; i++) types.push('event');
+    for (let i = 0; i < counts.elite; i++) types.push('elite');
+    
+    return types;
+}
+
+// 新增：获取节点标签
+function getNodeLabel(type) {
+    const labels = {
+        battle: '战斗',
+        shop: '商店',
+        rest: '休息',
+        event: '事件',
+        boss: 'BOSS',
+        elite: '精英'
+    };
+    return labels[type] || '';
 }
 
 // 生成可达路径系统：确保所有节点都至少有一条路径可以到达 BOSS
@@ -724,16 +816,7 @@ function generatePathLines(nodesContainer, paths) {
     });
 }
 
-function getNodeLabel(type) {
-    const labels = {
-        battle: '战斗',
-        shop: '商店',
-        rest: '休息',
-        event: '事件',
-        boss: 'BOSS'
-    };
-    return labels[type];
-}
+
 
 function enterNode(node) {
     console.log(`[enterNode] Clicked node: ${node.id}, type: ${node.type}`);
@@ -840,6 +923,9 @@ function enterNode(node) {
         case 'battle':
             startBattle(false);
             break;
+        case 'elite':
+            startEliteBattle();
+            break;
         case 'boss':
             startBattle(true);
             break;
@@ -920,6 +1006,82 @@ function startBattle(isBoss) {
         nextAction: null,
         weak: 0,
         vulnerable: 0
+    };
+    
+    // 初始化战斗状态
+    gameState.battle.hand = [];
+    gameState.battle.drawPile = shuffle([...gameState.player.deck]);
+    gameState.battle.discardPile = [];
+    gameState.battle.exhaustPile = [];
+    gameState.battle.turn = 1;
+    gameState.battle.firstAttack = true;
+    gameState.battle.noDraw = false;
+    gameState.battle.ornamentalFanCount = 0;
+    gameState.player.block = 0;
+    
+    // 重置临时属性
+    gameState.player.stats.strength = 0;
+    gameState.player.stats.dexterity = 0;
+    gameState.player.stats.weak = 0;
+    gameState.player.stats.vulnerable = 0;
+    
+    // 船锚效果 - 战斗开始获得格挡
+    if (gameState.player.relics.includes('anchor')) {
+        gameState.player.block += 10;
+    }
+    
+    showScreen('battle-screen');
+    updateBattleUI();
+    updatePotionBar();
+    startTurn();
+}
+
+// 新增：精英战斗
+function startEliteBattle() {
+    const floor = gameState.map.floor;
+    let enemyType;
+    
+    // 精英敌人难度系数（比普通敌人高 40%）
+    const eliteMultiplier = 1.4 + (floor - 1) * 0.2;
+    
+    // 根据层数选择精英敌人
+    if (floor === 1) {
+        // 第一层没有精英（配置为 0）
+        startBattle(false);
+        return;
+    } else if (floor === 2) {
+        enemyType = 'elite_orc';
+    } else {
+        // 第三层随机选择精英
+        enemyType = randomInt(0, 1) === 0 ? 'elite_demon' : 'elite_dragon';
+    }
+    
+    const baseEnemy = ENEMY_DB[enemyType];
+    
+    // 创建带难度调整的精英敌人
+    gameState.enemy = {
+        type: enemyType,
+        name: baseEnemy.name,
+        hp: Math.floor(baseEnemy.hp * eliteMultiplier),
+        maxHp: Math.floor(baseEnemy.hp * eliteMultiplier),
+        icon: baseEnemy.icon,
+        pattern: baseEnemy.pattern,
+        damage: Math.floor(baseEnemy.damage * eliteMultiplier),
+        action: null,
+        difficulty: floor,
+        isElite: true
+    };
+    
+    gameState.battle.enemy = {
+        type: enemyType,
+        ...baseEnemy,
+        currentHp: gameState.enemy.hp,
+        maxHp: gameState.enemy.hp,
+        block: 0,
+        nextAction: null,
+        weak: 0,
+        vulnerable: 0,
+        isElite: true
     };
     
     // 初始化战斗状态
@@ -1155,6 +1317,9 @@ function renderHand() {
             cardEl.classList.add('unplayable');
         }
         
+        // 添加 data-desc 属性用于悬停提示
+        cardEl.setAttribute('data-desc', cardData.desc);
+        
         cardEl.innerHTML = `
             <div class="card-cost">${cardData.cost}</div>
             <div class="card-icon">${cardData.icon}</div>
@@ -1380,9 +1545,18 @@ function winBattle() {
         healPlayer(6);
     }
     
-    // 计算奖励
+    // 计算奖励（精英战奖励翻倍）
     const isBoss = gameState.battle.enemy.pattern === 'boss';
-    const goldReward = isBoss ? randomInt(80, 120) : randomInt(10, 20);
+    const isElite = gameState.battle.enemy.isElite || false;
+    
+    let goldReward;
+    if (isBoss) {
+        goldReward = randomInt(80, 120);
+    } else if (isElite) {
+        goldReward = randomInt(25, 40); // 精英奖励比普通战斗高
+    } else {
+        goldReward = randomInt(10, 20);
+    }
     gameState.player.gold += goldReward;
     
     document.getElementById('reward-gold').textContent = goldReward;
@@ -1409,6 +1583,7 @@ function winBattle() {
         const cardData = CARD_DB[cardId];
         const cardEl = document.createElement('div');
         cardEl.className = `card ${cardData.type}`;
+        cardEl.setAttribute('data-desc', cardData.desc);
         cardEl.innerHTML = `
             <div class="card-cost">${cardData.cost}</div>
             <div class="card-icon">${cardData.icon}</div>
@@ -1494,6 +1669,33 @@ function winBattle() {
             }
         });
         relicContainer.appendChild(relicEl);
+    } else if (isElite) {
+        // 精英战额外奖励：50% 概率获得药水
+        relicRewardSection.style.display = 'block';
+        const relicContainer = document.getElementById('reward-relic');
+        relicContainer.innerHTML = '<p style="color: #888;">精英挑战成功！</p>';
+        
+        if (Math.random() < 0.5 && gameState.player.potions.length < 3) {
+            const potionId = 'health_potion';
+            const potionData = POTION_DB[potionId];
+            gameState.player.potions.push(potionId);
+            
+            const potionEl = document.createElement('div');
+            potionEl.className = 'potion-item';
+            potionEl.innerHTML = `<div style="font-size: 2em;">${potionData.icon}</div><div style="font-size: 0.5em;">${potionData.name}</div>`;
+            potionEl.title = potionData.desc;
+            relicContainer.appendChild(potionEl);
+            
+            setTimeout(() => {
+                showScreen('map-screen');
+                generateMap();
+            }, 1500);
+        } else {
+            setTimeout(() => {
+                showScreen('map-screen');
+                generateMap();
+            }, 1500);
+        }
     } else {
         relicRewardSection.style.display = 'none';
     }
@@ -1561,15 +1763,17 @@ function openShop() {
         
         const itemEl = document.createElement('div');
         itemEl.className = 'shop-item';
-        itemEl.innerHTML = `
-            <div class="card ${cardData.type}">
-                <div class="card-cost">${cardData.cost}</div>
-                <div class="card-icon">${cardData.icon}</div>
-                <div class="card-name">${cardData.name}</div>
-                <div class="card-desc">${cardData.desc}</div>
-            </div>
-            <div class="price">💰 ${price}</div>
+        const cardDiv = document.createElement('div');
+        cardDiv.className = `card ${cardData.type}`;
+        cardDiv.setAttribute('data-desc', cardData.desc);
+        cardDiv.innerHTML = `
+            <div class="card-cost">${cardData.cost}</div>
+            <div class="card-icon">${cardData.icon}</div>
+            <div class="card-name">${cardData.name}</div>
+            <div class="card-desc">${cardData.desc}</div>
         `;
+        itemEl.appendChild(cardDiv);
+        itemEl.innerHTML += `<div class="price">💰 ${price}</div>`;
         itemEl.addEventListener('click', () => {
             if (gameState.player.gold >= price) {
                 gameState.player.gold -= price;
@@ -1693,6 +1897,7 @@ function restUpgrade() {
         
         const cardEl = document.createElement('div');
         cardEl.className = `card ${cardData.type}`;
+        cardEl.setAttribute('data-desc', cardData.desc);
         cardEl.innerHTML = `
             <div class="card-cost">${cardData.cost}</div>
             <div class="card-icon">${cardData.icon}</div>
@@ -1864,6 +2069,7 @@ function showDeckModal() {
         const cardData = CARD_DB[cardId];
         const cardEl = document.createElement('div');
         cardEl.className = `card ${cardData.type}`;
+        cardEl.setAttribute('data-desc', cardData.desc);
         cardEl.innerHTML = `
             <div class="card-cost">${cardData.cost}</div>
             <div class="card-icon">${cardData.icon}</div>
