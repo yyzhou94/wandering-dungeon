@@ -67,6 +67,21 @@ body {
 .high-score {
     color: #ffd700;
     font-size: 1.2em;
+    margin-top: 20px;
+}
+
+.save-info {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    color: #ffd700;
+    font-size: 0.9em;
+}
+
+.save-info p {
+    margin: 0;
 }
 
 /* 按钮样式 */
@@ -80,31 +95,61 @@ button {
     font-family: inherit;
 }
 
-.btn-primary {
+/* 继续游戏按钮 - 金色（强调继续进度） */
+#continue-game {
+    background: linear-gradient(45deg, #ffd700, #ffb347);
+    color: #1a1a2e;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+}
+
+#continue-game:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(255, 215, 0, 0.6);
+    animation: goldGlow 1.5s infinite;
+}
+
+@keyframes goldGlow {
+    0%, 100% { box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); }
+    50% { box-shadow: 0 4px 25px rgba(255, 215, 0, 0.7); }
+}
+
+/* 开始游戏按钮 - 主红色（主要行动） */
+#start-game {
     background: linear-gradient(45deg, #e94560, #ff6b6b);
     color: white;
+    box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
 }
 
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(233, 69, 96, 0.4);
+#start-game:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 25px rgba(233, 69, 96, 0.6);
 }
 
-.btn-secondary {
-    background: rgba(255, 255, 255, 0.1);
+/* 游戏统计按钮 - 蓝色（信息类） */
+#view-stats {
+    background: linear-gradient(45deg, #3498db, #2980b9);
     color: white;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
 }
 
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.2);
+#view-stats:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(52, 152, 219, 0.6);
 }
 
+/* 清除进度按钮 - 危险红色 */
 .btn-danger {
     background: rgba(231, 76, 60, 0.8);
     color: white;
     padding: 8px 16px;
     font-size: 0.9em;
+}
+
+.btn-danger:hover {
+    background: rgba(231, 76, 60, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.5);
 }
 
 .btn-small {
@@ -188,9 +233,17 @@ button {
     border-radius: 10px;
 }
 
-.player-info {
+.battle-header {
     display: flex;
-    gap: 20px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
 }
 
 .player-info span {
@@ -298,30 +351,113 @@ button {
     border: 3px solid #ffd700;
 }
 
+/* 已完成节点 - 绿色边框 + 对勾 + 发光 */
 .map-node.completed {
-    opacity: 0.4;
+    border: 3px solid #2ecc71 !important;
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.5), inset 0 0 10px rgba(46, 204, 113, 0.2);
+    filter: grayscale(0.3) brightness(0.9);
+    position: relative;
     cursor: not-allowed;
-    filter: grayscale(0.8);
+    opacity: 1 !important;
+}
+
+.map-node.completed::after {
+    content: '✓';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    color: #2ecc71;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(46, 204, 113, 0.8);
+    z-index: 10;
+}
+
+/* 可用节点 - 金色脉冲发光动画 */
+@keyframes availablePulse {
+    0%, 100% { 
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.6), 0 0 30px rgba(255, 215, 0, 0.4);
+        transform: scale(1);
+    }
+    50% { 
+        box-shadow: 0 0 35px rgba(255, 215, 0, 1), 0 0 50px rgba(255, 215, 0, 0.7);
+        transform: scale(1.05);
+    }
 }
 
 .map-node.available {
-    animation: glow 1.5s infinite;
+    border: 3px solid #ffd700 !important;
+    animation: availablePulse 2s ease-in-out infinite;
+    position: relative;
+    z-index: 5;
+}
+
+.map-node.available::before {
+    content: '▶';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #ffd700;
+    font-size: 0.8em;
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
 }
 
 .map-node.available:hover {
-    transform: scale(1.15);
-    z-index: 3;
+    transform: scale(1.12) !important;
+    z-index: 10;
+    animation: none;
+    box-shadow: 0 0 40px rgba(255, 215, 0, 1), 0 0 60px rgba(255, 215, 0, 0.8);
 }
 
+/* 锁定节点 - 完全灰化 + 锁图标 */
 .map-node.locked {
-    opacity: 0.5;
+    filter: grayscale(100%) brightness(0.4) !important;
+    opacity: 0.25 !important;
     cursor: not-allowed;
-    filter: grayscale(0.5) brightness(0.7);
+    position: relative;
+}
+
+.map-node.locked::after {
+    content: '🔒';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2em;
+    z-index: 20;
+    filter: grayscale(100%) opacity(0.5);
 }
 
 /* 事件节点在锁定时保持紫色调 */
 .map-node.event.locked {
-    filter: grayscale(0.3) brightness(0.6);
+    filter: grayscale(0.5) brightness(0.5) !important;
+}
+
+.map-node.event.locked::after {
+    filter: hue-rotate(240deg) opacity(0.5);
+}
+
+/* Boss 节点特殊效果 */
+.map-node.boss.available {
+    border: 4px solid #e74c3c !important;
+    animation: bossPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes bossPulse {
+    0%, 100% { 
+        box-shadow: 0 0 25px rgba(231, 76, 60, 0.8), 0 0 40px rgba(231, 76, 60, 0.6);
+        transform: scale(1);
+    }
+    50% { 
+        box-shadow: 0 0 50px rgba(231, 76, 60, 1), 0 0 70px rgba(231, 76, 60, 0.8);
+        transform: scale(1.08);
+    }
+}
+
+.map-node.boss.available::before {
+    content: '👑';
 }
 
 /* 移除所有默认的竖直连线，只保留 SVG 动态生成的路径连线 */
