@@ -1932,13 +1932,48 @@ function upgradeCard(cardId) {
     
     // 创建升级后的卡牌
     const upgradedCardId = cardId + '_upgraded';
+    
+    // 检查是否是 0 费卡牌
+    const isZeroCost = cardData.cost === 0;
+    
+    let upgradedEffect = { ...cardData.effect };
+    let upgradedDesc = cardData.desc;
+    
+    if (isZeroCost) {
+        // 0 费卡牌升级：增强效果而不是降低费用
+        if (upgradedEffect.damage) {
+            // 有伤害效果的卡牌：增加 2-4 点伤害
+            upgradedEffect.damage += 3;
+            upgradedDesc = `${cardData.desc}（伤害 +3）`;
+        } else if (upgradedEffect.draw) {
+            // 有抽牌效果的卡牌：增加 1 张抽牌
+            upgradedEffect.draw += 1;
+            upgradedDesc = `${cardData.desc}（抽牌 +1）`;
+        } else if (upgradedEffect.energy) {
+            // 有能量效果的卡牌：增加 1 点能量
+            upgradedEffect.energy += 1;
+            upgradedDesc = `${cardData.desc}（能量 +1）`;
+        } else if (upgradedEffect.hpCost && upgradedEffect.energy) {
+            // 放血牌：减少生命代价或增加能量
+            upgradedEffect.energy += 1;
+            upgradedDesc = `${cardData.desc}（能量 +1）`;
+        } else {
+            // 其他情况：通用增强
+            upgradedDesc = `${cardData.desc}（效果增强）`;
+        }
+    } else {
+        // 非 0 费卡牌：降低费用
+        upgradedEffect = { ...cardData.effect };
+        upgradedDesc = `${cardData.desc}（费用 -1）`;
+    }
+    
     CARD_DB[upgradedCardId] = {
         name: cardData.name + '+',
-        cost: Math.max(0, cardData.cost - 1),
+        cost: isZeroCost ? 0 : Math.max(0, cardData.cost - 1),
         type: cardData.type,
         icon: cardData.icon,
-        desc: `${cardData.desc}（费用 -1）`,
-        effect: { ...cardData.effect }
+        desc: upgradedDesc,
+        effect: upgradedEffect
     };
     
     // 添加升级后的卡牌
@@ -1953,7 +1988,11 @@ function upgradeCard(cardId) {
     hideDeckModal();
     
     // 使用 alert 提示锻造结果
-    alert('锻造成功！\n\n' + cardData.name + ' -> ' + CARD_DB[upgradedCardId].name + '\n费用：' + cardData.cost + ' -> ' + CARD_DB[upgradedCardId].cost);
+    const costText = isZeroCost 
+        ? `费用：${cardData.cost}（保持 0 费）`
+        : `费用：${cardData.cost} -> ${CARD_DB[upgradedCardId].cost}`;
+        
+    alert('锻造成功！\n\n' + cardData.name + ' -> ' + CARD_DB[upgradedCardId].name + '\n' + costText + '\n' + CARD_DB[upgradedCardId].desc);
     
     setTimeout(() => {
         showScreen('map-screen');
