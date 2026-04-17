@@ -1997,11 +1997,20 @@ function handleEventChoice(choice) {
             }
             break;
         case 'altar_sacrifice':
+            // 献祭 10 点最大生命
+            const oldMaxHp = gameState.player.maxHp;
             gameState.player.maxHp -= 10;
+            
+            // 如果当前血量超过新的最大血量，同步降低当前血量
+            if (gameState.player.hp > gameState.player.maxHp) {
+                gameState.player.hp = gameState.player.maxHp;
+            }
+            
             const relicId1 = Object.keys(RELIC_DB)[randomInt(0, Object.keys(RELIC_DB).length - 1)];
             const relicData1 = RELIC_DB[relicId1];
             addRelic(relicId1);
-            alert('🎉 献祭成功！获得遗物：' + relicData1.name + '!\n\n' + relicData1.desc);
+            
+            alert(`🎉 献祭成功！\n\n最大生命：${oldMaxHp} → ${gameState.player.maxHp}\n\n获得遗物：${relicData1.name}!\n\n${relicData1.desc}`);
             break;
         case 'altar_pray':
             healPlayer(20);
