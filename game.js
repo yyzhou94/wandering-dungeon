@@ -258,18 +258,53 @@ function shuffle(array) {
 }
 
 function showScreen(screenId) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(screenId).classList.add('active');
+    document.querySelectorAll('.screen').forEach(s => {
+        s.classList.remove('active', 'floor-1', 'floor-2', 'floor-3');
+    });
+    const screen = document.getElementById(screenId);
+    screen.classList.add('active');
+    
+    // 为地图屏幕添加楼层类名
+    if (screenId === 'map-screen') {
+        const floor = gameState.map.floor;
+        screen.classList.add(`floor-${floor}`);
+    }
+    
+    // 为战斗屏幕添加楼层类名
+    if (screenId === 'battle-screen') {
+        const floor = gameState.map.floor;
+        screen.classList.add(`floor-${floor}`);
+    }
 }
 
 function showDamage(target, amount, type = 'damage') {
     const el = document.createElement('div');
     el.className = type === 'heal' ? 'heal-number' : type === 'block' ? 'block-number' : 'damage-number';
     el.textContent = amount;
-    el.style.left = '50%';
+    // 随机位置微调，避免完全重叠
+    const randomOffset = (Math.random() - 0.5) * 20;
+    el.style.left = `calc(50% + ${randomOffset}px)`;
     el.style.top = '50%';
     target.appendChild(el);
     setTimeout(() => el.remove(), 1000);
+}
+
+function showDamageWithFeedback(target, amount, type = 'damage', isCritical = false) {
+    const el = document.createElement('div');
+    el.className = type === 'heal' ? 'heal-number' : type === 'block' ? 'block-number' : 'damage-number';
+    
+    if (isCritical) {
+        el.classList.add('critical');
+        el.textContent = '💥 ' + amount;
+    } else {
+        el.textContent = amount;
+    }
+    
+    const randomOffset = (Math.random() - 0.5) * 20;
+    el.style.left = `calc(50% + ${randomOffset}px)`;
+    el.style.top = '50%';
+    target.appendChild(el);
+    setTimeout(() => el.remove(), 1200);
 }
 
 function shakeElement(element) {
@@ -1315,6 +1350,8 @@ function renderHand() {
         // 检查能量是否足够
         if (cardData.cost > gameState.player.energy) {
             cardEl.classList.add('unplayable');
+        } else {
+            cardEl.classList.add('energy-sufficient');
         }
         
         // 添加 data-desc 属性用于悬停提示
@@ -1347,6 +1384,17 @@ function playCard(handIndex) {
     // 从手牌移除
     gameState.battle.hand.splice(handIndex, 1);
     gameState.battle.discardPile.push(cardId);
+    
+    // 卡牌出牌动画效果
+    const handCards = document.querySelectorAll('#hand-cards .card');
+    if (handCards[handIndex]) {
+        handCards[handIndex].classList.add('playing');
+        setTimeout(() => {
+            if (handCards[handIndex]) {
+                handCards[handIndex].remove();
+            }
+        }, 400);
+    }
     
     // 执行效果
     executeCardEffect(cardData);
@@ -1456,6 +1504,7 @@ function executeCardEffect(cardData) {
 
 function damageEnemy(amount) {
     const enemy = gameState.battle.enemy;
+    const oldHp = enemy.currentHp;
     
     // 先扣除格挡
     if (enemy.block > 0) {
@@ -1467,11 +1516,60 @@ function damageEnemy(amount) {
     // 扣除生命
     if (amount > 0) {
         enemy.currentHp -= amount;
-        showDamage(document.querySelector('.enemy'), amount, 'damage');
-        shakeElement(document.querySelector('.enemy'));
+        
+        // 根据伤害大小决定震动强度和视觉效果
+        const damagePercent = amount / enemy.maxHp;
+        const enemyEl = document.querySelector('.enemy');
+        
+        if (damagePercent > 0.3) {
+            showDamageWithFeedback(document.querySelector('.enemy'), amount, 'damage', true);
+            enemyEl.classList.add('hit-large');
+        } else if (damagePercent > 0.15) {
+            showDamageWithFeedback(document.querySelector('.enemy'), amount, 'damage', false);
+            enemyEl.classList.add('hit-medium');
+        } else {
+            showDamage(document.querySelector('.enemy'), amount, 'damage');
+            enemyEl.classList.add('hit-small');
+        }
+        
+        // 添加闪光效果
+        enemyEl.classList.add('hit');
+        
+        // 添加 HP 下降脉冲
+        enemyEl.classList.add('hp-decrease');
+        
+        // 添加火花效果 (大伤害)
+        if (amount > 10) {
+            createSparks(enemyEl, 15);
+        }
+        
+        // 清理类名
+        setTimeout(() => {
+            enemyEl.classList.remove('hit-large', 'hit-medium', 'hit-small', 'hit', 'hp-decrease');
+        }, 600);
     }
     
     updateBattleUI();
+}
+
+// 火花粒子效果
+function createSparks(target, count = 10) {
+    const targetRect = target.getBoundingClientRect();
+    const container = document.querySelector('#game-container');
+    
+    for (let i = 0; i < count; i++) {
+        const spark = document.createElement('div');
+        spark.className = 'spark';
+        
+        const randomX = Math.random() * targetRect.width;
+        const randomY = Math.random() * targetRect.height;
+        
+        spark.style.left = `${targetRect.left + randomX - container.getBoundingClientRect().left}px`;
+        spark.style.top = `${targetRect.top + randomY - container.getBoundingClientRect().top}px`;
+        
+        container.appendChild(spark);
+        setTimeout(() => spark.remove(), 1000);
+    }
 }
 
 function endTurn() {

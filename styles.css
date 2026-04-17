@@ -549,10 +549,75 @@ button {
     transform: scale(0.95);
 }
 
+/* 卡牌视觉增强 */
 .card:hover {
-    transform: translateY(-10px);
+    transform: translateY(-15px) scale(1.05);
     border-color: #e94560;
-    box-shadow: 0 10px 30px rgba(233, 69, 96, 0.3);
+    box-shadow: 
+        0 15px 40px rgba(233, 69, 96, 0.4),
+        0 0 20px rgba(233, 69, 96, 0.2),
+        inset 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.card.attack:hover {
+    box-shadow: 0 15px 40px rgba(231, 76, 60, 0.5);
+}
+
+.card.defense:hover {
+    box-shadow: 0 15px 40px rgba(52, 152, 219, 0.5);
+}
+
+.card.skill:hover {
+    box-shadow: 0 15px 40px rgba(155, 89, 182, 0.5);
+}
+
+.card.unplayable {
+    opacity: 0.4;
+    filter: grayscale(0.7);
+    cursor: not-allowed;
+}
+
+.card.unplayable:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+}
+
+/* 卡牌出牌动画 */
+@keyframes playCard {
+    0% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2) rotate(10deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(0) rotate(20deg);
+        opacity: 0;
+    }
+}
+
+.card.playing {
+    animation: playCard 0.4s ease forwards;
+}
+
+/* 卡牌费用显示增强 */
+.card-cost {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    box-shadow: 
+        0 2px 8px rgba(52, 152, 219, 0.5),
+        inset 0 1px 2px rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.card-cost.energy-sufficient {
+    animation: energyGlow 2s infinite;
+}
+
+@keyframes energyGlow {
+    0%, 100% { box-shadow: 0 2px 8px rgba(52, 152, 219, 0.5); }
+    50% { box-shadow: 0 2px 12px rgba(52, 152, 219, 0.8); }
 }
 
 .card.unplayable {
@@ -1021,7 +1086,7 @@ button {
     font-weight: bold;
 }
 
-/* 动画效果 */
+/* 伤害数字系统升级 */
 .damage-number {
     position: absolute;
     color: #e74c3c;
@@ -1029,6 +1094,201 @@ button {
     font-weight: bold;
     animation: floatUp 1s ease forwards;
     pointer-events: none;
+    text-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
+}
+
+.damage-number.critical {
+    color: #ff6b6b;
+    font-size: 2em;
+    text-shadow: 0 0 20px rgba(255, 107, 107, 0.8);
+    animation: floatUpCritical 1.2s ease forwards;
+}
+
+.heal-number.big {
+    color: #2ecc71;
+    font-size: 1.8em;
+    text-shadow: 0 0 15px rgba(46, 204, 113, 0.6);
+}
+
+@keyframes floatUpCritical {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(0.8);
+        filter: blur(0px);
+    }
+    20% {
+        transform: translateY(-10px) scale(1.2);
+        filter: blur(2px);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-60px) scale(1);
+        filter: blur(0px);
+    }
+}
+
+/* 敌人受击反馈 */
+@keyframes hitFlash {
+    0%, 100% { 
+        box-shadow: 0 4px 15px rgba(231, 76, 60, 0.5); 
+        filter: brightness(1);
+    }
+    20% { 
+        box-shadow: 0 0 40px rgba(255, 255, 255, 0.9), 0 4px 15px rgba(231, 76, 60, 0.5); 
+        filter: brightness(1.5);
+    }
+}
+
+.enemy.hit {
+    animation: hitFlash 0.3s ease;
+}
+
+.enemy.hit-small {
+    animation: shake 0.3s ease;
+}
+
+.enemy.hit-medium {
+    animation: shake 0.5s ease;
+}
+
+.enemy.hit-large {
+    animation: shake-heavy 0.6s ease;
+}
+
+@keyframes shake-heavy {
+    0%, 100% { transform: translateX(0); }
+    15% { transform: translateX(-15px) rotate(-2deg); }
+    35% { transform: translateX(15px) rotate(2deg); }
+    55% { transform: translateX(-15px) rotate(-2deg); }
+    75% { transform: translateX(15px) rotate(2deg); }
+}
+
+@keyframes hpDecrease {
+    0% { 
+        box-shadow: inset 0 0 0 rgba(231, 76, 60, 0); 
+    }
+    30% { 
+        box-shadow: inset 0 0 40px rgba(231, 76, 60, 0.5); 
+    }
+    100% { 
+        box-shadow: inset 0 0 0 rgba(231, 76, 60, 0); 
+    }
+}
+
+.enemy.hp-decrease {
+    animation: hpDecrease 0.5s ease;
+}
+
+/* 分层地牢背景系统 */
+/* 第一层：废弃矿坑 - 灰蓝色调 */
+#map-screen.floor-1 {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
+}
+
+.floor-1 .map-node.battle {
+    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+    box-shadow: 0 4px 15px rgba(149, 165, 166, 0.4);
+}
+
+/* 第二层：黑暗神殿 - 紫黑色调 */
+#map-screen.floor-2 {
+    background: linear-gradient(135deg, #2c1e4a 0%, #1a1a2e 50%, #2c1e4a 100%);
+}
+
+.floor-2 .map-node.battle {
+    background: linear-gradient(135deg, #8e44ad, #6c3483);
+    box-shadow: 0 4px 15px rgba(142, 68, 173, 0.5);
+}
+
+.floor-2 .enemy {
+    border-color: rgba(142, 68, 173, 0.6);
+    box-shadow: 0 0 30px rgba(142, 68, 173, 0.3);
+}
+
+/* 第三层：龙巢深渊 - 红金色调 */
+#map-screen.floor-3 {
+    background: linear-gradient(135deg, #4a0404 0%, #2c0404 50%, #4a0404 100%);
+}
+
+.floor-3 .map-node.boss {
+    background: linear-gradient(135deg, #c0392b, #8b0000);
+    box-shadow: 0 0 40px rgba(192, 57, 43, 0.8), 0 4px 15px rgba(192, 57, 43, 0.5);
+    animation: bossPulse 2s infinite;
+}
+
+.floor-3 .enemy {
+    border-color: rgba(231, 76, 60, 0.8);
+    box-shadow: 0 0 50px rgba(231, 76, 60, 0.4);
+}
+
+/* Boss 战特殊效果 */
+@keyframes bossPulse {
+    0%, 100% { 
+        box-shadow: 0 0 40px rgba(192, 57, 43, 0.8), 0 4px 15px rgba(192, 57, 43, 0.5);
+        transform: scale(1);
+    }
+    50% { 
+        box-shadow: 0 0 60px rgba(255, 69, 0, 1), 0 6px 20px rgba(255, 69, 0, 0.7);
+        transform: scale(1.02);
+    }
+}
+
+/* 战斗粒子背景 */
+.battle-area {
+    position: relative;
+}
+
+.battle-area::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 20% 30%, rgba(233, 69, 96, 0.1) 2px, transparent 2px),
+        radial-gradient(circle at 80% 70%, rgba(233, 69, 96, 0.1) 2px, transparent 2px);
+    background-size: 100px 100px;
+    animation: particleFloat 20s linear infinite;
+    pointer-events: none;
+    z-index: -1;
+}
+
+@keyframes particleFloat {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-100px); }
+}
+
+/* Boss 战特殊粒子 */
+.floor-3 .battle-area::before {
+    background-image: 
+        radial-gradient(circle at 20% 30%, rgba(231, 76, 60, 0.2) 3px, transparent 3px),
+        radial-gradient(circle at 60% 80%, rgba(255, 107, 107, 0.15) 2px, transparent 2px),
+        radial-gradient(circle at 90% 20%, rgba(255, 215, 0, 0.1) 1px, transparent 1px);
+    background-size: 80px 80px;
+    animation: particleFloat 15s linear infinite;
+}
+
+/* 火花效果 */
+.spark {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #ffd700;
+    border-radius: 50%;
+    animation: spark 1s ease forwards;
+    pointer-events: none;
+}
+
+@keyframes spark {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-100px) scale(0);
+    }
 }
 
 .heal-number {
