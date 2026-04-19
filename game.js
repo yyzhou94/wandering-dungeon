@@ -745,9 +745,53 @@ function showDamageWithFeedback(target, amount, type = 'damage', isCritical = fa
     setTimeout(() => el.remove(), 1200);
 }
 
-function shakeElement(element) {
-    element.classList.add('shake');
-    setTimeout(() => element.classList.remove('shake'), 500);
+function shakeElement(element, intensity = 'medium') {
+    element.classList.add(`shake-${intensity}`);
+    const duration = intensity === 'large' ? 600 : intensity === 'medium' ? 400 : 300;
+    setTimeout(() => element.classList.remove(`shake-${intensity}`), duration);
+}
+
+// 屏幕震动效果
+function shakeScreen(intensity = 'medium') {
+    const gameContainer = document.getElementById('game-container');
+    if (!gameContainer) return;
+    
+    gameContainer.classList.add(`screen-shake-${intensity}`);
+    const duration = intensity === 'large' ? 800 : intensity === 'medium' ? 500 : 300;
+    setTimeout(() => gameContainer.classList.remove(`screen-shake-${intensity}`), duration);
+}
+
+// 重攻击时的屏幕震动
+function shakeOnHeavyAttack() {
+    const enemy = gameState.battle.enemy;
+    const damage = enemy.currentHp < enemy.maxHp * 0.5; // 如果造成过半伤害
+    if (damage) {
+        shakeScreen('medium');
+    }
+}
+
+// Boss 战持续微震动（每 3 秒一次）
+let bossShakeInterval = null;
+function startBossShake() {
+    if (bossShakeInterval) return;
+    
+    const enemy = gameState.battle.enemy;
+    if (!enemy || !enemy.name.includes('Boss') && !enemy.name.includes('巨龙') && !enemy.name.includes('王')) {
+        return;
+    }
+    
+    bossShakeInterval = setInterval(() => {
+        if (gameState.screen === 'battle') {
+            shakeScreen('small');
+        }
+    }, 3000);
+}
+
+function stopBossShake() {
+    if (bossShakeInterval) {
+        clearInterval(bossShakeInterval);
+        bossShakeInterval = null;
+    }
 }
 
 function showFloatingText(text, target, color = '#fff') {
@@ -1669,6 +1713,8 @@ function startBattle(isBoss) {
     const difficultyMultiplier = 1 + (floor - 1) * 0.2;
     
     if (isBoss) {
+        // Boss 战开始，启动持续震动
+        startBossShake();
         // Boss 额外增加 30% 难度
         const bossMultiplier = difficultyMultiplier * 1.3;
         
@@ -2254,6 +2300,16 @@ function damageEnemy(amount) {
         // 添加火花效果 (大伤害)
         if (amount > 10) {
             createSparks(enemyEl, 15);
+            // 添加伤害数字
+            createDamageNumber(enemyEl, amount, amount > enemy.maxHp * 0.4);
+        } else if (amount > 5) {
+            createSparks(enemyEl, 8);
+            createDamageNumber(enemyEl, amount, false);
+        }
+        
+        // 如果触发了格挡，添加格挡效果
+        if (oldHp - enemy.currentHp < amount) {
+            createBlockEffect(enemyEl);
         }
         
         // 清理类名
@@ -2274,15 +2330,162 @@ function createSparks(target, count = 10) {
         const spark = document.createElement('div');
         spark.className = 'spark';
         
-        const randomX = Math.random() * targetRect.width;
-        const randomY = Math.random() * targetRect.height;
+        const centerX = targetRect.left + targetRect.width / 2 - container.getBoundingClientRect().left;
+        const centerY = targetRect.top + targetRect.height / 2 - container.getBoundingClientRect().top;
         
-        spark.style.left = `${targetRect.left + randomX - container.getBoundingClientRect().left}px`;
-        spark.style.top = `${targetRect.top + randomY - container.getBoundingClientRect().top}px`;
+        spark.style.left = `${centerX}px`;
+        spark.style.top = `${centerY}px`;
+        
+        // 随机颜色和大小
+        const colors = ['#ffd700', '#ff6b6b', '#fff', '#f39c12'];
+        spark.style.background = colors[Math.floor(Math.random() * colors.length)];
+        const size = Math.random() * 4 + 2;
+        spark.style.width = `${size}px`;
+        spark.style.height = `${size}px`;
+        
+        // 随机飞溅方向
+        const angle = Math.random() * Math.PI * 2;
+        const distance = Math.random() * 80 + 40;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
+        
+        spark.style.setProperty('--spark-dx', `${dx}px`);
+        spark.style.setProperty('--spark-dy', `${dy}px`);
         
         container.appendChild(spark);
-        setTimeout(() => spark.remove(), 1000);
+        setTimeout(() => spark.remove(), 800);
     }
+}
+
+// 创建魔法粒子效果
+function createMagicParticles(target, color = '#3498db', count = 15) {
+    const targetRect = target.getBoundingClientRect();
+    const container = document.querySelector('#game-container');
+    
+    for (let i = 0; i < count; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'magic-particle';
+        
+        const centerX = targetRect.left + targetRect.width / 2 - container.getBoundingClientRect().left;
+        const centerY = targetRect.top + targetRect.height / 2 - container.getBoundingClientRect().top;
+        
+        const angle = (Math.PI * 2 * i) / count;
+        const distance = Math.random() * 50 + 30;
+        
+        particle.style.left = `${centerX}px`;
+        particle.style.top = `${centerY}px`;
+        particle.style.backgroundColor = color;
+        
+        container.appendChild(particle);
+        
+        // 动画
+        const endX = centerX + Math.cos(angle) * distance;
+        const endY = centerY + Math.sin(angle) * distance;
+        
+        particle.animate([
+            { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+            { transform: `translate(${endX - centerX}px, ${endY - centerY}px) scale(0)`, opacity: 0 }
+        ], {
+            duration: 800 + Math.random() * 400,
+            easing: 'ease-out',
+            fill: 'forwards'
+        });
+        
+        setTimeout(() => particle.remove(), 1200);
+    }
+}
+
+// 创建伤害数字飘字
+function createDamageNumber(target, damage, isCritical = false) {
+    const targetRect = target.getBoundingClientRect();
+    const container = document.querySelector('#game-container');
+    
+    const damageEl = document.createElement('div');
+    damageEl.className = 'damage-number';
+    damageEl.textContent = `-${damage}`;
+    
+    const centerX = targetRect.left + targetRect.width / 2 - container.getBoundingClientRect().left;
+    const topY = targetRect.top - container.getBoundingClientRect().top;
+    
+    damageEl.style.left = `${centerX}px`;
+    damageEl.style.top = `${topY}px`;
+    
+    if (isCritical) {
+        damageEl.classList.add('critical');
+    }
+    
+    container.appendChild(damageEl);
+    
+    // 飘出动画
+    damageEl.animate([
+        { transform: 'translateY(0) scale(1)', opacity: 1 },
+        { transform: 'translateY(-60px) scale(1.2)', opacity: 0 }
+    ], {
+        duration: 1000,
+        easing: 'ease-out',
+        fill: 'forwards'
+    });
+    
+    setTimeout(() => damageEl.remove(), 1000);
+}
+
+// 创建治疗数字飘字
+function createHealNumber(target, heal) {
+    const targetRect = target.getBoundingClientRect();
+    const container = document.querySelector('#game-container');
+    
+    const healEl = document.createElement('div');
+    healEl.className = 'heal-number';
+    healEl.textContent = `+${heal}`;
+    
+    const centerX = targetRect.left + targetRect.width / 2 - container.getBoundingClientRect().left;
+    const topY = targetRect.top - container.getBoundingClientRect().top;
+    
+    healEl.style.left = `${centerX}px`;
+    healEl.style.top = `${topY}px`;
+    
+    container.appendChild(healEl);
+    
+    // 飘出动画
+    healEl.animate([
+        { transform: 'translateY(0) scale(1)', opacity: 1 },
+        { transform: 'translateY(-50px) scale(1.1)', opacity: 0 }
+    ], {
+        duration: 1000,
+        easing: 'ease-out',
+        fill: 'forwards'
+    });
+    
+    setTimeout(() => healEl.remove(), 1000);
+}
+
+// 创建格挡效果
+function createBlockEffect(target) {
+    const targetRect = target.getBoundingClientRect();
+    const container = document.querySelector('#game-container');
+    
+    const blockEl = document.createElement('div');
+    blockEl.className = 'block-effect';
+    
+    const centerX = targetRect.left + targetRect.width / 2 - container.getBoundingClientRect().left;
+    const centerY = targetRect.top + targetRect.height / 2 - container.getBoundingClientRect().top;
+    
+    blockEl.style.left = `${centerX - 30}px`;
+    blockEl.style.top = `${centerY - 30}px`;
+    
+    container.appendChild(blockEl);
+    
+    // 脉冲动画
+    blockEl.animate([
+        { transform: 'scale(0.5)', opacity: 0.8 },
+        { transform: 'scale(1.5)', opacity: 0 }
+    ], {
+        duration: 600,
+        easing: 'ease-out',
+        fill: 'forwards'
+    });
+    
+    setTimeout(() => blockEl.remove(), 600);
 }
 
 function endTurn() {
@@ -2313,8 +2516,13 @@ function endTurn() {
         // 受到伤害
         if (damage > 0) {
             gameState.player.hp -= damage;
-            showDamage(document.querySelector('.player-area'), damage, 'damage');
-            shakeElement(document.querySelector('.player-area'));
+            const playerArea = document.querySelector('.player-area');
+            showDamage(playerArea, damage, 'damage');
+            shakeElement(playerArea);
+            
+            // 添加玩家受击粒子效果
+            createDamageNumber(playerArea, damage, damage > gameState.player.maxHp * 0.3);
+            createSparks(playerArea, damage > 10 ? 12 : 6);
             
             // 青铜鳞效果
             if (gameState.player.relics.includes('bronze_scales')) {
@@ -2346,6 +2554,9 @@ function endTurn() {
 }
 
 function winBattle() {
+    // 停止 Boss 战震动
+    stopBossShake();
+    
     gameState.stats.enemiesKilled++;
     
     // 燃烧之血效果
@@ -2541,7 +2752,11 @@ function healPlayer(amount) {
     gameState.player.hp = Math.min(gameState.player.maxHp, gameState.player.hp + amount);
     const actualHeal = gameState.player.hp - oldHp;
     if (actualHeal > 0) {
-        showDamage(document.querySelector('.player-area'), actualHeal, 'heal');
+        const playerArea = document.querySelector('.player-area');
+        showDamage(playerArea, actualHeal, 'heal');
+        // 添加治疗粒子效果
+        createHealNumber(playerArea, actualHeal);
+        createMagicParticles(playerArea, '#2ecc71', 10);
     }
 }
 
