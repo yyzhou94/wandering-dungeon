@@ -1,3 +1,264 @@
+// ==================== 怪物 SVG 精灵系统 ====================
+
+// SVG 精灵图像库（扁平化矢量风格）
+const ENEMY_SPRITES = {
+    // 第一层 - 青绿色调
+    goblin: `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="goblinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#1abc9c;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#16a085;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <ellipse cx="50" cy="60" rx="30" ry="35" fill="url(#goblinGrad)"/>
+            <path d="M 25 45 L 10 30 L 30 40 Z" fill="#16a085"/>
+            <path d="M 75 45 L 90 30 L 70 40 Z" fill="#16a085"/>
+            <circle cx="40" cy="50" r="5" fill="#fff"/>
+            <circle cx="60" cy="50" r="5" fill="#fff"/>
+            <circle cx="40" cy="50" r="2" fill="#000"/>
+            <circle cx="60" cy="50" r="2" fill="#000"/>
+            <path d="M 40 65 Q 50 70 60 65" stroke="#0d5c4e" stroke-width="2" fill="none"/>
+            <path d="M 45 68 L 45 75 L 48 72 Z" fill="#fff"/>
+            <path d="M 55 68 L 55 75 L 52 72 Z" fill="#fff"/>
+        </svg>
+    `,
+    slime: `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="slimeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#58d68d;stop-opacity:0.8" />
+                    <stop offset="100%" style="stop-color:#27ae60;stop-opacity:0.8" />
+                </linearGradient>
+            </defs>
+            <ellipse cx="50" cy="65" rx="35" ry="25" fill="url(#slimeGrad)"/>
+            <ellipse cx="50" cy="60" rx="30" ry="20" fill="url(#slimeGrad)"/>
+            <circle cx="40" cy="55" r="4" fill="#000"/>
+            <circle cx="60" cy="55" r="4" fill="#000"/>
+            <ellipse cx="35" cy="50" rx="8" ry="5" fill="rgba(255,255,255,0.3)"/>
+        </svg>
+    `,
+    skeleton: `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="50" cy="45" rx="25" ry="28" fill="#ecf0f1"/>
+            <circle cx="38" cy="40" r="8" fill="#2c3e50"/>
+            <circle cx="62" cy="40" r="8" fill="#2c3e50"/>
+            <path d="M 45 52 L 50 58 L 55 52 Z" fill="#2c3e50"/>
+            <rect x="42" y="60" width="6" height="10" fill="#ecf0f1"/>
+            <rect x="52" y="60" width="6" height="10" fill="#ecf0f1"/>
+            <path d="M 35 70 Q 50 75 65 70" stroke="#bdc3c7" stroke-width="3" fill="none"/>
+            <path d="M 38 78 Q 50 82 62 78" stroke="#bdc3c7" stroke-width="3" fill="none"/>
+        </svg>
+    `,
+    orc: `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="orcGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#588157;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#3a5a40;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <ellipse cx="50" cy="60" rx="32" ry="35" fill="url(#orcGrad)"/>
+            <path d="M 42 65 L 42 78 L 48 72 Z" fill="#fff"/>
+            <path d="M 58 65 L 58 78 L 52 72 Z" fill="#fff"/>
+            <circle cx="38" cy="50" r="6" fill="#e74c3c"/>
+            <circle cx="62" cy="50" r="6" fill="#e74c3c"/>
+            <circle cx="38" cy="50" r="2" fill="#000"/>
+            <circle cx="62" cy="50" r="2" fill="#000"/>
+            <path d="M 30 42 L 45 45" stroke="#2d4428" stroke-width="4" stroke-linecap="round"/>
+            <path d="M 70 42 L 55 45" stroke="#2d4428" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+    `,
+    dark_mage: `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="mageGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#8e44ad;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#5b2c6f;stop-opacity:1" />
+                </linearGradient>
+                <filter id="glow">
+                    <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                    <feMerge>
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
+            <path d="M 30 70 L 70 70 L 60 40 L 40 40 Z" fill="url(#mageGrad)"/>
+            <ellipse cx="50" cy="75" rx="25" ry="15" fill="#4a1c5a"/>
+            <ellipse cx="50" cy="35" rx="20" ry="22" fill="#3a1a4a"/>
+            <circle cx="43" cy="32" r="4" fill="#00ffff" filter="url(#glow)"/>
+            <circle cx="57" cy="32" r="4" fill="#00ffff" filter="url(#glow)"/>
+            <rect x="75" y="40" width="4" height="40" fill="#8b4513"/>
+            <circle cx="77" cy="38" r="6" fill="#8e44ad" filter="url(#glow)"/>
+        </svg>
+    `,
+    werewolf: `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="wolfGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#7f8c8d;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#5d6d7e;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <ellipse cx="50" cy="62" rx="30" ry="32" fill="url(#wolfGrad)"/>
+            <path d="M 28 45 L 18 25 L 35 40 Z" fill="#5d6d7e"/>
+            <path d="M 72 45 L 82 25 L 65 40 Z" fill="#5d6d7e"/>
+            <ellipse cx="40" cy="50" rx="5" ry="4" fill="#e67e22"/>
+            <ellipse cx="60" cy="50" rx="5" ry="4" fill="#e67e22"/>
+            <circle cx="40" cy="50" r="1.5" fill="#000"/>
+            <circle cx="60" cy="50" r="1.5" fill="#000"/>
+            <circle cx="50" cy="58" r="4" fill="#2c3e50"/>
+            <path d="M 42 65 L 50 70 L 58 65" stroke="#2c3e50" stroke-width="2" fill="none"/>
+        </svg>
+    `,
+    demon: `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="demonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#c0392b;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#8b0000;stop-opacity:1" />
+                </linearGradient>
+                <filter id="demonGlow">
+                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                    <feMerge>
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
+            <ellipse cx="50" cy="60" rx="32" ry="35" fill="url(#demonGrad)"/>
+            <path d="M 25 40 Q 15 20 25 10 L 32 38 Z" fill="#8b0000"/>
+            <path d="M 75 40 Q 85 20 75 10 L 68 38 Z" fill="#8b0000"/>
+            <circle cx="38" cy="50" r="6" fill="#ffd700" filter="url(#demonGlow)"/>
+            <circle cx="62" cy="50" r="6" fill="#ffd700" filter="url(#demonGlow)"/>
+            <circle cx="38" cy="50" r="2" fill="#000"/>
+            <circle cx="62" cy="50" r="2" fill="#000"/>
+            <circle cx="50" cy="50" r="45" fill="none" stroke="#e74c3c" stroke-width="2" opacity="0.5">
+                <animate attributeName="opacity" values="0.3;0.7;0.3" dur="2s" repeatCount="indefinite"/>
+            </circle>
+        </svg>
+    `,
+    dragon: `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="dragonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#3498db;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#2980b9;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <path d="M 20 50 Q 5 30 15 20 L 35 45 Z" fill="#2980b9"/>
+            <path d="M 80 50 Q 95 30 85 20 L 65 45 Z" fill="#2980b9"/>
+            <ellipse cx="50" cy="60" rx="28" ry="32" fill="url(#dragonGrad)"/>
+            <path d="M 35 35 L 30 20 L 40 38 Z" fill="#f39c12"/>
+            <path d="M 65 35 L 70 20 L 60 38 Z" fill="#f39c12"/>
+            <circle cx="40" cy="48" r="5" fill="#f1c40f"/>
+            <circle cx="60" cy="48" r="5" fill="#f1c40f"/>
+            <circle cx="40" cy="48" r="2" fill="#000"/>
+            <circle cx="60" cy="48" r="2" fill="#000"/>
+            <circle cx="45" cy="65" r="2" fill="#1a5276"/>
+            <circle cx="55" cy="65" r="2" fill="#1a5276"/>
+            <circle cx="50" cy="72" r="2" fill="#1a5276"/>
+        </svg>
+    `,
+    boss_goblin_king: `
+        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="bossGoblinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#2ecc71;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#27ae60;stop-opacity:1" />
+                </linearGradient>
+                <filter id="bossGlow">
+                    <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                    <feMerge>
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
+            <circle cx="60" cy="60" r="55" fill="none" stroke="#ffd700" stroke-width="3" opacity="0.6">
+                <animate attributeName="stroke-width" values="2;4;2" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <ellipse cx="60" cy="75" rx="40" ry="38" fill="url(#bossGoblinGrad)"/>
+            <path d="M 40 35 L 60 15 L 80 35 L 85 45 L 35 45 Z" fill="#ffd700" filter="url(#bossGlow)"/>
+            <circle cx="48" cy="65" r="7" fill="#fff"/>
+            <circle cx="72" cy="65" r="7" fill="#fff"/>
+            <circle cx="48" cy="65" r="3" fill="#e74c3c"/>
+            <circle cx="72" cy="65" r="3" fill="#e74c3c"/>
+            <path d="M 30 80 L 20 110 L 100 110 L 90 80 Z" fill="#c0392b"/>
+        </svg>
+    `,
+    boss_lich: `
+        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="lichGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#9b59b6;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#8e44ad;stop-opacity:1" />
+                </linearGradient>
+                <filter id="lichGlow">
+                    <feGaussianBlur stdDeviation="5" result="coloredBlur"/>
+                    <feMerge>
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
+            <circle cx="60" cy="60" r="55" fill="none" stroke="#9b59b6" stroke-width="4" opacity="0.5">
+                <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2.5s" repeatCount="indefinite"/>
+            </circle>
+            <ellipse cx="60" cy="45" rx="30" ry="32" fill="#ecf0f1"/>
+            <path d="M 40 20 L 60 5 L 80 20 L 85 30 L 35 30 Z" fill="#ffd700" filter="url(#lichGlow)"/>
+            <circle cx="48" cy="42" r="8" fill="#2c3e50"/>
+            <circle cx="72" cy="42" r="8" fill="#2c3e50"/>
+            <circle cx="48" cy="42" r="3" fill="#00ffff" filter="url(#lichGlow)"/>
+            <circle cx="72" cy="42" r="3" fill="#00ffff" filter="url(#lichGlow)"/>
+            <path d="M 30 80 L 20 115 L 100 115 L 90 80 Z" fill="#4a1c5a"/>
+            <rect x="95" y="50" width="5" height="50" fill="#8b4513"/>
+            <circle cx="97" cy="45" r="8" fill="#9b59b6" filter="url(#lichGlow)"/>
+        </svg>
+    `,
+    boss_dragon: `
+        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="bossDragonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#e74c3c;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#c0392b;stop-opacity:1" />
+                </linearGradient>
+                <filter id="dragonBossGlow">
+                    <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+                    <feMerge>
+                        <feMergeNode in="coloredBlur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                    </feMerge>
+                </filter>
+            </defs>
+            <ellipse cx="60" cy="110" rx="50" ry="8" fill="#e74c3c" opacity="0.6">
+                <animate attributeName="opacity" values="0.4;0.8;0.4" dur="1.5s" repeatCount="indefinite"/>
+            </ellipse>
+            <path d="M 10 60 Q 0 20 30 35 L 50 55 Z" fill="#c0392b"/>
+            <path d="M 110 60 Q 120 20 90 35 L 70 55 Z" fill="#c0392b"/>
+            <ellipse cx="60" cy="70" rx="45" ry="40" fill="url(#bossDragonGrad)"/>
+            <path d="M 30 40 Q 15 10 35 5 L 45 42 Z" fill="#f39c12"/>
+            <path d="M 90 40 Q 105 10 85 5 L 75 42 Z" fill="#f39c12"/>
+            <ellipse cx="45" cy="60" r="8" fill="#f1c40f" filter="url(#dragonBossGlow)"/>
+            <ellipse cx="75" cy="60" r="8" fill="#f1c40f" filter="url(#dragonBossGlow)"/>
+            <circle cx="45" cy="60" r="3" fill="#000"/>
+            <circle cx="75" cy="60" r="3" fill="#000"/>
+            <circle cx="50" cy="75" r="3" fill="#922b21"/>
+            <circle cx="70" cy="75" r="3" fill="#922b21"/>
+            <circle cx="60" cy="85" r="3" fill="#922b21"/>
+        </svg>
+    `
+};
+
+// 怪物 CSS 类映射
+const ENEMY_CSS_CLASSES = {
+    goblin: 'goblin', slime: 'slime', skeleton: 'skeleton',
+    orc: 'orc', dark_mage: 'dark_mage', werewolf: 'werewolf',
+    demon: 'demon', dragon: 'dragon',
+    boss_goblin_king: 'boss_goblin_king', boss_lich: 'boss_lich', boss_dragon: 'boss_dragon'
+};
+
 // ==================== 存档系统 ====================
 
 const SAVE_KEY = 'dungeonCardSave';
@@ -1584,8 +1845,24 @@ function updateBattleUI() {
     const enemy = gameState.battle.enemy;
     const player = gameState.player;
     
-    // 更新敌人显示
-    document.querySelector('.enemy-sprite').textContent = enemy.icon;
+    // 更新敌人显示（使用 SVG 图像）
+    const enemySpriteEl = document.querySelector('.enemy-sprite');
+    const enemyType = enemy.type;
+    const cssClass = ENEMY_CSS_CLASSES[enemyType] || enemyType;
+    
+    // 设置 SVG 图像
+    enemySpriteEl.innerHTML = ENEMY_SPRITES[enemyType] || enemy.icon;
+    enemySpriteEl.className = `enemy-sprite ${cssClass}`;
+    enemySpriteEl.classList.remove('dead');
+    
+    // 如果是新进入战斗，触发登场动画
+    if (!enemySpriteEl.dataset.entered) {
+        enemySpriteEl.dataset.entered = 'true';
+        setTimeout(() => {
+            enemySpriteEl.classList.add('enemy-enter');
+        }, 100);
+    }
+    
     document.querySelector('.enemy-name').textContent = enemy.name;
     document.getElementById('enemy-hp').textContent = `${enemy.currentHp}/${enemy.hp}`;
     document.getElementById('enemy-hp-fill').style.width = `${(enemy.currentHp / enemy.hp) * 100}%`;
@@ -1779,6 +2056,9 @@ function renderHand() {
         const cardData = CARD_DB[cardId];
         const cardEl = document.createElement('div');
         cardEl.className = `card ${cardData.type}`;
+        
+        // 添加延迟动画，让卡牌一张张出现
+        cardEl.style.animationDelay = `${index * 0.05}s`;
         
         // 检查能量是否足够
         if (cardData.cost > gameState.player.energy) {

@@ -19,19 +19,194 @@ body {
     min-height: 100vh;
 }
 
-/* 屏幕切换 */
+/* ========== 转场动画系统增强 ========== */
+
+/* 屏幕切换 - 多种动画类型 */
 .screen {
     display: none;
-    animation: fadeIn 0.3s ease;
 }
 
 .screen.active {
     display: block;
+    animation: screenEnter 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+/* 主菜单淡入 */
+#main-menu.active {
+    animation: menuEnter 0.6s ease-out;
+}
+
+@keyframes screenEnter {
+    from { 
+        opacity: 0; 
+        transform: translateY(30px) scale(0.98);
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes menuEnter {
+    0% { 
+        opacity: 0; 
+        transform: translateY(50px);
+    }
+    100% { 
+        opacity: 1; 
+        transform: translateY(0);
+    }
+}
+
+/* 卡牌抽取动画 */
+@keyframes cardDraw {
+    from {
+        opacity: 0;
+        transform: translateY(-100px) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.card {
+    animation: cardDraw 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 敌人登场动画 */
+@keyframes enemyEnter {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(1.1);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.enemy {
+    animation: enemyEnter 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 敌人受击动画 */
+@keyframes enemyHit {
+    0%, 100% { transform: translateX(0) scale(1); }
+    15% { transform: translateX(-10px) scale(0.95); }
+    30% { transform: translateX(10px) scale(0.95); }
+    45% { transform: translateX(-10px) scale(0.95); }
+    60% { transform: translateX(10px) scale(0.95); }
+    75% { transform: translateX(-5px) scale(0.98); }
+    90% { transform: translateX(5px) scale(0.98); }
+}
+
+.enemy.hit {
+    animation: enemyHit 0.4s ease-out;
+}
+
+/* 敌人攻击动画 */
+@keyframes enemyAttack {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15) translateX(15px); }
+    100% { transform: scale(1); }
+}
+
+.enemy.attacking {
+    animation: enemyAttack 0.3s ease-out;
+}
+
+/* 卡牌悬停放大 */
+.card:hover {
+    animation: cardHover 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes cardHover {
+    to {
+        transform: translateY(-20px) scale(1.08);
+    }
+}
+
+/* 按钮点击反馈 */
+@keyframes buttonPress {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+}
+
+button:active {
+    animation: buttonPress 0.15s ease-out;
+}
+
+/* 粒子漂浮动画 */
+@keyframes particleFloat {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.6;
+    }
+    100% {
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* 经验值/金币飘出动画 */
+@keyframes floatUp {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.8);
+    }
+}
+
+.floating-text {
+    animation: floatUp 1s ease-out forwards;
+}
+
+/* 牌堆抽牌动画 */
+@keyframes drawFromDeck {
+    0% {
+        transform: translateY(0) rotate(0deg);
+    }
+    100% {
+        transform: translateY(-150px) rotate(10deg);
+    }
+}
+
+.draw-animation {
+    animation: drawFromDeck 0.3s ease-out;
+}
+
+/* 战斗结束敌人消失 */
+@keyframes enemyDead {
+    0% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0.5) rotate(360deg);
+    }
+}
+
+.enemy.dead {
+    animation: enemyDead 0.6s ease-out forwards;
+}
+
+/* 能量恢复脉冲 */
+@keyframes energyPulse {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+    }
+}
+
+.energy-restored {
+    animation: energyPulse 0.5s ease-out;
 }
 
 /* 主菜单 */
@@ -544,6 +719,9 @@ button {
 .enemy-sprite {
     font-size: 4em;
     margin-bottom: 10px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .enemy-name {
@@ -1315,46 +1493,143 @@ button {
     animation: hpDecrease 0.5s ease;
 }
 
-/* 分层地牢背景系统 */
-/* 第一层：废弃矿坑 - 灰蓝色调 */
-#map-screen.floor-1 {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
+/* ========== 楼层主题色系统增强 ========== */
+
+/* 第一层：废弃矿坑 - 青绿色调 + 潮湿苔藓质感 */
+#map-screen.floor-1,
+#battle-screen.floor-1 {
+    background: linear-gradient(135deg, #1a3a3a 0%, #2d5a4a 50%, #1a3a3a 100%);
+    position: relative;
+}
+
+/* 第一层背景粒子 - 水滴下落 */
+.floor-1 .battle-area::before,
+.floor-1 #map-screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 10% 20%, rgba(52, 152, 219, 0.15) 2px, transparent 2px),
+        radial-gradient(circle at 50% 60%, rgba(46, 204, 113, 0.12) 3px, transparent 3px),
+        radial-gradient(circle at 80% 40%, rgba(52, 152, 219, 0.1) 2px, transparent 2px);
+    background-size: 100px 100px;
+    animation: particleFloat 20s linear infinite;
+    pointer-events: none;
+    z-index: 0;
 }
 
 .floor-1 .map-node.battle {
-    background: linear-gradient(135deg, #95a5a6, #7f8c8d);
-    box-shadow: 0 4px 15px rgba(149, 165, 166, 0.4);
+    background: linear-gradient(135deg, #16a085, #1abc9c);
+    box-shadow: 0 4px 20px rgba(26, 188, 156, 0.5), inset 0 2px 10px rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(26, 188, 156, 0.6);
 }
 
-/* 第二层：黑暗神殿 - 紫黑色调 */
-#map-screen.floor-2 {
-    background: linear-gradient(135deg, #2c1e4a 0%, #1a1a2e 50%, #2c1e4a 100%);
+.floor-1 .enemy {
+    border-color: rgba(26, 188, 156, 0.6);
+    box-shadow: 0 0 30px rgba(26, 188, 156, 0.3);
+}
+
+.floor-1 .card {
+    background: linear-gradient(135deg, #1a3a3a, #2d5a4a);
+    border: 2px solid rgba(26, 188, 156, 0.4);
+    box-shadow: 0 4px 15px rgba(26, 188, 156, 0.2);
+}
+
+/* 第二层：黑暗神殿 - 紫罗兰色调 + 神秘魔法感 */
+#map-screen.floor-2,
+#battle-screen.floor-2 {
+    background: linear-gradient(135deg, #1a0a2e 0%, #2d1a4a 50%, #1a0a2e 100%);
+    position: relative;
+}
+
+/* 第二层背景粒子 - 魔法符文漂浮 */
+.floor-2 .battle-area::before,
+.floor-2 #map-screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 15% 30%, rgba(142, 68, 173, 0.2) 3px, transparent 3px),
+        radial-gradient(circle at 45% 70%, rgba(155, 89, 182, 0.15) 4px, transparent 4px),
+        radial-gradient(circle at 75% 25%, rgba(142, 68, 173, 0.18) 2px, transparent 2px),
+        radial-gradient(circle at 90% 55%, rgba(192, 57, 255, 0.12) 3px, transparent 3px);
+    background-size: 120px 120px;
+    animation: particleFloat 25s linear infinite;
+    pointer-events: none;
+    z-index: 0;
 }
 
 .floor-2 .map-node.battle {
-    background: linear-gradient(135deg, #8e44ad, #6c3483);
-    box-shadow: 0 4px 15px rgba(142, 68, 173, 0.5);
+    background: linear-gradient(135deg, #8e44ad, #9b59b6);
+    box-shadow: 0 4px 20px rgba(142, 68, 173, 0.6), inset 0 2px 10px rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(142, 68, 173, 0.7);
 }
 
 .floor-2 .enemy {
-    border-color: rgba(142, 68, 173, 0.6);
-    box-shadow: 0 0 30px rgba(142, 68, 173, 0.3);
+    border-color: rgba(142, 68, 173, 0.7);
+    box-shadow: 0 0 40px rgba(142, 68, 173, 0.4);
 }
 
-/* 第三层：龙巢深渊 - 红金色调 */
-#map-screen.floor-3 {
-    background: linear-gradient(135deg, #4a0404 0%, #2c0404 50%, #4a0404 100%);
+.floor-2 .card {
+    background: linear-gradient(135deg, #1a0a2e, #2d1a4a);
+    border: 2px solid rgba(142, 68, 173, 0.5);
+    box-shadow: 0 4px 15px rgba(142, 68, 173, 0.3);
+}
+
+/* 第三层：龙巢深渊 - 赤红熔岩调 + 炽热压迫感 */
+#map-screen.floor-3,
+#battle-screen.floor-3 {
+    background: linear-gradient(135deg, #2b0505 0%, #5c1818 50%, #2b0505 100%);
+    position: relative;
+}
+
+/* 第三层背景粒子 - 熔岩流动 + 火星上升 */
+.floor-3 .battle-area::before,
+.floor-3 #map-screen::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 20% 30%, rgba(231, 76, 60, 0.25) 4px, transparent 4px),
+        radial-gradient(circle at 60% 80%, rgba(255, 107, 107, 0.2) 3px, transparent 3px),
+        radial-gradient(circle at 90% 20%, rgba(255, 215, 0, 0.15) 2px, transparent 2px),
+        radial-gradient(circle at 40% 60%, rgba(255, 69, 0, 0.18) 3px, transparent 3px);
+    background-size: 100px 100px;
+    animation: particleFloat 15s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.floor-3 .map-node.battle {
+    background: linear-gradient(135deg, #c0392b, #e74c3c);
+    box-shadow: 0 4px 25px rgba(231, 76, 60, 0.7), inset 0 2px 10px rgba(255, 215, 0, 0.2);
+    border: 2px solid rgba(255, 69, 0, 0.8);
 }
 
 .floor-3 .map-node.boss {
     background: linear-gradient(135deg, #c0392b, #8b0000);
-    box-shadow: 0 0 40px rgba(192, 57, 43, 0.8), 0 4px 15px rgba(192, 57, 43, 0.5);
+    box-shadow: 0 0 50px rgba(255, 69, 0, 1), 0 6px 20px rgba(255, 69, 0, 0.8);
     animation: bossPulse 2s infinite;
 }
 
 .floor-3 .enemy {
-    border-color: rgba(231, 76, 60, 0.8);
-    box-shadow: 0 0 50px rgba(231, 76, 60, 0.4);
+    border-color: rgba(255, 69, 0, 0.8);
+    box-shadow: 0 0 60px rgba(231, 76, 60, 0.5);
+}
+
+.floor-3 .card {
+    background: linear-gradient(135deg, #2b0505, #5c1818);
+    border: 2px solid rgba(255, 69, 0, 0.6);
+    box-shadow: 0 4px 20px rgba(231, 76, 60, 0.4);
 }
 
 /* Boss 战特殊效果 */
@@ -1510,6 +1785,82 @@ button {
     gap: 20px;
     margin-bottom: 10px;
     flex-wrap: wrap;
+}
+
+/* ========== 敌人 SVG 图像样式 ========== */
+.enemy-sprite {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 10px auto;
+    transition: all 0.3s ease;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+    pointer-events: none;
+    display: block;
+}
+
+/* SVG 内部元素居中 */
+.enemy-sprite svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Boss 怪物更大 */
+.enemy-sprite.boss_goblin_king,
+.enemy-sprite.boss_lich,
+.enemy-sprite.boss_dragon {
+    width: 140px;
+    height: 140px;
+}
+
+/* 第一层怪物 - 青绿色调 */
+.enemy-sprite.goblin,
+.enemy-sprite.slime,
+.enemy-sprite.skeleton {
+    filter: drop-shadow(0 4px 8px rgba(26, 188, 156, 0.4));
+}
+
+/* 第二层怪物 - 紫罗兰色调 */
+.enemy-sprite.orc,
+.enemy-sprite.dark_mage,
+.enemy-sprite.werewolf {
+    filter: drop-shadow(0 4px 8px rgba(142, 68, 173, 0.5));
+}
+
+/* 第三层怪物 - 赤红色调 */
+.enemy-sprite.demon,
+.enemy-sprite.dragon {
+    filter: drop-shadow(0 4px 15px rgba(231, 76, 60, 0.7));
+    animation: demonFire 2s ease-in-out infinite;
+}
+
+@keyframes demonFire {
+    0%, 100% { filter: drop-shadow(0 4px 15px rgba(231, 76, 60, 0.7)); }
+    50% { filter: drop-shadow(0 8px 25px rgba(255, 87, 34, 0.9)); }
+}
+
+/* Boss 特效 */
+.enemy-sprite.boss_goblin_king,
+.enemy-sprite.boss_lich,
+.enemy-sprite.boss_dragon {
+    animation: bossPulseSVG 2s ease-in-out infinite;
+}
+
+@keyframes bossPulseSVG {
+    0%, 100% { 
+        filter: drop-shadow(0 4px 20px rgba(255, 215, 0, 0.6));
+    }
+    50% { 
+        filter: drop-shadow(0 8px 30px rgba(255, 215, 0, 0.9));
+    }
+}
+
+.enemy-sprite.boss_lich {
+    filter: drop-shadow(0 4px 20px rgba(124, 77, 255, 0.7));
+}
+
+.enemy-sprite.boss_dragon {
+    filter: drop-shadow(0 4px 25px rgba(255, 87, 34, 0.8));
 }
 
 .map-info .legend span {
