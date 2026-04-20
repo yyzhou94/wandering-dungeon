@@ -1357,6 +1357,207 @@ button {
     z-index: 100;
 }
 
+/* ==================== 新手引导样式 ==================== */
+
+/* 引导遮罩层 */
+.tutorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* 引导弹窗 */
+.tutorial-modal {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    border: 3px solid #3498db;
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 500px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(52, 152, 219, 0.3);
+    animation: slideUp 0.4s ease;
+    position: relative;
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(50px) scale(0.9); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
+}
+
+/* 引导进度 */
+.tutorial-progress {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 0.9em;
+    color: #3498db;
+    font-weight: bold;
+}
+
+/* 引导消息 */
+.tutorial-message {
+    font-size: 1.2em;
+    line-height: 1.8;
+    color: #ecf0f1;
+    margin: 20px 0 30px;
+    text-align: left;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+.tutorial-message strong {
+    color: #3498db;
+}
+
+/* 引导按钮 */
+.tutorial-btn {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 1.1em;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+    min-width: 150px;
+}
+
+.tutorial-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(52, 152, 219, 0.4);
+}
+
+.tutorial-btn:active {
+    transform: translateY(-1px);
+}
+
+/* 高亮效果 */
+.tutorial-highlight {
+    animation: tutorialPulse 1.5s infinite;
+    box-shadow: 0 0 30px rgba(52, 152, 219, 0.8) !important;
+    border-color: #3498db !important;
+}
+
+@keyframes tutorialPulse {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 20px rgba(52, 152, 219, 0.6);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 40px rgba(52, 152, 219, 1);
+    }
+}
+
+/* 职业卡片高亮 */
+.class-card.tutorial-highlight {
+    transform: scale(1.05);
+}
+
+/* 卡牌高亮 */
+.card.tutorial-highlight {
+    transform: scale(1.1);
+    z-index: 100;
+}
+
+/* 地图节点高亮 */
+.map-node.tutorial-highlight {
+    transform: scale(1.1);
+    border-width: 4px;
+}
+
+/* ==================== 难度选择样式 ==================== */
+
+.difficulty-selection {
+    margin: 30px 0;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+}
+
+.difficulty-selection h3 {
+    color: #ecf0f1;
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+}
+
+.difficulty-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.difficulty-btn {
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    border: 2px solid #7f8c8d;
+    border-radius: 12px;
+    padding: 15px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 180px;
+}
+
+.difficulty-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.difficulty-btn.selected {
+    border-color: #3498db;
+    background: linear-gradient(135deg, #2980b9 0%, #3498db 100%);
+    box-shadow: 0 0 20px rgba(52, 152, 219, 0.5);
+}
+
+.difficulty-btn.easy.selected {
+    border-color: #27ae60;
+    background: linear-gradient(135deg, #229954 0%, #27ae60 100%);
+    box-shadow: 0 0 20px rgba(39, 174, 96, 0.5);
+}
+
+.difficulty-btn.hard.selected {
+    border-color: #e74c3c;
+    background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+    box-shadow: 0 0 20px rgba(231, 76, 60, 0.5);
+}
+
+.diff-name {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #ecf0f1;
+    margin-bottom: 8px;
+}
+
+.diff-desc {
+    font-size: 0.85em;
+    color: #bdc3c7;
+    line-height: 1.4;
+}
+
+
 .relic-item-small:hover .relic-desc {
     display: block;
 }

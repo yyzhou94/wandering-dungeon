@@ -1,4 +1,136 @@
+// ==================== 新手引导系统 ====================
+
+// 引导步骤配置
+const TUTORIAL_STEPS = [
+    {
+        name: 'start_game',
+        target: '#start-game-btn',
+        message: '🎮 欢迎来到流浪地牢！<br>点击"开始新游戏"开启冒险之旅！',
+        highlightClass: null
+    },
+    {
+        name: 'choose_class',
+        target: '.class-card',
+        message: '👤 选择一个职业<br>战士：高血量，适合新手<br>法师：高伤害，需要策略<br>盗贼：高金币，灵活多变',
+        highlightClass: 'class-card'
+    },
+    {
+        name: 'confirm_class',
+        target: '#confirm-class',
+        message: '✅ 确认职业选择<br>进入地牢地图',
+        highlightClass: null
+    },
+    {
+        name: 'first_node',
+        target: '.map-node.available',
+        message: '⚔️ 点击绿色边框的节点<br>开始第一场战斗！',
+        highlightClass: 'available'
+    },
+    {
+        name: 'battle_cards',
+        target: '.card',
+        message: '🃏 点击卡牌打出<br>每张卡牌消耗 1 点能量<br>合理安排卡牌顺序！',
+        highlightClass: 'card'
+    },
+    {
+        name: 'end_turn',
+        target: '#end-turn-btn',
+        message: '⏹️ 点击"结束回合"<br>敌人将进行攻击',
+        highlightClass: null
+    },
+    {
+        name: 'complete',
+        target: null,
+        message: '🎉 恭喜完成新手引导！<br>现在你已掌握基本操作<br>继续探索地牢，收集卡牌和遗物吧！',
+        highlightClass: null
+    }
+];
+
+// 引导状态
+let currentTutorialStep = 0;
+let tutorialOverlay = null;
+let highlightedElement = null;
+
+// 显示当前引导步骤
+function showTutorialStep() {
+    if (currentTutorialStep >= TUTORIAL_STEPS.length) {
+        completeTutorial();
+        return;
+    }
+    
+    const step = TUTORIAL_STEPS[currentTutorialStep];
+    
+    // 移除上一个高亮
+    clearTutorialHighlight();
+    
+    // 高亮目标元素
+    if (step.target && step.highlightClass) {
+        highlightedElement = document.querySelector(step.target);
+        if (highlightedElement) {
+            highlightedElement.classList.add('tutorial-highlight');
+        }
+    }
+    
+    // 创建引导弹窗
+    tutorialOverlay = document.createElement('div');
+    tutorialOverlay.className = 'tutorial-overlay';
+    tutorialOverlay.innerHTML = `
+        <div class="tutorial-modal">
+            <div class="tutorial-progress">步骤 ${currentTutorialStep + 1}/${TUTORIAL_STEPS.length}</div>
+            <div class="tutorial-message">${step.message}</div>
+            <button class="tutorial-btn" onclick="nextTutorialStep()">知道了</button>
+        </div>
+    `;
+    
+    document.body.appendChild(tutorialOverlay);
+}
+
+// 下一步引导
+function nextTutorialStep() {
+    // 关闭当前弹窗
+    if (tutorialOverlay) {
+        tutorialOverlay.remove();
+        tutorialOverlay = null;
+    }
+    
+    // 清除高亮
+    clearTutorialHighlight();
+    
+    // 前进到下一步
+    currentTutorialStep++;
+    
+    // 显示下一步
+    showTutorialStep();
+}
+
+// 清除高亮
+function clearTutorialHighlight() {
+    if (highlightedElement) {
+        highlightedElement.classList.remove('tutorial-highlight');
+        highlightedElement = null;
+    }
+}
+
+// 完成引导
+function completeTutorial() {
+    localStorage.setItem('tutorialComplete', 'true');
+    currentTutorialStep = 0;
+}
+
+// 检查并启动引导
+function startTutorialIfFirstTime() {
+    const isCompleted = localStorage.getItem('tutorialComplete');
+    if (!isCompleted) {
+        // 延迟 500ms 确保页面完全加载
+        setTimeout(() => {
+            showTutorialStep();
+        }, 500);
+    }
+}
+
 // ==================== 怪物 SVG 精灵系统 ====================
+
+
 
 // SVG 精灵图像库（扁平化矢量风格）
 const ENEMY_SPRITES = {
@@ -248,6 +380,219 @@ const ENEMY_SPRITES = {
             <circle cx="70" cy="75" r="3" fill="#922b21"/>
             <circle cx="60" cy="85" r="3" fill="#922b21"/>
         </svg>
+    `,
+    
+    // ==================== 新增敌人 SVG ====================
+    // 第一层 - 毒蜘蛛
+    spider: `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="spiderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#8e44ad;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#2c3e50;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <ellipse cx="50" cy="50" rx="25" ry="20" fill="url(#spiderGrad)"/>
+            <circle cx="50" cy="40" r="12" fill="#34495e"/>
+            <circle cx="45" cy="38" r="4" fill="#e74c3c"/>
+            <circle cx="55" cy="38" r="4" fill="#e74c3c"/>
+            <circle cx="45" cy="38" r="1.5" fill="#000"/>
+            <circle cx="55" cy="38" r="1.5" fill="#000"/>
+            <path d="M 35 45 Q 15 35 10 25" stroke="#2c3e50" stroke-width="3" fill="none"/>
+            <path d="M 35 50 Q 15 50 10 55" stroke="#2c3e50" stroke-width="3" fill="none"/>
+            <path d="M 35 55 Q 15 65 10 75" stroke="#2c3e50" stroke-width="3" fill="none"/>
+            <path d="M 65 45 Q 85 35 90 25" stroke="#2c3e50" stroke-width="3" fill="none"/>
+            <path d="M 65 50 Q 85 50 90 55" stroke="#2c3e50" stroke-width="3" fill="none"/>
+            <path d="M 65 55 Q 85 65 90 75" stroke="#2c3e50" stroke-width="3" fill="none"/>
+            <path d="M 42 52 L 38 60" stroke="#5d4037" stroke-width="2"/>
+            <path d="M 58 52 L 62 60" stroke="#5d4037" stroke-width="2"/>
+        </svg>
+    `,
+    // 第二层 - 吸血鬼
+    vampire: `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="vampireGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#e74c3c;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#8b0000;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <path d="M 20 80 Q 10 50 20 30 L 80 30 Q 90 50 80 80 Z" fill="#8b0000"/>
+            <path d="M 25 75 Q 15 50 25 35 L 75 35 Q 85 50 75 75 Z" fill="#c0392b"/>
+            <ellipse cx="50" cy="55" rx="20" ry="25" fill="#1a1a1a"/>
+            <path d="M 45 50 L 50 60 L 55 50" fill="#c0392b"/>
+            <ellipse cx="50" cy="35" rx="18" ry="20" fill="#f5d6c4"/>
+            <path d="M 30 25 Q 30 10 50 10 L 50 10 Q 70 10 70 25 Q 70 15 50 15 Q 30 15 30 25" fill="#1a1a1a"/>
+            <circle cx="45" cy="32" r="3" fill="#e74c3c"/>
+            <circle cx="55" cy="32" r="3" fill="#e74c3c"/>
+            <circle cx="45" cy="32" r="1" fill="#000"/>
+            <circle cx="55" cy="32" r="1" fill="#000"/>
+            <path d="M 47 42 L 45 48" stroke="#fff" stroke-width="1.5"/>
+            <path d="M 53 42 L 55 48" stroke="#fff" stroke-width="1.5"/>
+            <path d="M 42 50 L 50 48 L 58 50 L 50 52 Z" fill="#000"/>
+        </svg>
+    `,
+    // 第二层 - 石像鬼
+    golem: `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="golemGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#95a5a6;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#7f8c8d;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <rect x="30" y="40" width="40" height="50" rx="5" fill="url(#golemGrad)"/>
+            <rect x="35" y="45" width="30" height="40" rx="3" fill="#879697"/>
+            <rect x="35" y="15" width="30" height="28" rx="5" fill="url(#golemGrad)"/>
+            <circle cx="45" cy="28" r="4" fill="#e74c3c"/>
+            <circle cx="55" cy="28" r="4" fill="#e74c3c"/>
+            <circle cx="45" cy="28" r="1.5" fill="#000"/>
+            <circle cx="55" cy="28" r="1.5" fill="#000"/>
+            <path d="M 50 18 L 50 25" stroke="#5d6d6e" stroke-width="1"/>
+            <path d="M 50 48 L 50 60" stroke="#5d6d6e" stroke-width="1"/>
+            <path d="M 60 55 L 65 65" stroke="#5d6d6e" stroke-width="1"/>
+            <rect x="15" y="50" width="12" height="30" rx="4" fill="url(#golemGrad)"/>
+            <rect x="73" y="50" width="12" height="30" rx="4" fill="url(#golemGrad)"/>
+            <circle cx="21" cy="82" r="6" fill="url(#golemGrad)"/>
+            <circle cx="79" cy="82" r="6" fill="url(#golemGrad)"/>
+        </svg>
+    `,
+    // 第三层 - 凤凰
+    phoenix: `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="phoenixGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#f39c12;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#e74c3c;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="45" fill="none" stroke="#f39c12" stroke-width="2" opacity="0.6">
+                <animate attributeName="stroke-width" values="1;3;1" dur="1s" repeatCount="indefinite"/>
+            </circle>
+            <ellipse cx="50" cy="55" rx="20" ry="25" fill="url(#phoenixGrad)"/>
+            <circle cx="50" cy="35" r="15" fill="url(#phoenixGrad)"/>
+            <path d="M 45 25 L 45 10 L 50 18 Z" fill="#e74c3c"/>
+            <path d="M 50 23 L 50 5 L 55 16 Z" fill="#f39c12"/>
+            <path d="M 55 25 L 55 10 L 50 18 Z" fill="#e74c3c"/>
+            <circle cx="46" cy="32" r="3" fill="#fff"/>
+            <circle cx="54" cy="32" r="3" fill="#fff"/>
+            <circle cx="46" cy="32" r="1.5" fill="#000"/>
+            <circle cx="54" cy="32" r="1.5" fill="#000"/>
+            <path d="M 47 38 L 50 45 L 53 38 Z" fill="#f1c40f"/>
+            <path d="M 30 50 Q 15 40 20 30 Q 25 45 35 52 Z" fill="#e74c3c">
+                <animateTransform attributeName="transform" type="scale" values="1;1.1;1" dur="1.5s" repeatCount="indefinite" additive="sum"/>
+            </path>
+            <path d="M 70 50 Q 85 40 80 30 Q 75 45 65 52 Z" fill="#e74c3c">
+                <animateTransform attributeName="transform" type="scale" values="1;1.1;1" dur="1.5s" repeatCount="indefinite" additive="sum"/>
+            </path>
+            <path d="M 40 75 Q 35 90 45 95" stroke="#f39c12" stroke-width="4" fill="none"/>
+            <path d="M 50 78 Q 50 95 50 98" stroke="#e74c3c" stroke-width="4" fill="none"/>
+            <path d="M 60 75 Q 65 90 55 95" stroke="#f39c12" stroke-width="4" fill="none"/>
+        </svg>
+    `,
+    // 第三层 - 巫骑士
+    lich_knight: `
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="knightGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#34495e;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#2c3e50;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <path d="M 25 80 Q 15 50 25 35 L 75 35 Q 85 50 75 80 Z" fill="#8b0000"/>
+            <rect x="32" y="45" width="36" height="45" rx="8" fill="url(#knightGrad)"/>
+            <rect x="38" y="50" width="24" height="35" rx="5" fill="#4a5d70"/>
+            <path d="M 50 50 L 50 85" stroke="#ffd700" stroke-width="2"/>
+            <circle cx="50" cy="60" r="4" fill="#ffd700"/>
+            <circle cx="50" cy="70" r="4" fill="#ffd700"/>
+            <circle cx="50" cy="80" r="4" fill="#ffd700"/>
+            <ellipse cx="50" cy="32" rx="20" ry="18" fill="url(#knightGrad)"/>
+            <path d="M 30 32 L 30 20 Q 50 10 70 20 L 70 32" fill="url(#knightGrad)"/>
+            <line x1="45" y1="28" x2="45" y2="36" stroke="#1a2832" stroke-width="2"/>
+            <line x1="55" y1="28" x2="55" y2="36" stroke="#1a2832" stroke-width="2"/>
+            <circle cx="45" cy="30" r="3" fill="#00ffff"/>
+            <circle cx="55" cy="30" r="3" fill="#00ffff"/>
+            <rect x="75" y="40" width="6" height="50" fill="#7f8c8d"/>
+            <path d="M 72 35 L 78 35 L 78 40 L 72 40 Z" fill="#bdc3c7"/>
+            <path d="M 75 25 L 70 35 L 80 35 Z" fill="#95a5a6"/>
+        </svg>
+    `,
+    
+    // ==================== 新增 Boss SVG ====================
+    boss_lich_king: `
+        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="lichKingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#2c3e50;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#1a252f;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <circle cx="60" cy="60" r="55" fill="none" stroke="#9b59b6" stroke-width="4" opacity="0.6">
+                <animate attributeName="stroke-width" values="2;5;2" dur="2s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <path d="M 35 30 L 35 15 L 45 25 L 50 10 L 55 25 L 60 12 L 65 25 L 70 15 L 85 30 Z" fill="#ffd700"/>
+            <ellipse cx="60" cy="75" rx="40" ry="35" fill="url(#lichKingGrad)"/>
+            <path d="M 40 60 L 60 50 L 80 60 L 80 90 L 40 90 Z" fill="#34495e"/>
+            <path d="M 60 55 L 60 85" stroke="#9b59b6" stroke-width="3"/>
+            <circle cx="60" cy="65" r="5" fill="#9b59b6"/>
+            <circle cx="60" cy="75" r="5" fill="#9b59b6"/>
+            <ellipse cx="60" cy="42" rx="28" ry="25" fill="#ecf0f1"/>
+            <ellipse cx="50" cy="38" rx="8" ry="10" fill="#1a252f"/>
+            <ellipse cx="70" cy="38" rx="8" ry="10" fill="#1a252f"/>
+            <circle cx="50" cy="38" r="4" fill="#e74c3c"/>
+            <circle cx="70" cy="38" r="4" fill="#e74c3c"/>
+            <path d="M 56 45 L 60 52 L 64 45 Z" fill="#1a252f"/>
+            <path d="M 52 58 L 52 65" stroke="#ecf0f1" stroke-width="2"/>
+            <path d="M 58 58 L 58 65" stroke="#ecf0f1" stroke-width="2"/>
+            <path d="M 64 58 L 64 65" stroke="#ecf0f1" stroke-width="2"/>
+            <path d="M 70 58 L 70 65" stroke="#ecf0f1" stroke-width="2"/>
+            <rect x="90" y="45" width="6" height="60" fill="#5d4037"/>
+            <circle cx="93" cy="40" r="10" fill="#9b59b6">
+                <animate attributeName="r" values="8;12;8" dur="2s" repeatCount="indefinite"/>
+            </circle>
+            <circle cx="93" cy="40" r="5" fill="#00ffff"/>
+        </svg>
+    `,
+    boss_ancient_dragon: `
+        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="ancientDragonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#c0392b;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#8b0000;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <circle cx="60" cy="60" r="55" fill="none" stroke="#e74c3c" stroke-width="5" opacity="0.7">
+                <animate attributeName="stroke-width" values="3;6;3" dur="1.5s" repeatCount="indefinite"/>
+                <animate attributeName="opacity" values="0.5;0.9;0.5" dur="1.5s" repeatCount="indefinite"/>
+            </circle>
+            <ellipse cx="60" cy="110" rx="55" ry="10" fill="#e74c3c" opacity="0.7">
+                <animate attributeName="opacity" values="0.5;1;0.5" dur="1s" repeatCount="indefinite"/>
+            </ellipse>
+            <path d="M 20 50 Q 5 20 30 30 L 45 45 Z" fill="#8b0000">
+                <animateTransform attributeName="transform" type="scale" values="1;1.15;1" dur="2s" repeatCount="indefinite" additive="sum"/>
+            </path>
+            <path d="M 100 50 Q 115 20 90 30 L 75 45 Z" fill="#8b0000">
+                <animateTransform attributeName="transform" type="scale" values="1;1.15;1" dur="2s" repeatCount="indefinite" additive="sum"/>
+            </path>
+            <ellipse cx="60" cy="70" rx="45" ry="38" fill="url(#ancientDragonGrad)"/>
+            <circle cx="45" cy="60" r="3" fill="#922b21" opacity="0.6"/>
+            <circle cx="55" cy="58" r="3" fill="#922b21" opacity="0.6"/>
+            <circle cx="65" cy="58" r="3" fill="#922b21" opacity="0.6"/>
+            <circle cx="75" cy="60" r="3" fill="#922b21" opacity="0.6"/>
+            <ellipse cx="60" cy="40" rx="30" ry="25" fill="url(#ancientDragonGrad)"/>
+            <path d="M 35 25 L 25 10 L 38 28 Z" fill="#2c3e50"/>
+            <path d="M 85 25 L 95 10 L 82 28 Z" fill="#2c3e50"/>
+            <ellipse cx="48" cy="35" r="8" fill="#f1c40f"/>
+            <ellipse cx="72" cy="35" r="8" fill="#f1c40f"/>
+            <circle cx="48" cy="35" r="3" fill="#000"/>
+            <circle cx="72" cy="35" r="3" fill="#000"/>
+            <circle cx="55" cy="42" r="2" fill="#922b21"/>
+            <circle cx="65" cy="42" r="2" fill="#922b21"/>
+            <path d="M 50 48 Q 60 55 70 48" stroke="#8b0000" stroke-width="3" fill="none"/>
+            <path d="M 55 50 L 53 56" stroke="#fff" stroke-width="2"/>
+            <path d="M 65 50 L 67 56" stroke="#fff" stroke-width="2"/>
+        </svg>
     `
 };
 
@@ -459,8 +804,66 @@ const CLASSES = {
         icon: '🗡️',
         maxHp: 65,
         energy: 3,
-        startingDeck: ['strike', 'strike', 'strike', 'strike', 'defend', 'defend', 'quick_attack', 'quick_attack', 'dagger_throw', 'backstab']
+        startingDeck: ['strike', 'strike', 'strike', 'strike', 'defend', 'defend', 'quick_attack', 'quick_attack', 'dagger_throw', 'backstab'],
+        // 职业专属技能（冷却制）
+        specialSkill: {
+            name: '背刺',
+            icon: '🗡️💨',
+            desc: '对敌人造成 12 点伤害，如果敌人身后有队友则伤害翻倍',
+            cost: 0,  // 不消耗能量，但有冷却
+            cooldown: 3,  // 3 回合冷却
+            maxCooldown: 3
+        }
+    },
+    // ==================== 新增职业 ====================
+    monk: {
+        name: '武僧',
+        icon: '🥋',
+        maxHp: 70,
+        energy: 3,
+        startingDeck: ['strike', 'strike', 'defend', 'defend', 'punch', 'punch', 'kick', 'meditate', 'focus', 'iron_skin'],
+        specialSkill: {
+            name: '气功波',
+            icon: '🌊',
+            desc: '对所有敌人造成 8 点伤害，恢复 5 点生命',
+            cost: 0,
+            cooldown: 4,
+            maxCooldown: 4
+        }
+    },
+    paladin: {
+        name: '圣骑士',
+        icon: '✨',
+        maxHp: 90,
+        energy: 3,
+        startingDeck: ['strike', 'strike', 'defend', 'defend', 'holy_strike', 'holy_strike', 'heal_light', 'divine_shield', 'blessing', 'smite'],
+        specialSkill: {
+            name: '圣光审判',
+            icon: '⚖️✨',
+            desc: '对敌人造成 15 点伤害，恢复自身 10 点生命',
+            cost: 0,
+            cooldown: 4,
+            maxCooldown: 4
+        }
     }
+};
+
+// 职业专属卡牌池（只能该职业获得）
+const CLASS_EXCLUSIVE_CARDS = {
+    warrior: ['war_cry', 'whirling_strike', 'last_stand', 'retaliate', 'execute'],
+    mage: ['lightning_bolt', 'ice_shield', 'teleport', 'meteor_shower', 'time_warp'],
+    rogue: ['shadow_step', 'poison_dagger', 'eviscerate', 'smoke_bomb', 'assassination'],
+    monk: ['punch', 'kick', 'meditate', 'focus', 'iron_skin'],
+    paladin: ['holy_strike', 'heal_light', 'divine_shield', 'blessing', 'smite']
+};
+
+// 职业专属遗物
+const CLASS_RELICS = {
+    warrior: ['berserker_armor', 'war_horn'],
+    mage: ['archmage_staff', 'mana_crystal'],
+    rogue: ['shadow_cloak', 'thief_ring'],
+    monk: ['mystic_beads', 'dragon_gauntlets'],
+    paladin: ['holy_avenger', 'divine_amulet']
 };
 
 // 卡牌数据库
@@ -504,7 +907,42 @@ const CARD_DB = {
     // 技能牌
     battle_trance: { name: '战斗专注', cost: 0, type: 'skill', icon: '🧘', desc: '抽 3 张牌，本回合不能再抽牌', effect: { draw: 3, noDraw: true } },
     bloodletting: { name: '放血', cost: 0, type: 'skill', icon: '🩸', desc: '失去 3 点生命，获得 2 点能量', effect: { hpCost: 3, energy: 2 } },
-    seeing_red: { name: '看见红色', cost: 1, type: 'skill', icon: '🔴', desc: '获得 2 点能量，将这张牌放入抽牌堆', effect: { energy: 2, shuffle: true } }
+    seeing_red: { name: '看见红色', cost: 1, type: 'skill', icon: '🔴', desc: '获得 2 点能量，将这张牌放入抽牌堆', effect: { energy: 2, shuffle: true } },
+    
+    // ==================== 新增战士卡牌（5 张） ====================
+    war_cry: { name: '战吼', cost: 1, type: 'skill', icon: '📢', desc: '造成 5 点伤害，抽 1 张牌，获得 5 点格挡', effect: { damage: 5, draw: 1, block: 5 } },
+    whirling_strike: { name: '旋风斩', cost: 2, type: 'attack', icon: '🌪️', desc: '对所有敌人造成 6 点伤害', effect: { damage: 6, area: true } },
+    last_stand: { name: '殊死一搏', cost: 0, type: 'attack', icon: '⚔️', desc: '每损失 10 点生命造成 3 点额外伤害', effect: { damage: 3, hp_bonus: true } },
+    retaliate: { name: '反击', cost: 1, type: 'skill', icon: '🛡️', desc: '本回合受伤时对攻击者造成 5 点伤害', effect: { retaliate: 5 } },
+    execute: { name: '处决', cost: 2, type: 'attack', icon: '💀', desc: '对生命值低于 50% 的敌人造成 25 点伤害', effect: { damage: 25, execute: true } },
+    
+    // ==================== 新增法师卡牌（5 张） ====================
+    lightning_bolt: { name: '闪电链', cost: 1, type: 'attack', icon: '⚡', desc: '造成 7 点伤害，随机弹射到另一个敌人造成 4 点伤害', effect: { damage: 7, bounce: 4 } },
+    ice_shield: { name: '冰霜护盾', cost: 1, type: 'defense', icon: '❄️', desc: '获得 8 点格挡，下回合敌人伤害 -2', effect: { block: 8, weaken_next: 2 } },
+    teleport: { name: '传送', cost: 0, type: 'skill', icon: '🌀', desc: '抽 2 张牌，丢弃 1 张', effect: { draw: 2, discard: 1 } },
+    meteor_shower: { name: '陨石雨', cost: 3, type: 'attack', icon: '☄️', desc: '对所有敌人造成 10 点伤害', effect: { damage: 10, area: true } },
+    time_warp: { name: '时间扭曲', cost: 2, type: 'skill', icon: '⏰', desc: '本回合额外获得 2 点能量', effect: { extra_energy: 2 } },
+    
+    // ==================== 新增盗贼卡牌（5 张） ====================
+    shadow_step: { name: '暗影步', cost: 0, type: 'skill', icon: '👤', desc: '下张攻击牌伤害翻倍', effect: { next_damage_double: true } },
+    poison_dagger: { name: '毒刃', cost: 1, type: 'attack', icon: '☠️', desc: '造成 5 点伤害，施加 2 层中毒', effect: { damage: 5, poison: 2 } },
+    eviscerate: { name: '绞杀', cost: 2, type: 'attack', icon: '🔪', desc: '造成 8 点伤害，如果敌人有负面状态则额外造成 8 点', effect: { damage: 8, debuff_bonus: 8 } },
+    smoke_bomb: { name: '烟雾弹', cost: 1, type: 'skill', icon: '💨', desc: '获得 10 点格挡，抽 1 张牌，敌人下回合命中率 -50%', effect: { block: 10, draw: 1, miss_chance: 0.5 } },
+    assassination: { name: '暗杀', cost: 3, type: 'attack', icon: '💀', desc: '造成 20 点伤害，如果击杀敌人则抽 2 张牌', effect: { damage: 20, kill_draw: 2 } },
+    
+    // ==================== 武僧专属卡牌（5 张） ====================
+    punch: { name: '拳击', cost: 1, type: 'attack', icon: '👊', desc: '造成 7 点伤害，如果本回合未受伤则额外造成 3 点', effect: { damage: 7, combo: 3 } },
+    kick: { name: '飞踢', cost: 2, type: 'attack', icon: '🦵', desc: '造成 10 点伤害，获得 5 点格挡', effect: { damage: 10, block: 5 } },
+    meditate: { name: '冥想', cost: 0, type: 'skill', icon: '🧘', desc: '恢复 5 点生命，抽 1 张牌', effect: { heal: 5, draw: 1 } },
+    focus: { name: '专注', cost: 1, type: 'skill', icon: '🎯', desc: '本回合下张卡牌消耗 -1（最低 0）', effect: { next_cost_minus: 1 } },
+    iron_skin: { name: '铁布衫', cost: 2, type: 'defense', icon: '🛡️', desc: '获得 15 点格挡，本回合受伤减半', effect: { block: 15, damage_halve: true } },
+    
+    // ==================== 圣骑士专属卡牌（5 张） ====================
+    holy_strike: { name: '圣击', cost: 1, type: 'attack', icon: '⚔️✨', desc: '造成 8 点伤害，对亡灵敌人额外造成 6 点', effect: { damage: 8, undead_bonus: 6 } },
+    heal_light: { name: '微光治愈', cost: 1, type: 'skill', icon: '💚', desc: '恢复 8 点生命', effect: { heal: 8 } },
+    divine_shield: { name: '神圣护盾', cost: 2, type: 'defense', icon: '🛡️✨', desc: '获得 12 点格挡，下回合受到攻击时反弹 5 点伤害', effect: { block: 12, reflect: 5 } },
+    blessing: { name: '祝福', cost: 1, type: 'skill', icon: '🙏', desc: '所有队友获得 3 点格挡，抽 1 张牌', effect: { team_block: 3, draw: 1 } },
+    smite: { name: '制裁', cost: 2, type: 'attack', icon: '⚡✨', desc: '造成 12 点伤害，如果敌人有负面状态则额外造成 8 点', effect: { damage: 12, debuff_bonus: 8 } }
 };
 
 // 敌人数据库
@@ -531,7 +969,21 @@ const ENEMY_DB = {
     // Boss
     boss_goblin_king: { name: '哥布林王', hp: 120, icon: '👑', pattern: 'boss', damage: 15 },
     boss_lich: { name: '巫妖', hp: 150, icon: '💀', pattern: 'boss', damage: 18 },
-    boss_dragon: { name: '远古巨龙', hp: 200, icon: '🐲', pattern: 'boss', damage: 22 }
+    boss_dragon: { name: '远古巨龙', hp: 200, icon: '🐲', pattern: 'boss', damage: 22 },
+    
+    // ==================== 新增敌人（5 个） ====================
+    // 第一层新增
+    spider: { name: '毒蜘蛛', hp: 25, icon: '🕷️', pattern: 'fast', damage: 7 },
+    // 第二层新增
+    vampire: { name: '吸血鬼', hp: 60, icon: '🧛', pattern: 'lifesteal', damage: 11 },
+    golem: { name: '石像鬼', hp: 75, icon: '🗿', pattern: 'tank', damage: 9 },
+    // 第三层新增
+    phoenix: { name: '凤凰', hp: 90, icon: '🔥', pattern: 'regen', damage: 16 },
+    lich_knight: { name: '巫骑士', hp: 85, icon: '💀⚔️', pattern: 'balanced', damage: 15 },
+    
+    // ==================== 新增 Boss（2 个） ====================
+    boss_lich_king: { name: '巫妖王', hp: 250, icon: '👑💀', pattern: 'boss', damage: 25 },
+    boss_ancient_dragon: { name: '上古邪龙', hp: 300, icon: '🐲🔥', pattern: 'boss', damage: 28 }
 };
 
 // 分层节点类型配置（新增）
@@ -579,7 +1031,43 @@ const RELIC_DB = {
     
     cursed_key: { name: '诅咒钥匙', icon: '🗝️', desc: '获得时获得 1 个普通遗物，但宝箱变成诅咒', rarity: 'rare' },
     eternal_feather: { name: '永恒羽毛', icon: '🪶', desc: '每添加一张牌到牌组，恢复 3 点生命', rarity: 'rare' },
-    gambling_chip: { name: '赌博筹码', icon: '🎰', desc: '战斗开始时丢弃任意张牌并抽等量牌', rarity: 'rare' }
+    gambling_chip: { name: '赌博筹码', icon: '🎰', desc: '战斗开始时丢弃任意张牌并抽等量牌', rarity: 'rare' },
+    
+    // ==================== 新增遗物（8 个） ====================
+    // 普通遗物（4 个）
+    lucky_gem: { name: '幸运宝石', icon: '💎', desc: '战斗开始时 30% 几率获得 5 点格挡', rarity: 'common' },
+    vial_of_poison: { name: '毒液瓶', icon: '🧪', desc: '攻击敌人时 10% 几率施加 1 层中毒', rarity: 'common' },
+    worn_cape: { name: '破旧斗篷', icon: '🧥', desc: '战斗开始时获得 5 点格挡', rarity: 'common' },
+    copper_coin: { name: '铜币', icon: '🪙', desc: '每场战斗获得 10 金币', rarity: 'common' },
+    
+    // 稀有遗物（2 个）
+    shadow_mirror: { name: '暗影之镜', icon: '🪞', desc: '每当你使用技能牌，对随机敌人造成 4 点伤害', rarity: 'uncommon' },
+    phoenix_down: { name: '凤凰羽毛', icon: '🪶🔥', desc: '生命值降至 0 时保留 1 点生命并免疫所有伤害 1 回合（每场战斗一次）', rarity: 'rare' },
+    
+    // 传说遗物（2 个）
+    dragon_heart: { name: '龙之心', icon: '❤️🐲', desc: '每损失 20% 生命，力量 +1', rarity: 'legendary' },
+    time_keeper: { name: '时间守护者', icon: '⏰', desc: '每 3 回合，额外获得 2 点能量', rarity: 'legendary' },
+    
+    // ==================== 职业专属遗物（10 个） ====================
+    // 战士专属
+    berserker_armor: { name: '狂战士铠甲', icon: '👕⚔️', desc: '每损失 10 点生命，攻击伤害 +1', rarity: 'rare', exclusiveClass: 'warrior' },
+    war_horn: { name: '战号角', icon: '🎺', desc: '战斗开始时，对所有敌人造成 5 点伤害', rarity: 'uncommon', exclusiveClass: 'warrior' },
+    
+    // 法师专属
+    archmage_staff: { name: '大法师法杖', icon: '🪄✨', desc: '能量上限 +1', rarity: 'rare', exclusiveClass: 'mage' },
+    mana_crystal: { name: '魔力水晶', icon: '💎🔮', desc: '每回合开始时恢复 1 点能量', rarity: 'uncommon', exclusiveClass: 'mage' },
+    
+    // 盗贼专属
+    shadow_cloak: { name: '暗影斗篷', icon: '🧥👤', desc: '闪避几率 +15%（每回合一次）', rarity: 'rare', exclusiveClass: 'rogue' },
+    thief_ring: { name: '盗贼戒指', icon: '💍🗡️', desc: '商店商品价格 -20%', rarity: 'uncommon', exclusiveClass: 'rogue' },
+    
+    // 武僧专属
+    mystic_beads: { name: '神秘念珠', icon: '📿', desc: '每使用 5 张技能牌，恢复 10 点生命', rarity: 'rare', exclusiveClass: 'monk' },
+    dragon_gauntlets: { name: '龙拳护手', icon: '🥊🐲', desc: '拳击和飞踢伤害 +3', rarity: 'uncommon', exclusiveClass: 'monk' },
+    
+    // 圣骑士专属
+    holy_avenger: { name: '神圣复仇者', icon: '⚔️✨', desc: '对亡灵和恶魔敌人伤害 +5', rarity: 'rare', exclusiveClass: 'paladin' },
+    divine_amulet: { name: '神圣护符', icon: '📿✨', desc: '治愈效果 +25%', rarity: 'uncommon', exclusiveClass: 'paladin' }
 };
 
 // 药水数据库
@@ -871,6 +1359,14 @@ function initGame() {
         });
     });
     
+    // 难度选择
+    document.querySelectorAll('.difficulty-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+        });
+    });
+    
     document.getElementById('confirm-class').addEventListener('click', startNewGame);
     document.getElementById('back-to-menu').addEventListener('click', () => showScreen('main-menu'));
     
@@ -914,17 +1410,34 @@ function initGame() {
 
 function startNewGame() {
     const selectedClass = document.querySelector('.class-card.selected').dataset.class;
+    const selectedDifficulty = document.querySelector('.difficulty-btn.selected').dataset.difficulty || 'normal';
     const classData = CLASSES[selectedClass];
     
+    // 根据难度调整参数
+    let hpMultiplier = 1;
+    let enemyDamageMultiplier = 1;
+    let goldMultiplier = 1;
+    
+    if (selectedDifficulty === 'easy') {
+        hpMultiplier = 1.2;  // 初始生命 +20%
+        enemyDamageMultiplier = 0.8;  // 敌人伤害 -20%
+        goldMultiplier = 1;
+    } else if (selectedDifficulty === 'hard') {
+        hpMultiplier = 1;
+        enemyDamageMultiplier = 1.3;  // 敌人伤害 +30%
+        goldMultiplier = 0.8;  // 金币 -20%
+    }
+    
     // 根据职业设置初始金币（战士 100，法师 80，盗贼 120）
-    const initialGold = selectedClass === 'warrior' ? 100 :
-                       selectedClass === 'mage' ? 80 : 120;
+    const initialGold = Math.floor((selectedClass === 'warrior' ? 100 :
+                       selectedClass === 'mage' ? 80 : 120) * goldMultiplier);
     
     // 初始化玩家状态
     gameState.player = {
         class: selectedClass,
-        hp: classData.maxHp,
-        maxHp: classData.maxHp,
+        difficulty: selectedDifficulty,
+        hp: Math.floor(classData.maxHp * hpMultiplier),
+        maxHp: Math.floor(classData.maxHp * hpMultiplier),
         energy: classData.energy,
         maxEnergy: classData.energy,
         block: 0,
@@ -970,6 +1483,9 @@ function startNewGame() {
     
     showScreen('map-screen');
     generateMap();
+    
+    // 首次游戏：启动新手引导
+    startTutorialIfFirstTime();
 }
 
 // ==================== 地图系统 ====================
