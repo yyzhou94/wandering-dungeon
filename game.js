@@ -288,6 +288,121 @@ function showCollectionPanel() {
     panel.classList.add('show');
 }
 
+// 显示更新日志面板
+function showChangelogPanel() {
+    const panel = document.getElementById('changelog-panel');
+    renderChangelogList();
+    panel.classList.add('show');
+}
+
+// 渲染更新日志列表
+function renderChangelogList() {
+    const list = document.getElementById('changelog-list');
+    list.innerHTML = '';
+    
+    // 更新日志数据
+    const changelogs = [
+        {
+            version: 'v1.2.1',
+            date: '2026-04-21',
+            type: 'patch',
+            title: '🐛 卡牌系统优化',
+            changes: [
+                { type: 'fix', text: '修复<span class="changelog-highlight">祝福卡牌</span>（团队效果改为单人效果）' },
+                { type: 'fix', text: '修复<span class="changelog-highlight">背刺技能</span>描述（队友条件改为未受伤条件）' },
+                { type: 'optimization', text: '0 费卡牌锻造支持治疗（+2）和格挡（+3）效果增强' },
+                { type: 'other', text: '所有卡牌适配单人游戏模式' }
+            ]
+        },
+        {
+            version: 'v1.2.0',
+            date: '2026-04-21',
+            type: 'major',
+            title: '🎮 游戏流程大扩展',
+            changes: [
+                { type: 'add', text: '扩展至<span class="changelog-highlight">5 层地牢</span>，每层不同敌人和 Boss' },
+                { type: 'add', text: '地图节点从 12 个扩展到 15-25 个（根据楼层动态调整）' },
+                { type: 'add', text: '新增<span class="changelog-highlight">精英守卫</span>和<span class="changelog-highlight">连续战斗</span>特殊战斗类型' },
+                { type: 'add', text: '新增 7 个新敌人：毒蜘蛛、吸血鬼、石像鬼、凤凰、巫骑士、巫妖王、上古邪龙' },
+                { type: 'add', text: '新增 8 个新遗物和 15 张新卡牌' },
+                { type: 'add', text: '新增 2 个新职业：武僧和圣骑士（含专属卡牌/遗物/技能）' },
+                { type: 'fix', text: '修复治疗卡牌（冥想、微光治愈、生命药水）不生效的 BUG' },
+                { type: 'balance', text: '调整难度曲线，第 1-2 层新手区，第 3-4 层进阶区，第 5 层终局区' },
+                { type: 'optimization', text: '游戏总时长从 20-30 分钟延长到 80-100 分钟' },
+                { type: 'other', text: '优化首页按钮样式，统一颜色和字体' }
+            ]
+        },
+        {
+            version: 'v1.1.0',
+            date: '2026-04-20',
+            type: 'minor',
+            title: '✨ 功能完善与优化',
+            changes: [
+                { type: 'add', text: '实现完整的收藏系统（卡牌和遗物图鉴）' },
+                { type: 'add', text: '添加战斗日志系统，实时记录战斗事件' },
+                { type: 'add', text: '实现音效系统（13 种音效，Web Audio API 生成）' },
+                { type: 'add', text: '成就系统完善（30 个成就，实时通知）' },
+                { type: 'fix', text: '修复收藏面板稀有度颜色显示问题' },
+                { type: 'optimization', text: '优化 UI 交互和视觉效果' }
+            ]
+        },
+        {
+            version: 'v1.0.0',
+            date: '2026-04-15',
+            type: 'patch',
+            title: '🚀 正式发布',
+            changes: [
+                { type: 'add', text: '基础游戏框架（地牢楼层、节点地图系统）' },
+                { type: 'add', text: '3 个基础职业：战士、法师、盗贼' },
+                { type: 'add', text: '45+ 张卡牌，14 个敌人，30 个遗物' },
+                { type: 'add', text: '3 级难度系统（简单/普通/困难）' },
+                { type: 'add', text: '完整的卡牌构筑和战斗系统' },
+                { type: 'other', text: '首次公开发布' }
+            ]
+        }
+    ];
+    
+    // 渲染每个版本日志
+    for (const changelog of changelogs) {
+        const entry = document.createElement('div');
+        entry.className = `changelog-entry ${changelog.type}`;
+        
+        const header = document.createElement('div');
+        header.className = 'changelog-header';
+        header.innerHTML = `
+            <div class="changelog-version-info">
+                <span class="changelog-version-badge ${changelog.type}">${changelog.version}</span>
+                <span class="changelog-date">${changelog.date}</span>
+            </div>
+        `;
+        entry.appendChild(header);
+        
+        const title = document.createElement('div');
+        title.className = 'changelog-title';
+        title.textContent = changelog.title;
+        entry.appendChild(title);
+        
+        const changes = document.createElement('ul');
+        changes.className = 'changelog-changes';
+        
+        for (const change of changelog.changes) {
+            const li = document.createElement('li');
+            li.className = change.type;
+            li.innerHTML = change.text;
+            changes.appendChild(li);
+        }
+        
+        entry.appendChild(changes);
+        list.appendChild(entry);
+    }
+    
+    // 添加页脚
+    const footer = document.createElement('div');
+    footer.className = 'changelog-footer';
+    footer.innerHTML = '🎮 流浪地牢 - 持续更新中...';
+    list.appendChild(footer);
+}
+
 // 渲染收藏列表
 function renderCollectionList() {
     const list = document.getElementById('collection-list');
@@ -1589,6 +1704,20 @@ document.addEventListener('click', (e) => {
     }
 });
 
+// 关闭更新日志面板
+function closeChangelogPanel() {
+    document.getElementById('changelog-panel').classList.remove('show');
+}
+
+// 点击更新日志面板外部关闭
+document.addEventListener('click', (e) => {
+    const changelogPanel = document.getElementById('changelog-panel');
+    const changelogBtn = document.getElementById('view-changelog');
+    if (changelogPanel && !changelogPanel.contains(e.target) && changelogBtn && !changelogBtn.contains(e.target)) {
+        closeChangelogPanel();
+    }
+});
+
 // 加载游戏进度
 function loadGame() {
     const saveData = localStorage.getItem(SAVE_KEY);
@@ -1754,7 +1883,7 @@ const CLASSES = {
         specialSkill: {
             name: '背刺',
             icon: '🗡️💨',
-            desc: '对敌人造成 12 点伤害，如果敌人身后有队友则伤害翻倍',
+            desc: '对敌人造成 14 点伤害，如果本回合未受伤则额外造成 6 点',
             cost: 0,  // 不消耗能量，但有冷却
             cooldown: 3,  // 3 回合冷却
             maxCooldown: 3
@@ -1886,7 +2015,7 @@ const CARD_DB = {
     holy_strike: { name: '圣击', cost: 1, type: 'attack', icon: '⚔️✨', desc: '造成 8 点伤害，对亡灵敌人额外造成 6 点', effect: { damage: 8, undead_bonus: 6 } },
     heal_light: { name: '微光治愈', cost: 1, type: 'skill', icon: '💚', desc: '恢复 8 点生命', effect: { heal: 8 } },
     divine_shield: { name: '神圣护盾', cost: 2, type: 'defense', icon: '🛡️✨', desc: '获得 12 点格挡，下回合受到攻击时反弹 5 点伤害', effect: { block: 12, reflect: 5 } },
-    blessing: { name: '祝福', cost: 1, type: 'skill', icon: '🙏', desc: '所有队友获得 3 点格挡，抽 1 张牌', effect: { team_block: 3, draw: 1 } },
+    blessing: { name: '祝福', cost: 1, type: 'skill', icon: '🙏', desc: '获得 5 点格挡，抽 1 张牌', effect: { block: 5, draw: 1 } },
     smite: { name: '制裁', cost: 2, type: 'attack', icon: '⚡✨', desc: '造成 12 点伤害，如果敌人有负面状态则额外造成 8 点', effect: { damage: 12, debuff_bonus: 8 } }
 };
 
@@ -2310,6 +2439,9 @@ function initGame() {
     
     // 查看战斗日志
     document.getElementById('view-combat-log').addEventListener('click', showCombatLogPanel);
+    
+    // 查看更新日志
+    document.getElementById('view-changelog').addEventListener('click', showChangelogPanel);
     
     // 点击面板外部关闭
     document.addEventListener('click', (e) => {
@@ -4627,6 +4759,14 @@ function upgradeCard(cardId) {
             // 有伤害效果的卡牌：增加 2-4 点伤害
             upgradedEffect.damage += 3;
             upgradedDesc = `${cardData.desc}（伤害 +3）`;
+        } else if (upgradedEffect.heal) {
+            // 有治疗效果的卡牌：增加 2 点治疗
+            upgradedEffect.heal += 2;
+            upgradedDesc = `${cardData.desc}（治疗 +2）`;
+        } else if (upgradedEffect.block) {
+            // 有格挡效果的卡牌：增加 3 点格挡
+            upgradedEffect.block += 3;
+            upgradedDesc = `${cardData.desc}（格挡 +3）`;
         } else if (upgradedEffect.draw) {
             // 有抽牌效果的卡牌：增加 1 张抽牌
             upgradedEffect.draw += 1;

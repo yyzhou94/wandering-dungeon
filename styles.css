@@ -314,7 +314,7 @@ button, .btn-small {
 #view-stats {
     background: linear-gradient(135deg, #5dade2 0%, #3498db 100%);
     color: white !important;
-    font-weight: 600;
+    font-weight: 700;
     box-shadow: 0 4px 15px rgba(93, 173, 226, 0.4);
 }
 
@@ -327,7 +327,7 @@ button, .btn-small {
 #view-collection {
     background: linear-gradient(135deg, #af7ac5 0%, #8e44ad 100%);
     color: white !important;
-    font-weight: 600;
+    font-weight: 700;
     box-shadow: 0 4px 15px rgba(175, 122, 197, 0.4);
 }
 
@@ -2702,6 +2702,189 @@ input[type="checkbox"], input[type="radio"] {
 }
 
 /* 启用胶片颗粒的类 */
+.grain-overlay.enabled {
+    opacity: 0.05;
+}
+
+/* ==================== 更新日志样式 ==================== */
+
+.changelog-list {
+    padding: 20px;
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
+}
+
+.changelog-entry {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(23, 32, 43, 0.95);
+    border-radius: 12px;
+    border-left: 4px solid #1abc9c;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.changelog-entry:hover {
+    background: rgba(28, 39, 52, 0.98);
+    transform: translateX(5px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+}
+
+.changelog-entry.major {
+    border-left-color: #e67e22;
+    background: rgba(230, 126, 34, 0.15);
+}
+
+.changelog-entry.minor {
+    border-left-color: #3498db;
+    background: rgba(52, 152, 219, 0.12);
+}
+
+.changelog-entry.patch {
+    border-left-color: #2ecc71;
+    background: rgba(46, 204, 113, 0.12);
+}
+
+.changelog-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.changelog-version-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.changelog-version-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    font-weight: bold;
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    color: white;
+}
+
+.changelog-version-badge.major {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+.changelog-version-badge.minor {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.changelog-version-badge.patch {
+    background: linear-gradient(135deg, #27ae60, #229954);
+}
+
+.changelog-date {
+    color: #95a5a6;
+    font-size: 0.9em;
+}
+
+.changelog-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #ecf0f1;
+    margin-bottom: 12px;
+}
+
+.changelog-changes {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.changelog-changes li {
+    padding: 8px 0;
+    padding-left: 25px;
+    position: relative;
+    color: #bdc3c7;
+    line-height: 1.6;
+}
+
+.changelog-changes li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: #27ae60;
+    font-weight: bold;
+}
+
+.changelog-changes li.add::before {
+    content: '+';
+    color: #3498db;
+}
+
+.changelog-changes li.fix::before {
+    content: '✦';
+    color: #f39c12;
+}
+
+.changelog-changes li.balance::before {
+    content: '⚖';
+    color: #9b59b6;
+}
+
+.changelog-changes li.optimization::before {
+    content: '⚡';
+    color: #1abc9c;
+}
+
+.changelog-changes li.other::before {
+    content: '•';
+    color: #95a5a6;
+}
+
+.changelog-highlight {
+    color: #f39c12;
+    font-weight: bold;
+}
+
+.changelog-section {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.changelog-section-title {
+    font-size: 0.95em;
+    color: #95a5a6;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.changelog-footer {
+    text-align: center;
+    padding: 20px;
+    color: #7f8c8d;
+    font-size: 0.85em;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 20px;
+}
+
+/* 更新日志按钮样式 */
+#view-changelog {
+    background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+    color: white !important;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4);
+}
+
+#view-changelog:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(230, 126, 34, 0.6);
+}
+
+.changelog-version {
+    font-size: 0.9em;
+    color: #95a5a6;
+    margin-top: 5px;
+}
 .enable-grain .grain-overlay {
     opacity: 0.08;
 }
