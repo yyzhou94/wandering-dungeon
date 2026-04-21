@@ -263,18 +263,26 @@ button:active {
 button {
     padding: 15px 30px;
     font-size: 1.1em;
+    font-weight: 600;
     border: none;
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
     font-family: inherit;
+    letter-spacing: 0.5px;
+}
+
+/* 所有按钮统一文字样式 */
+button, .btn-small {
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* 继续游戏按钮 - 金色（强调继续进度） */
 #continue-game {
-    background: linear-gradient(45deg, #ffd700, #ffb347);
-    color: #1a1a2e;
-    font-weight: bold;
+    background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+    color: white !important;
+    font-weight: 700;
     box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
 }
 
@@ -286,31 +294,92 @@ button {
 
 @keyframes goldGlow {
     0%, 100% { box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4); }
-    50% { box-shadow: 0 4px 25px rgba(255, 215, 0, 0.7); }
+    50% { box-shadow: 0 6px 25px rgba(255, 215, 0, 0.7); }
 }
 
 /* 开始游戏按钮 - 主红色（主要行动） */
 #start-game {
-    background: linear-gradient(45deg, #e94560, #ff6b6b);
-    color: white;
-    box-shadow: 0 4px 15px rgba(233, 69, 96, 0.4);
+    background: linear-gradient(135deg, #ff6b6b 0%, #e94560 100%);
+    color: white !important;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
 }
 
 #start-game:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 25px rgba(233, 69, 96, 0.6);
+    box-shadow: 0 6px 25px rgba(255, 107, 107, 0.6);
 }
 
 /* 游戏统计按钮 - 蓝色（信息类） */
 #view-stats {
-    background: linear-gradient(45deg, #3498db, #2980b9);
-    color: white;
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+    background: linear-gradient(135deg, #5dade2 0%, #3498db 100%);
+    color: white !important;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(93, 173, 226, 0.4);
 }
 
 #view-stats:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(52, 152, 219, 0.6);
+    box-shadow: 0 6px 25px rgba(93, 173, 226, 0.6);
+}
+
+/* 收藏按钮 - 紫色渐变 */
+#view-collection {
+    background: linear-gradient(135deg, #af7ac5 0%, #8e44ad 100%);
+    color: white !important;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(175, 122, 197, 0.4);
+}
+
+#view-collection:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(175, 122, 197, 0.6);
+}
+
+/* 成就按钮 - 绿色渐变 */
+#view-achievements {
+    background: linear-gradient(135deg, #58d68d 0%, #27ae60 100%);
+    color: white !important;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(88, 214, 141, 0.4);
+}
+
+#view-achievements:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(88, 214, 141, 0.6);
+}
+
+/* 小按钮统一样式 */
+.btn-small {
+    padding: 8px 16px;
+    font-size: 0.9em;
+    font-weight: 600;
+    color: white !important;
+    background: linear-gradient(135deg, #7f8c8d 0%, #95a5a6 100%);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.3px;
+}
+
+.btn-small:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(127, 140, 141, 0.4);
+}
+
+/* 特殊小按钮颜色 */
+.btn-small.primary {
+    background: linear-gradient(135deg, #5dade2 0%, #3498db 100%);
+}
+
+.btn-small.success {
+    background: linear-gradient(135deg, #58d68d 0%, #27ae60 100%);
+}
+
+.btn-small.warning {
+    background: linear-gradient(135deg, #f4d03f 0%, #f39c12 100%);
+    color: #2c3e50 !important;
 }
 
 /* 清除进度按钮 - 危险红色 */
@@ -437,7 +506,7 @@ button {
 .map-row {
     display: flex;
     justify-content: center;
-    gap: 40px; /* 从 50px 减小到 40px，适应 4 列布局 */
+    gap: 30px; /* 减小间距，适应 5 列布局 */
     position: relative;
 }
 
@@ -481,8 +550,8 @@ button {
 }
 
 .map-node {
-    width: 80px; /* 从 90px 减小到 80px，适应 4 列布局 */
-    height: 80px;
+    width: 70px; /* 进一步减小到 70px，适应 5 列布局 */
+    height: 70px;
     border-radius: 50%;
     display: flex;
     flex-direction: column;
@@ -490,7 +559,7 @@ button {
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 2.2em;
+    font-size: 2em;
     position: relative;
     z-index: 2;
 }
@@ -1557,6 +1626,325 @@ button {
     line-height: 1.4;
 }
 
+/* ==================== 成就系统样式 ==================== */
+
+/* 成就通知 */
+.achievement-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+    border: 3px solid #f39c12;
+    border-radius: 15px;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    animation: slideInRight 0.5s ease;
+    min-width: 300px;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.achievement-notification.hide {
+    animation: slideOutRight 0.5s ease;
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+.achievement-icon {
+    font-size: 2.5em;
+    animation: pulse 1s ease infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+.achievement-content {
+    flex: 1;
+}
+
+.achievement-name {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #f39c12;
+    margin-bottom: 5px;
+}
+
+.achievement-desc {
+    font-size: 0.9em;
+    color: #ecf0f1;
+}
+
+/* 成就面板 */
+.achievements-panel {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 380px;
+    height: 100vh;
+    background: rgba(44, 62, 80, 0.98);
+    border-left: 3px solid #f39c12;
+    box-shadow: -5px 0 20px rgba(0, 0, 0, 0.5);
+    transition: right 0.3s ease;
+    z-index: 9999;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.achievements-panel.show {
+    right: 0;
+}
+
+.achievements-header {
+    text-align: center;
+    padding: 20px 0;
+    border-bottom: 2px solid #f39c12;
+    margin-bottom: 20px;
+}
+
+.achievements-header h2 {
+    color: #f39c12;
+    margin: 0;
+    font-size: 1.8em;
+}
+
+.achievements-progress {
+    color: #bdc3c7;
+    font-size: 0.9em;
+    margin-top: 10px;
+}
+
+.achievement-category {
+    margin-bottom: 20px;
+}
+
+.achievement-category-title {
+    color: #3498db;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #3498db;
+}
+
+.achievement-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    opacity: 0.5;
+    transition: all 0.3s ease;
+}
+
+.achievement-item.unlocked {
+    opacity: 1;
+    background: rgba(243, 156, 18, 0.2);
+    border: 1px solid #f39c12;
+}
+
+.achievement-item.unlocked:hover {
+    transform: translateX(5px);
+    box-shadow: 0 3px 10px rgba(243, 156, 18, 0.3);
+}
+
+.achievement-item-icon {
+    font-size: 2em;
+    filter: grayscale(100%);
+}
+
+.achievement-item.unlocked .achievement-item-icon {
+    filter: grayscale(0%);
+    animation: unlockPulse 0.5s ease;
+}
+
+@keyframes unlockPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+
+.achievement-item-info {
+    flex: 1;
+}
+
+.achievement-item-name {
+    color: #ecf0f1;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.achievement-item.unlocked .achievement-item-name {
+    color: #f39c12;
+}
+
+.achievement-item-desc {
+    color: #95a5a6;
+    font-size: 0.85em;
+}
+
+/* 成就按钮 */
+.btn-achievements {
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* ==================== 收藏系统样式 ==================== */
+
+.collection-category {
+    margin-bottom: 25px;
+}
+
+.collection-category-title {
+    color: #3498db;
+    font-size: 1.3em;
+    font-weight: bold;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #3498db;
+}
+
+.collection-rarity {
+    margin-bottom: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.collection-rarity-title {
+    font-size: 1em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding-left: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 稀有度颜色 - 使用类名选择器 */
+.rarity-common .collection-rarity-title {
+    color: #ecf0f1 !important; /* 普通 - 白色 */
+}
+
+.rarity-uncommon .collection-rarity-title {
+    color: #3498db !important; /* 稀有 - 蓝色 */
+}
+
+.rarity-rare .collection-rarity-title {
+    color: #9b59b6 !important; /* 史诗 - 紫色 */
+}
+
+.rarity-legendary .collection-rarity-title {
+    color: #f39c12 !important; /* 传说 - 橙色 */
+}
+
+.collection-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
+}
+
+.collection-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+    opacity: 0.4;
+}
+
+.collection-item.locked {
+    filter: grayscale(100%);
+}
+
+.collection-item.unlocked {
+    opacity: 1;
+    border-color: #3498db;
+    background: rgba(52, 152, 219, 0.1);
+}
+
+.collection-item.unlocked:hover {
+    transform: translateX(5px);
+    box-shadow: 0 3px 10px rgba(52, 152, 219, 0.3);
+}
+
+.collection-item-icon {
+    font-size: 2.5em;
+    flex-shrink: 0;
+}
+
+.collection-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.collection-item-name {
+    color: #ecf0f1;
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 1em;
+}
+
+.collection-item.unlocked .collection-item-name {
+    color: #3498db;
+}
+
+.collection-item-desc {
+    color: #7f8c8d;
+    font-size: 0.8em;
+    line-height: 1.3;
+}
+
+/* 稀有度颜色 */
+.collection-rarity-title:contains("普通") {
+    color: #bdc3c7;
+}
+
+.collection-rarity-title:contains("稀有") {
+    color: #3498db;
+}
+
+.collection-rarity-title:contains("史诗") {
+    color: #9b59b6;
+}
+
+.collection-rarity-title:contains("传说") {
+    color: #f39c12;
+}
+
 
 .relic-item-small:hover .relic-desc {
     display: block;
@@ -1882,6 +2270,47 @@ button {
 }
 
 /* ========== 粒子特效系统 ========== */
+
+/* 火花效果 */
+/* ==================== 地图响应式优化（5 列布局）==================== */
+
+/* 小屏幕适配 */
+@media (max-width: 768px) {
+    .map-row {
+        gap: 15px; /* 移动端进一步减小间距 */
+    }
+    
+    .map-node {
+        width: 55px;
+        height: 55px;
+        font-size: 1.6em;
+    }
+    
+    .map-node .node-icon {
+        font-size: 1.2em;
+    }
+    
+    .map-node .node-label {
+        font-size: 0.6em;
+    }
+}
+
+/* 超小屏幕 */
+@media (max-width: 480px) {
+    .map-row {
+        gap: 10px;
+    }
+    
+    .map-node {
+        width: 48px;
+        height: 48px;
+        font-size: 1.4em;
+    }
+    
+    .map-node .node-label {
+        display: none; /* 超小屏幕隐藏标签 */
+    }
+}
 
 /* 火花效果 */
 .spark {
@@ -2595,10 +3024,105 @@ input[type="checkbox"], input[type="radio"] {
     .reward-cards {
         gap: 12px;
     }
-    
+
     .shop-cards,
     .shop-relics,
     .shop-potions {
         gap: 10px;
     }
 }
+
+/* ==================== 战斗日志样式 ==================== */
+
+.combat-log-list {
+    padding: 15px;
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+}
+
+.combat-log-entry {
+    padding: 10px;
+    margin-bottom: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    border-left: 3px solid #3498db;
+    animation: slideInLeft 0.3s ease;
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.combat-log-entry.damage {
+    border-left-color: #e74c3c;
+}
+
+.combat-log-entry.heal {
+    border-left-color: #2ecc71;
+}
+
+.combat-log-entry.block {
+    border-left-color: #3498db;
+}
+
+.combat-log-entry.power {
+    border-left-color: #9b59b6;
+}
+
+.combat-log-entry.info {
+    border-left-color: #95a5a6;
+}
+
+.combat-log-turn {
+    padding: 12px;
+    margin: 15px 0 10px 0;
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    border-radius: 8px;
+    color: #3498db;
+    font-weight: bold;
+    text-align: center;
+    border: 2px solid #3498db;
+}
+
+.combat-log-entry-icon {
+    margin-right: 8px;
+    font-size: 1.2em;
+}
+
+.combat-log-entry-text {
+    color: #ecf0f1;
+}
+
+.combat-log-entry-value {
+    color: #f39c12;
+    font-weight: bold;
+}
+
+/* 清空日志按钮 */
+.btn-clear-log {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid #7f8c8d;
+    padding: 5px 10px;
+    border-radius: 5px;
+    color: #bdc3c7;
+    cursor: pointer;
+    font-size: 0.8em;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.btn-clear-log:hover {
+    background: rgba(231, 76, 60, 0.2);
+    border-color: #e74c3c;
+    color: #e74c3c;
+}
+

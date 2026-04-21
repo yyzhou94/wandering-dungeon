@@ -15,8 +15,9 @@
             <div class="menu-buttons">
                 <button id="continue-game" class="btn-primary" style="display: none;">继续游戏</button>
                 <button id="start-game" class="btn-primary">开始游戏</button>
+                <button id="view-collection" class="btn-secondary">查看收藏</button>
+                <button id="view-achievements" class="btn-secondary">查看成就</button>
                 <button id="view-stats" class="btn-secondary">游戏统计</button>
-                <button id="clear-save" class="btn-danger" style="display: none;">清除进度</button>
             </div>
             <div class="high-score">
                 最高分: <span id="menu-high-score">0</span>
@@ -123,6 +124,7 @@
             <div class="battle-header">
                 <span id="battle-floor">第 1 层</span>
                 <div class="header-buttons">
+                    <button id="view-combat-log" class="btn-small">战斗日志</button>
                     <button id="view-relics-battle" class="btn-small">查看遗物</button>
                     <button id="view-deck" class="btn-small">查看牌组</button>
                 </div>
@@ -276,6 +278,41 @@
                 <p>获得金币: <span id="final-gold">150</span></p>
             </div>
             <button id="return-menu" class="btn-primary">返回主菜单</button>
+        </div>
+    </div>
+
+    <!-- 成就面板 -->
+    <div id="achievements-panel" class="achievements-panel">
+        <div class="achievements-header">
+            <h2>🏆 成就系统</h2>
+            <div class="achievements-progress">已解锁：<span id="achievement-count">0</span>/30</div>
+        </div>
+        <div id="achievements-list">
+            <!-- 动态生成 -->
+        </div>
+    </div>
+
+    <!-- 收藏面板 -->
+    <div id="collection-panel" class="achievements-panel">
+        <div class="achievements-header">
+            <h2>📚 收藏图鉴</h2>
+            <div class="achievements-progress" id="collection-progress">
+                卡牌：0/0 (0%) | 遗物：0/0 (0%)
+            </div>
+        </div>
+        <div id="collection-list">
+            <!-- 动态生成 -->
+        </div>
+    </div>
+
+    <!-- 战斗日志面板 -->
+    <div id="combat-log-panel" class="achievements-panel" style="width: 350px;">
+        <div class="achievements-header">
+            <h2>📋 战斗日志</h2>
+            <div class="achievements-progress">当前战斗记录</div>
+        </div>
+        <div id="combat-log-list" class="combat-log-list">
+            <!-- 动态生成 -->
         </div>
     </div>
 

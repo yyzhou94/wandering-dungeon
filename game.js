@@ -1,4 +1,882 @@
+// ==================== 音效系统 ====================
+
+// 音效开关状态
+let soundEnabled = true;
+let musicEnabled = true;
+
+// 音效音量
+const SFX_VOLUME = 0.5;
+const MUSIC_VOLUME = 0.3;
+
+// 音效类型
+const SFX_TYPES = {
+    // UI 音效
+    click: 'click',
+    hover: 'hover',
+    unlock: 'unlock',
+    
+    // 战斗音效
+    attack: 'attack',
+    damage: 'damage',
+    heal: 'heal',
+    block: 'block',
+    power: 'power',
+    
+    // 事件音效
+    card_get: 'card_get',
+    relic_get: 'relic_get',
+    gold_get: 'gold_get',
+    
+    // 特殊音效
+    win: 'win',
+    lose: 'lose',
+    level_up: 'level_up'
+};
+
+// 使用 Web Audio API 生成音效（无需外部文件）
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+// 播放音效函数
+function playSFX(type) {
+    if (!soundEnabled) return;
+    
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // 根据不同音效类型设置参数
+    switch(type) {
+        case SFX_TYPES.click:
+            oscillator.frequency.value = 600;
+            gainNode.gain.setValueAtTime(SFX_VOLUME * 0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+            break;
+            
+        case SFX_TYPES.hover:
+            oscillator.frequency.value = 400;
+            gainNode.gain.setValueAtTime(SFX_VOLUME * 0.15, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.05);
+            break;
+            
+        case SFX_TYPES.unlock:
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(SFX_VOLUME * 0.4, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+            break;
+            
+        case SFX_TYPES.attack:
+            oscillator.frequency.value = 200;
+            oscillator.type = 'square';
+            gainNode.gain.setValueAtTime(SFX_VOLUME * 0.5, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.15);
+            break;
+            
+        case SFX_TYPES.damage:
+            oscillator.frequency.value = 150;
+            oscillator.type = 'sawtooth';
+            gainNode.gain.setValueAtTime(SFX_VOLUME * 0.6, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
+            break;
+            
+        case SFX_TYPES.heal:
+            oscillator.frequency.value = 600;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(SFX_VOLUME * 0.4, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.25);
+            const osc2 = audioContext.createOscillator();
+            const gain2 = audioContext.createGain();
+            osc2.connect(gain2);
+            gain2.connect(audioContext.destination);
+            osc2.frequency.value = 800;
+            osc2.type = 'sine';
+            gain2.gain.setValueAtTime(SFX_VOLUME * 0.3, audioContext.currentTime);
+            gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.25);
+            osc2.start(audioContext.currentTime);
+            osc2.stop(audioContext.currentTime + 0.25);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.25);
+            break;
+            
+        case SFX_TYPES.block:
+            oscillator.frequency.value = 300;
+            oscillator.type = 'triangle';
+            gainNode.gain.setValueAtTime(SFX_VOLUME * 0.35, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.15);
+            break;
+            
+        case SFX_TYPES.power:
+            oscillator.frequency.value = 500;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(SFX_VOLUME * 0.45, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
+            break;
+            
+        case SFX_TYPES.card_get:
+            oscillator.frequency.value = 700;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(SFX_VOLUME * 0.4, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+            break;
+            
+        case SFX_TYPES.relic_get:
+            oscillator.frequency.value = 600;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(SFX_VOLUME * 0.5, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.4);
+            break;
+            
+        case SFX_TYPES.gold_get:
+            oscillator.frequency.value = 800;
+            oscillator.type = 'sine';
+            gainNode.gain.setValueAtTime(SFX_VOLUME * 0.35, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.15);
+            break;
+            
+        case SFX_TYPES.win:
+            [523.25, 659.25, 783.99].forEach((freq, i) => {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(SFX_VOLUME * 0.4, audioContext.currentTime + i * 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.1 + 0.5);
+                osc.start(audioContext.currentTime + i * 0.1);
+                osc.stop(audioContext.currentTime + i * 0.1 + 0.5);
+            });
+            break;
+            
+        case SFX_TYPES.lose:
+            oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.5);
+            oscillator.type = 'sawtooth';
+            gainNode.gain.setValueAtTime(SFX_VOLUME * 0.5, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+            break;
+            
+        case SFX_TYPES.level_up:
+            [440, 554.37, 659.25, 880].forEach((freq, i) => {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(SFX_VOLUME * 0.35, audioContext.currentTime + i * 0.1);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + i * 0.1 + 0.3);
+                osc.start(audioContext.currentTime + i * 0.1);
+                osc.stop(audioContext.currentTime + i * 0.1 + 0.3);
+            });
+            break;
+    }
+}
+
+// 切换音效开关
+function toggleSound() {
+    soundEnabled = !soundEnabled;
+    return soundEnabled;
+}
+
+// 切换音乐开关
+function toggleMusic() {
+    musicEnabled = !musicEnabled;
+    return musicEnabled;
+}
+
+// 初始化音频上下文（需要用户交互）
+function initAudio() {
+    if (audioContext.state === 'suspended') {
+        audioContext.resume();
+    }
+}
+
+// ==================== 卡牌收藏系统 ====================
+
+// 收藏数据
+let cardCollection = new Set();
+let relicCollection = new Set();
+
+// 战斗日志
+let combatLog = [];
+let currentTurn = 0;
+
+// 初始化收藏系统
+function initCollection() {
+    const savedCards = localStorage.getItem('cardCollection');
+    const savedRelics = localStorage.getItem('relicCollection');
+    
+    if (savedCards) {
+        cardCollection = new Set(JSON.parse(savedCards));
+    }
+    
+    if (savedRelics) {
+        relicCollection = new Set(JSON.parse(savedRelics));
+    }
+}
+
+// 记录获得的卡牌
+function recordCard(cardId) {
+    if (!cardCollection.has(cardId)) {
+        cardCollection.add(cardId);
+        saveCollection();
+    }
+}
+
+// 记录获得的遗物
+function recordRelic(relicId) {
+    if (!relicCollection.has(relicId)) {
+        relicCollection.add(relicId);
+        saveCollection();
+    }
+}
+
+// 保存收藏数据
+function saveCollection() {
+    localStorage.setItem('cardCollection', JSON.stringify([...cardCollection]));
+    localStorage.setItem('relicCollection', JSON.stringify([...relicCollection]));
+}
+
+// 获取收藏进度
+function getCollectionProgress() {
+    const totalCards = Object.keys(CARD_DB).length;
+    const totalRelics = Object.keys(RELIC_DB).length;
+    
+    return {
+        cards: {
+            collected: cardCollection.size,
+            total: totalCards,
+            percentage: Math.round((cardCollection.size / totalCards) * 100)
+        },
+        relics: {
+            collected: relicCollection.size,
+            total: totalRelics,
+            percentage: Math.round((relicCollection.size / totalRelics) * 100)
+        }
+    };
+}
+
+// 显示收藏面板
+function showCollectionPanel() {
+    const panel = document.getElementById('collection-panel');
+    renderCollectionList();
+    panel.classList.add('show');
+}
+
+// 渲染收藏列表
+function renderCollectionList() {
+    const list = document.getElementById('collection-list');
+    list.innerHTML = '';
+    
+    // 更新进度
+    const progress = getCollectionProgress();
+    
+    // 统计各类型卡牌数量
+    const cardTypeStats = {
+        common: { total: 0, collected: 0 },
+        uncommon: { total: 0, collected: 0 },
+        rare: { total: 0, collected: 0 },
+        legendary: { total: 0, collected: 0 }
+    };
+    
+    for (const [cardId, cardData] of Object.entries(CARD_DB)) {
+        const rarity = cardData.rarity || 'common';
+        cardTypeStats[rarity].total++;
+        if (cardCollection.has(cardId)) {
+            cardTypeStats[rarity].collected++;
+        }
+    }
+    
+    // 构建进度显示，显示总体百分率
+    const totalCards = progress.cards.total;
+    const collectedCards = progress.cards.collected;
+    const cardsPercentage = totalCards > 0 ? Math.round((collectedCards / totalCards) * 100) : 0;
+    
+    const totalRelics = progress.relics.total;
+    const collectedRelics = progress.relics.collected;
+    const relicsPercentage = totalRelics > 0 ? Math.round((collectedRelics / totalRelics) * 100) : 0;
+    
+    let progressHtml = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div style="flex: 1;">
+                <strong>🃏 卡牌：</strong>
+                <span style="color: #ecf0f1; font-size: 1.2em; font-weight: bold;">${collectedCards}/${totalCards}</span>
+                <span style="color: #95a5a6; margin-left: 10px;">(${cardsPercentage}%)</span>
+            </div>
+            <div style="flex: 1; text-align: right;">
+                <strong>🎒 遗物：</strong>
+                <span style="color: #f39c12; font-size: 1.2em; font-weight: bold;">${collectedRelics}/${totalRelics}</span>
+                <span style="color: #95a5a6; margin-left: 10px;">(${relicsPercentage}%)</span>
+            </div>
+        </div>
+        <div style="width: 100%; background: rgba(0,0,0,0.3); border-radius: 8px; overflow: hidden; display: flex; height: 8px;">
+            <div style="flex: 1; background: linear-gradient(90deg, #ecf0f1, #bdc3c7); width: ${cardsPercentage}%;"></div>
+            <div style="flex: 1; background: linear-gradient(90deg, #f39c12, #e67e22); width: ${relicsPercentage}%;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.8em; color: #7f8c8d;">
+            <span>🃏 卡牌 ${cardsPercentage}%</span>
+            <span>🎒 遗物 ${relicsPercentage}%</span>
+        </div>
+    `;
+    
+    document.getElementById('collection-progress').innerHTML = progressHtml;
+    
+    // 卡牌收藏
+    const cardsCategory = document.createElement('div');
+    cardsCategory.className = 'collection-category';
+    
+    const cardsTitle = document.createElement('div');
+    cardsTitle.className = 'collection-category-title';
+    cardsTitle.textContent = '🃏 卡牌收藏';
+    cardsCategory.appendChild(cardsTitle);
+    
+    // 按稀有度分组
+    const rarities = {
+        common: '普通卡牌',
+        uncommon: '稀有卡牌',
+        rare: '史诗卡牌',
+        legendary: '传说卡牌'
+    };
+    
+    for (const [rarity, title] of Object.entries(rarities)) {
+        const rarityEl = document.createElement('div');
+        rarityEl.className = `collection-rarity rarity-${rarity}`;
+        
+        const stats = cardTypeStats[rarity];
+        const progressPercent = stats.total > 0 ? Math.round((stats.collected / stats.total) * 100) : 0;
+        
+        const rarityTitle = document.createElement('div');
+        rarityTitle.className = 'collection-rarity-title';
+        rarityTitle.innerHTML = `${title} <span style="float: right; font-size: 0.9em; color: #95a5a6;">${stats.collected}/${stats.total} (${progressPercent}%)</span>`;
+        rarityEl.appendChild(rarityTitle);
+        
+        const rarityContainer = document.createElement('div');
+        rarityContainer.className = 'collection-items';
+        
+        for (const [cardId, cardData] of Object.entries(CARD_DB)) {
+            if (cardData.rarity === rarity) {
+                const hasCard = cardCollection.has(cardId);
+                const itemEl = document.createElement('div');
+                itemEl.className = `collection-item ${hasCard ? 'unlocked' : 'locked'}`;
+                itemEl.innerHTML = `
+                    <div class="collection-item-icon">${cardData.icon}</div>
+                    <div class="collection-item-info">
+                        <div class="collection-item-name">${cardData.name}</div>
+                        <div class="collection-item-desc">${cardData.desc}</div>
+                    </div>
+                `;
+                rarityContainer.appendChild(itemEl);
+            }
+        }
+        
+        rarityEl.appendChild(rarityContainer);
+        cardsCategory.appendChild(rarityEl);
+    }
+    
+    list.appendChild(cardsCategory);
+    
+    // 遗物收藏
+    const relicsCategory = document.createElement('div');
+    relicsCategory.className = 'collection-category';
+    
+    const relicsTitle = document.createElement('div');
+    relicsTitle.className = 'collection-category-title';
+    relicsTitle.textContent = '🎒 遗物收藏';
+    relicsCategory.appendChild(relicsTitle);
+    
+    const relicsContainer = document.createElement('div');
+    relicsContainer.className = 'collection-items';
+    
+    for (const [relicId, relicData] of Object.entries(RELIC_DB)) {
+        const hasRelic = relicCollection.has(relicId);
+        const itemEl = document.createElement('div');
+        itemEl.className = `collection-item ${hasRelic ? 'unlocked' : 'locked'}`;
+        itemEl.innerHTML = `
+            <div class="collection-item-icon">${relicData.icon}</div>
+            <div class="collection-item-info">
+                <div class="collection-item-name">${relicData.name}</div>
+                <div class="collection-item-desc">${relicData.desc}</div>
+            </div>
+        `;
+        relicsContainer.appendChild(itemEl);
+    }
+    
+    relicsCategory.appendChild(relicsContainer);
+    list.appendChild(relicsCategory);
+}
+
+// 关闭收藏面板
+function closeCollectionPanel() {
+    document.getElementById('collection-panel').classList.remove('show');
+}
+
+// ==================== 战斗日志系统 ====================
+
+// 添加日志条目
+function addCombatLog(type, text, value = null) {
+    const entry = {
+        type,
+        text,
+        value,
+        turn: currentTurn,
+        timestamp: Date.now()
+    };
+    
+    combatLog.push(entry);
+    
+    // 如果日志太多，只保留最近的 50 条
+    if (combatLog.length > 50) {
+        combatLog = combatLog.slice(-50);
+    }
+    
+    // 实时更新日志显示
+    updateCombatLogDisplay();
+}
+
+// 更新回合
+function updateCombatTurn() {
+    currentTurn++;
+    addCombatLog('turn', `第 ${currentTurn} 回合`);
+}
+
+// 显示战斗日志面板
+function showCombatLogPanel() {
+    const panel = document.getElementById('combat-log-panel');
+    renderCombatLog();
+    panel.classList.add('show');
+}
+
+// 渲染战斗日志
+function renderCombatLog() {
+    const list = document.getElementById('combat-log-list');
+    list.innerHTML = '';
+    
+    if (combatLog.length === 0) {
+        list.innerHTML = '<div style="text-align: center; color: #7f8c8d; padding: 40px;">暂无战斗记录</div>';
+        return;
+    }
+    
+    // 按回合分组
+    const logByTurn = {};
+    combatLog.forEach(entry => {
+        if (!logByTurn[entry.turn]) {
+            logByTurn[entry.turn] = [];
+        }
+        logByTurn[entry.turn].push(entry);
+    });
+    
+    // 渲染日志
+    for (const [turn, entries] of Object.entries(logByTurn).reverse()) {
+        const turnEl = document.createElement('div');
+        turnEl.className = 'combat-log-turn';
+        turnEl.textContent = `第 ${turn} 回合`;
+        list.appendChild(turnEl);
+        
+        entries.forEach(entry => {
+            const entryEl = document.createElement('div');
+            entryEl.className = `combat-log-entry ${entry.type}`;
+            
+            const icons = {
+                damage: '💥',
+                heal: '💚',
+                block: '🛡️',
+                power: '⚡',
+                info: 'ℹ️',
+                turn: '🔄'
+            };
+            
+            const valueHtml = entry.value !== null 
+                ? `<span class="combat-log-entry-value">${entry.value}</span>` 
+                : '';
+            
+            entryEl.innerHTML = `
+                <span class="combat-log-entry-icon">${icons[entry.type] || '•'}</span>
+                <span class="combat-log-entry-text">${entry.text}${valueHtml}</span>
+            `;
+            
+            list.appendChild(entryEl);
+        });
+    }
+    
+    // 添加清空按钮
+    const clearBtn = document.createElement('button');
+    clearBtn.className = 'btn-clear-log';
+    clearBtn.textContent = '清空日志';
+    clearBtn.onclick = clearCombatLog;
+    list.appendChild(clearBtn);
+}
+
+// 更新战斗日志显示（实时）
+function updateCombatLogDisplay() {
+    // 如果面板已打开，重新渲染
+    const panel = document.getElementById('combat-log-panel');
+    if (panel && panel.classList.contains('show')) {
+        renderCombatLog();
+    }
+}
+
+// 清空战斗日志
+function clearCombatLog() {
+    combatLog = [];
+    currentTurn = 0;
+    renderCombatLog();
+}
+
+// 战斗开始时初始化
+function initCombatLog() {
+    combatLog = [];
+    currentTurn = 1;
+    addCombatLog('info', '战斗开始！');
+}
+
+
+// ==================== 成就系统 ====================
+
+// 成就数据库（30 个成就）
+const ACHIEVEMENT_DB = {
+    // 基础成就（5 个）
+    first_blood: { 
+        id: 'first_blood', 
+        name: '初出茅庐', 
+        icon: '⚔️', 
+        desc: '击败第一个敌人', 
+        category: 'combat',
+        condition: (stats) => stats.enemiesKilled >= 1 
+    },
+    veteran: { 
+        id: 'veteran', 
+        name: '身经百战', 
+        icon: '🛡️', 
+        desc: '击败 50 个敌人', 
+        category: 'combat',
+        condition: (stats) => stats.enemiesKilled >= 50 
+    },
+    slayer: { 
+        id: 'slayer', 
+        name: '杀戮者', 
+        icon: '💀', 
+        desc: '击败 100 个敌人', 
+        category: 'combat',
+        condition: (stats) => stats.enemiesKilled >= 100 
+    },
+    deck_builder: { 
+        id: 'deck_builder', 
+        name: '牌组大师', 
+        icon: '🃏', 
+        desc: '将牌组扩展到 20 张以上', 
+        category: 'progression',
+        condition: (stats) => stats.deckSize >= 20 
+    },
+    collector: { 
+        id: 'collector', 
+        name: '收藏家', 
+        icon: '🎒', 
+        desc: '收集 5 个遗物', 
+        category: 'progression',
+        condition: (stats) => stats.relicsCollected >= 5 
+    },
+    
+    // 战斗成就（8 个）
+    quick_victory: { 
+        id: 'quick_victory', 
+        name: '速战速决', 
+        icon: '⚡', 
+        desc: '在 3 回合内击败敌人', 
+        category: 'combat',
+        condition: (stats) => stats.quickVictories >= 1 
+    },
+    perfect_defense: { 
+        id: 'perfect_defense', 
+        name: '完美防御', 
+        icon: '🛡️✨', 
+        desc: '单回合格挡达到 30 点以上', 
+        category: 'combat',
+        condition: (stats) => stats.maxBlock >= 30 
+    },
+    no_damage: { 
+        id: 'no_damage', 
+        name: '完美无瑕', 
+        icon: '✨', 
+        desc: '单场战斗未受到伤害', 
+        category: 'combat',
+        condition: (stats) => stats.noDamageWins >= 1 
+    },
+    critical_strike: { 
+        id: 'critical_strike', 
+        name: '致命一击', 
+        icon: '💥', 
+        desc: '单次攻击造成 20 点以上伤害', 
+        category: 'combat',
+        condition: (stats) => stats.maxSingleDamage >= 20 
+    },
+    boss_slayer: { 
+        id: 'boss_slayer', 
+        name: 'Boss 杀手', 
+        icon: '👑', 
+        desc: '击败 3 个 Boss', 
+        category: 'combat',
+        condition: (stats) => stats.bossesDefeated >= 3 
+    },
+    elite_hunter: { 
+        id: 'elite_hunter', 
+        name: '精英猎手', 
+        icon: '⭐', 
+        desc: '击败 10 个精英敌人', 
+        category: 'combat',
+        condition: (stats) => stats.elitesDefeated >= 10 
+    },
+    combo_master: { 
+        id: 'combo_master', 
+        name: '连击大师', 
+        icon: '🔥', 
+        desc: '单回合打出 5 张以上卡牌', 
+        category: 'combat',
+        condition: (stats) => stats.maxCardsPlayed >= 5 
+    },
+    survivor: { 
+        id: 'survivor', 
+        name: '幸存者', 
+        icon: '❤️', 
+        desc: '生命值低于 10 点时赢得战斗', 
+        category: 'combat',
+        condition: (stats) => stats.lowHpWins >= 1 
+    },
+    
+    // 进度成就（6 个）
+    floor_1_clear: { 
+        id: 'floor_1_clear', 
+        name: '第一层通关', 
+        icon: '🗺️', 
+        desc: '完成第 1 层', 
+        category: 'progression',
+        condition: (stats) => stats.maxFloor >= 1 
+    },
+    floor_2_clear: { 
+        id: 'floor_2_clear', 
+        name: '第二层通关', 
+        icon: '🗺️✨', 
+        desc: '完成第 2 层', 
+        category: 'progression',
+        condition: (stats) => stats.maxFloor >= 2 
+    },
+    floor_3_clear: { 
+        id: 'floor_3_clear', 
+        name: '地牢征服者', 
+        icon: '🗺️👑', 
+        desc: '完成第 3 层', 
+        category: 'progression',
+        condition: (stats) => stats.maxFloor >= 3 
+    },
+    treasure_hunter: { 
+        id: 'treasure_hunter', 
+        name: '寻宝猎人', 
+        icon: '💎', 
+        desc: '累计获得 500 金币', 
+        category: 'progression',
+        condition: (stats) => stats.totalGold >= 500 
+    },
+    shop_regular: { 
+        id: 'shop_regular', 
+        name: '常客', 
+        icon: '🏪', 
+        desc: '在商店购买 10 次物品', 
+        category: 'progression',
+        condition: (stats) => stats.shopPurchases >= 10 
+    },
+    rest_master: { 
+        id: 'rest_master', 
+        name: '休息大师', 
+        icon: '🔥', 
+        desc: '在休息处升级卡牌 5 次', 
+        category: 'progression',
+        condition: (stats) => stats.cardsUpgraded >= 5 
+    },
+    
+    // 职业成就（6 个）
+    warrior_master: { 
+        id: 'warrior_master', 
+        name: '战士精通', 
+        icon: '⚔️👑', 
+        desc: '使用战士职业通关', 
+        category: 'class',
+        condition: (stats) => stats.classWins?.warrior >= 1 
+    },
+    mage_master: { 
+        id: 'mage_master', 
+        name: '法师精通', 
+        icon: '🔮👑', 
+        desc: '使用法师职业通关', 
+        category: 'class',
+        condition: (stats) => stats.classWins?.mage >= 1 
+    },
+    rogue_master: { 
+        id: 'rogue_master', 
+        name: '盗贼精通', 
+        icon: '🗡️👑', 
+        desc: '使用盗贼职业通关', 
+        category: 'class',
+        condition: (stats) => stats.classWins?.rogue >= 1 
+    },
+    monk_master: { 
+        id: 'monk_master', 
+        name: '武僧精通', 
+        icon: '🥋👑', 
+        desc: '使用武僧职业通关', 
+        category: 'class',
+        condition: (stats) => stats.classWins?.monk >= 1 
+    },
+    paladin_master: { 
+        id: 'paladin_master', 
+        name: '圣骑士精通', 
+        icon: '✨👑', 
+        desc: '使用圣骑士职业通关', 
+        category: 'class',
+        condition: (stats) => stats.classWins?.paladin >= 1 
+    },
+    all_classes: { 
+        id: 'all_classes', 
+        name: '全能冒险者', 
+        icon: '🎭', 
+        desc: '使用所有职业各通关一次', 
+        category: 'class',
+        condition: (stats) => {
+            const classes = stats.classWins || {};
+            return classes.warrior >= 1 && classes.mage >= 1 && classes.rogue >= 1 && 
+                   classes.monk >= 1 && classes.paladin >= 1;
+        } 
+    },
+    
+    // 特殊成就（5 个）
+    lucky: { 
+        id: 'lucky', 
+        name: '幸运儿', 
+        icon: '🍀', 
+        desc: '获得传说级遗物', 
+        category: 'special',
+        condition: (stats) => stats.legendaryRelics >= 1 
+    },
+    speed_runner: { 
+        id: 'speed_runner', 
+        name: '速通者', 
+        icon: '⏱️', 
+        desc: '在 30 回合内通关游戏', 
+        category: 'special',
+        condition: (stats) => stats.fastClears >= 1 
+    },
+    perfectionist: { 
+        id: 'perfectionist', 
+        name: '完美主义者', 
+        icon: '💯', 
+        desc: '以满血状态通关', 
+        category: 'special',
+        condition: (stats) => stats.fullHpClears >= 1 
+    },
+    hardcore: { 
+        id: 'hardcore', 
+        name: '硬核玩家', 
+        icon: '💀', 
+        desc: '在困难难度下通关', 
+        category: 'special',
+        condition: (stats) => stats.hardModeWins >= 1 
+    },
+    legendary: { 
+        id: 'legendary', 
+        name: '传奇冒险者', 
+        icon: '👑✨', 
+        desc: '解锁所有成就', 
+        category: 'special',
+        condition: (stats) => stats.achievementsUnlocked >= 30 
+    }
+};
+
+// 成就状态
+let unlockedAchievements = new Set();
+
+// 检查并解锁成就
+function checkAchievements(category, stats) {
+    const newUnlocks = [];
+    
+    for (const [key, achievement] of Object.entries(ACHIEVEMENT_DB)) {
+        if (achievement.category === category || !category) {
+            if (!unlockedAchievements.has(key) && achievement.condition(stats)) {
+                unlockedAchievements.add(key);
+                newUnlocks.push(achievement);
+            }
+        }
+    }
+    
+    if (newUnlocks.length > 0) {
+        showAchievementNotifications(newUnlocks);
+    }
+    
+    return newUnlocks;
+}
+
+// 显示成就解锁通知
+function showAchievementNotifications(achievements) {
+    achievements.forEach((achievement, index) => {
+        // 播放解锁音效
+        setTimeout(() => playSFX(SFX_TYPES.unlock), index * 200);
+        
+        const notification = document.createElement('div');
+        notification.className = 'achievement-notification';
+        notification.innerHTML = `
+            <div class="achievement-icon">${achievement.icon}</div>
+            <div class="achievement-content">
+                <div class="achievement-name">${achievement.name}</div>
+                <div class="achievement-desc">${achievement.desc}</div>
+            </div>
+        `;
+        document.body.appendChild(notification);
+        
+        // 2 秒后移除
+        setTimeout(() => {
+            notification.classList.add('hide');
+            setTimeout(() => notification.remove(), 500);
+        }, 3000);
+    });
+}
+
+// 初始化成就系统
+function initAchievements() {
+    const saved = localStorage.getItem('achievements');
+    if (saved) {
+        unlockedAchievements = new Set(JSON.parse(saved));
+    }
+}
+
+// 保存成就
+function saveAchievements() {
+    localStorage.setItem('achievements', JSON.stringify([...unlockedAchievements]));
+}
+
 // ==================== 新手引导系统 ====================
+
 
 // 引导步骤配置
 const TUTORIAL_STEPS = [
@@ -642,6 +1520,75 @@ function saveGame() {
     }
 }
 
+// ==================== 成就系统函数 ====================
+
+// 显示成就面板
+function showAchievementsPanel() {
+    const panel = document.getElementById('achievements-panel');
+    renderAchievementsList();
+    panel.classList.add('show');
+}
+
+// 渲染成就列表
+function renderAchievementsList() {
+    const list = document.getElementById('achievements-list');
+    list.innerHTML = '';
+    
+    // 更新解锁数量
+    document.getElementById('achievement-count').textContent = unlockedAchievements.size;
+    
+    // 按分类渲染
+    const categories = {
+        combat: '⚔️ 战斗成就',
+        progression: '📈 进度成就',
+        class: '🎭 职业成就',
+        special: '🌟 特殊成就'
+    };
+    
+    for (const [category, title] of Object.entries(categories)) {
+        const categoryEl = document.createElement('div');
+        categoryEl.className = 'achievement-category';
+        
+        const titleEl = document.createElement('div');
+        titleEl.className = 'achievement-category-title';
+        titleEl.textContent = title;
+        categoryEl.appendChild(titleEl);
+        
+        // 添加该分类的成就
+        for (const [key, achievement] of Object.entries(ACHIEVEMENT_DB)) {
+            if (achievement.category === category) {
+                const isUnlocked = unlockedAchievements.has(key);
+                const itemEl = document.createElement('div');
+                itemEl.className = `achievement-item ${isUnlocked ? 'unlocked' : ''}`;
+                itemEl.innerHTML = `
+                    <div class="achievement-item-icon">${achievement.icon}</div>
+                    <div class="achievement-item-info">
+                        <div class="achievement-item-name">${achievement.name}</div>
+                        <div class="achievement-item-desc">${achievement.desc}</div>
+                    </div>
+                `;
+                categoryEl.appendChild(itemEl);
+            }
+        }
+        
+        list.appendChild(categoryEl);
+    }
+}
+
+// 关闭成就面板
+function closeAchievementsPanel() {
+    document.getElementById('achievements-panel').classList.remove('show');
+}
+
+// 点击面板外部关闭
+document.addEventListener('click', (e) => {
+    const panel = document.getElementById('achievements-panel');
+    const btn = document.getElementById('view-achievements');
+    if (panel && !panel.contains(e.target) && btn && !btn.contains(e.target)) {
+        closeAchievementsPanel();
+    }
+});
+
 // 加载游戏进度
 function loadGame() {
     const saveData = localStorage.getItem(SAVE_KEY);
@@ -764,13 +1711,11 @@ function getSaveTime() {
 // 更新主菜单的存档按钮状态
 function updateMainMenu() {
     const continueBtn = document.getElementById('continue-game');
-    const clearBtn = document.getElementById('clear-save');
     const saveInfo = document.getElementById('save-info');
     const saveTime = document.getElementById('save-time');
     
     if (hasSave()) {
         continueBtn.style.display = 'block';
-        clearBtn.style.display = 'block';
         saveInfo.style.display = 'block';
         saveTime.textContent = getSaveTime();
         continueBtn.textContent = `继续游戏 (${getSaveTime()})`;
@@ -986,34 +1931,52 @@ const ENEMY_DB = {
     boss_ancient_dragon: { name: '上古邪龙', hp: 300, icon: '🐲🔥', pattern: 'boss', damage: 28 }
 };
 
-// 分层节点类型配置（新增）
+// 分层节点类型配置（扩展至 5 层）
 const FLOOR_NODE_CONFIG = {
     1: {
-        // 第一层：教学与适应
-        battles: 0.50,      // 50% 战斗
-        shops: 0.12,        // 12% 商店
-        rests: 0.06,        // 6% 休息
-        events: 0.12,       // 12% 事件
-        elites: 0,          // 0% 精英
-        boss: 0.06          // 6% Boss
+        // 第一层：新手区 - 教学与适应
+        battles: 0.55,      // 55% 战斗
+        shops: 0.15,        // 15% 商店
+        rests: 0.10,        // 10% 休息
+        events: 0.13,       // 13% 事件
+        elites: 0.02,       // 2% 精英
+        boss: 0.05          // 5% Boss（第 3 行最后一个）
     },
     2: {
-        // 第二层：深化与挑战
-        battles: 0.56,      // 56% 战斗
-        shops: 0.12,        // 12% 商店
-        rests: 0.06,        // 6% 休息
-        events: 0.12,       // 12% 事件
-        elites: 0.06,       // 6% 精英
-        boss: 0.06          // 6% Boss
+        // 第二层：新手区 - 深化与挑战
+        battles: 0.60,      // 60% 战斗
+        shops: 0.13,        // 13% 商店
+        rests: 0.07,        // 7% 休息
+        events: 0.13,       // 13% 事件
+        elites: 0.02,       // 2% 精英
+        boss: 0.05          // 5% Boss（第 3 行最后一个）
     },
     3: {
-        // 第三层：终极考验
-        battles: 0.62,      // 62% 战斗
+        // 第三层：进阶区 - 新敌人和机制
+        battles: 0.65,      // 65% 战斗
+        shops: 0.10,        // 10% 商店
+        rests: 0.05,        // 5% 休息
+        events: 0.10,       // 10% 事件
+        elites: 0.05,       // 5% 精英
+        boss: 0.05          // 5% Boss（迷你 Boss）
+    },
+    4: {
+        // 第四层：进阶区 - 更高强度
+        battles: 0.68,      // 68% 战斗
+        shops: 0.08,        // 8% 商店
+        rests: 0.04,        // 4% 休息
+        events: 0.08,       // 8% 事件
+        elites: 0.07,       // 7% 精英
+        boss: 0.05          // 5% Boss（迷你 Boss）
+    },
+    5: {
+        // 第五层：终局区 - 终极考验
+        battles: 0.70,      // 70% 战斗
         shops: 0.06,        // 6% 商店
-        rests: 0,           // 0% 休息
-        events: 0.06,       // 6% 事件
-        elites: 0.19,       // 19% 精英
-        boss: 0.06          // 6% Boss
+        rests: 0.02,        // 2% 休息
+        events: 0.07,       // 7% 事件
+        elites: 0.10,       // 10% 精英
+        boss: 0.05          // 5% Boss（最终 Boss）
     }
 };
 
@@ -1302,16 +2265,25 @@ function initGame() {
         document.getElementById('menu-high-score').textContent = savedScore;
     }
     
+    // 初始化收藏系统
+    initCollection();
+    
+    // 初始化成就系统
+    initAchievements();
+    
     // 更新主菜单存档按钮状态
     updateMainMenu();
     
     // 绑定主菜单按钮
     document.getElementById('start-game').addEventListener('click', () => {
+        initAudio();
+        playSFX(SFX_TYPES.click);
         showScreen('class-select');
     });
     
     // 继续游戏按钮
     document.getElementById('continue-game').addEventListener('click', () => {
+        playSFX(SFX_TYPES.click);
         if (loadGame()) {
             showScreen('map-screen');
             // 如果地图数据已恢复，直接渲染；否则生成新地图
@@ -1327,16 +2299,39 @@ function initGame() {
         }
     });
     
-    // 清除进度按钮
-    document.getElementById('clear-save').addEventListener('click', () => {
-        if (confirm('确定要清除当前进度吗？清除后无法恢复！')) {
-            clearSave();
-            updateMainMenu();
-            showFloatingText('进度已清除', document.querySelector('#main-menu'), '#e74c3c');
+    // 游戏统计按钮
+    document.getElementById('view-stats').addEventListener('click', showStatsModal);
+    
+    // 查看成就
+    document.getElementById('view-achievements').addEventListener('click', showAchievementsPanel);
+    
+    // 查看收藏
+    document.getElementById('view-collection').addEventListener('click', showCollectionPanel);
+    
+    // 查看战斗日志
+    document.getElementById('view-combat-log').addEventListener('click', showCombatLogPanel);
+    
+    // 点击面板外部关闭
+    document.addEventListener('click', (e) => {
+        const achievementsPanel = document.getElementById('achievements-panel');
+        const collectionPanel = document.getElementById('collection-panel');
+        const combatLogPanel = document.getElementById('combat-log-panel');
+        const achievementsBtn = document.getElementById('view-achievements');
+        const collectionBtn = document.getElementById('view-collection');
+        const combatLogBtn = document.getElementById('view-combat-log');
+        
+        if (achievementsPanel && !achievementsPanel.contains(e.target) && achievementsBtn && !achievementsBtn.contains(e.target)) {
+            closeAchievementsPanel();
+        }
+        
+        if (collectionPanel && !collectionPanel.contains(e.target) && collectionBtn && !collectionBtn.contains(e.target)) {
+            closeCollectionPanel();
+        }
+        
+        if (combatLogPanel && !combatLogPanel.contains(e.target) && combatLogBtn && !combatLogBtn.contains(e.target)) {
+            combatLogPanel.classList.remove('show');
         }
     });
-    
-    document.getElementById('view-stats').addEventListener('click', showStatsModal);
     
     // 查看遗物（地图界面和战斗界面）
     const viewRelicsBtn = document.getElementById('view-relics');
@@ -1527,11 +2522,15 @@ function renderMap() {
     
     let floorHint = '';
     if (floor === 1) {
-        floorHint = '🌱 第一层：熟悉机制，谨慎探索';
+        floorHint = '🌱 第一层：新手区 - 熟悉机制，谨慎探索';
     } else if (floor === 2) {
-        floorHint = '⚔️ 第二层：策略规划，资源管理';
+        floorHint = '⚔️ 第二层：新手区 - 策略规划，资源管理';
+    } else if (floor === 3) {
+        floorHint = '🔥 第三层：进阶区 - 新挑战，新敌人';
+    } else if (floor === 4) {
+        floorHint = '💀 第四层：进阶区 - 高强度战斗';
     } else {
-        floorHint = '🔥 第三层：极限考验，全力以赴！';
+        floorHint = '👹 第五层：终局区 - 终极考验，全力以赴！';
     }
     
     mapInfo.innerHTML = `
@@ -1550,8 +2549,9 @@ function renderMap() {
     `;
     nodesContainer.appendChild(mapInfo);
     
-    const rows = 4;
-    const nodesPerRow = 4;
+    // 根据楼层动态设置行数（逐渐增加游戏流程）
+    const rows = floor <= 1 ? 3 : (floor <= 2 ? 4 : (floor <= 3 ? 4 : 5));
+    const nodesPerRow = 5;
     
     // 清空节点数组，重新构建
     gameState.map.nodes = [];
@@ -1676,8 +2676,6 @@ function renderMap() {
     setTimeout(() => {
         generatePathLines(nodesContainer, gameState.map.paths);
     }, 100);
-    
-    updateMapUI();
 }
 
 function generateMap() {
@@ -1694,14 +2692,18 @@ function generateMap() {
     const mapInfo = document.createElement('div');
     mapInfo.className = 'map-info';
     
-    // 根据楼层显示不同的提示
+    // 根据楼层显示不同的提示（5 层扩展）
     let floorHint = '';
     if (floor === 1) {
-        floorHint = '🌱 第一层：熟悉机制，谨慎探索';
+        floorHint = '🌱 第一层：新手区 - 熟悉机制，谨慎探索';
     } else if (floor === 2) {
-        floorHint = '⚔️ 第二层：策略规划，资源管理';
+        floorHint = '⚔️ 第二层：新手区 - 策略规划，资源管理';
+    } else if (floor === 3) {
+        floorHint = '🔥 第三层：进阶区 - 新挑战，新敌人';
+    } else if (floor === 4) {
+        floorHint = '💀 第四层：进阶区 - 高强度战斗';
     } else {
-        floorHint = '🔥 第三层：极限考验，全力以赴！';
+        floorHint = '👹 第五层：终局区 - 终极考验，全力以赴！';
     }
     
     mapInfo.innerHTML = `
@@ -1722,8 +2724,9 @@ function generateMap() {
     
     // 生成节点类型（使用分层配置）
     const nodeTypes = getFloorNodeTypes(floor);
-    const rows = 4;  // 4 行：3 行普通 + 1 行 Boss
-    const nodesPerRow = 4;
+    // 根据楼层动态设置行数（逐渐增加游戏流程）
+    const rows = floor <= 1 ? 3 : (floor <= 2 ? 4 : (floor <= 3 ? 4 : 5));
+    const nodesPerRow = 5;  // 每行 5 个节点
     
     gameState.map.nodes = [];
     
@@ -1886,8 +2889,11 @@ function getFloorNodeTypes(floor) {
     const config = FLOOR_NODE_CONFIG[floor] || FLOOR_NODE_CONFIG[1];
     const types = [];
     
-    // 根据配置比例生成节点类型数组
-    const totalNodes = 12; // 3 行 × 4 列 = 12 个普通节点
+    // 根据楼层动态计算总节点数（行数逐渐增加）
+    const rows = floor <= 1 ? 3 : (floor <= 2 ? 4 : (floor <= 3 ? 4 : 5));
+    const nodesPerRow = 5;
+    const totalNodes = rows * nodesPerRow;
+    
     const counts = {
         battle: Math.floor(totalNodes * config.battles),
         shop: Math.floor(totalNodes * config.shops),
@@ -1896,7 +2902,7 @@ function getFloorNodeTypes(floor) {
         elite: Math.floor(totalNodes * config.elites)
     };
     
-    // 确保总数为 12，调整战斗数量
+    // 确保总数正确，调整战斗数量
     const currentTotal = Object.values(counts).reduce((a, b) => a + b, 0);
     counts.battle += (totalNodes - currentTotal);
     
@@ -2199,7 +3205,28 @@ function enterNode(node) {
     // 进入对应场景
     switch (node.type) {
         case 'battle':
-            startBattle(false);
+            // 随机判断是否为特殊战斗（根据楼层难度）
+            const floor = gameState.map.floor;
+            let isElite = false;
+            let isDouble = false;
+            
+            // 第 3-5 层有概率出现特殊战斗
+            if (floor >= 3) {
+                const specialChance = Math.random();
+                if (floor >= 4 && specialChance < 0.15) {
+                    isElite = true; // 15% 概率精英战
+                } else if (specialChance < 0.10) {
+                    isDouble = true; // 10% 概率连续战斗
+                }
+            }
+            
+            if (isElite) {
+                startBattle(false, true, false);
+            } else if (isDouble) {
+                startBattle(false, false, true);
+            } else {
+                startBattle(false);
+            }
             break;
         case 'elite':
             startEliteBattle();
@@ -2221,12 +3248,27 @@ function enterNode(node) {
 
 // ==================== 战斗系统 ====================
 
-function startBattle(isBoss) {
+function startBattle(isBoss, isElite = false, isDouble = false) {
     const floor = gameState.map.floor;
     let enemyType;
     
+    // 初始化战斗日志
+    initCombatLog();
+    
+    // 特殊战斗标记
+    if (isDouble) {
+        addCombatLog('info', '⚠️ 连续战斗！你将面对两个敌人！');
+    }
+    if (isElite) {
+        addCombatLog('info', '💀 精英守卫！敌人更强，但奖励更丰厚！');
+    }
+    
     // 计算难度系数（每层增加 20% 难度）
-    const difficultyMultiplier = 1 + (floor - 1) * 0.2;
+    let difficultyMultiplier = 1 + (floor - 1) * 0.2;
+    
+    // 特殊战斗难度加成
+    if (isElite) difficultyMultiplier *= 1.5;
+    if (isDouble) difficultyMultiplier *= 1.3;
     
     if (isBoss) {
         // Boss 战开始，启动持续震动
@@ -2234,11 +3276,14 @@ function startBattle(isBoss) {
         // Boss 额外增加 30% 难度
         const bossMultiplier = difficultyMultiplier * 1.3;
         
-        if (floor === 1) enemyType = 'boss_goblin_king';
-        else if (floor === 2) enemyType = 'boss_lich';
-        else enemyType = 'boss_dragon';
+        // 根据楼层选择 Boss
+        if (floor === 1) enemyType = 'boss_goblin_king';           // 第 1 层：哥布林王
+        else if (floor === 2) enemyType = 'boss_lich';             // 第 2 层：巫妖
+        else if (floor === 3) enemyType = 'boss_poison_spider';    // 第 3 层：毒蜘蛛（迷你 Boss）
+        else if (floor === 4) enemyType = 'boss_vampire';          // 第 4 层：吸血鬼（迷你 Boss）
+        else enemyType = 'boss_dragon';                            // 第 5 层：上古邪龙（最终 Boss）
         
-        // 创建带难度调整的敌人
+        // 创建带难度调整的 Boss
         const baseEnemy = ENEMY_DB[enemyType];
         gameState.enemy = {
             type: enemyType,
@@ -2252,10 +3297,24 @@ function startBattle(isBoss) {
             difficulty: floor
         };
     } else {
-        // 根据层数选择敌人
-        const enemyPool = floor === 1 ? ['goblin', 'slime', 'skeleton'] :
-                         floor === 2 ? ['orc', 'dark_mage', 'werewolf'] :
-                         ['demon', 'dragon'];
+        // 根据层数选择敌人池（5 层扩展）
+        let enemyPool;
+        if (floor === 1) {
+            // 第 1 层：新手敌人
+            enemyPool = ['goblin', 'slime', 'skeleton'];
+        } else if (floor === 2) {
+            // 第 2 层：中等难度敌人
+            enemyPool = ['orc', 'dark_mage', 'werewolf'];
+        } else if (floor === 3) {
+            // 第 3 层：进阶敌人（新增）
+            enemyPool = ['orc', 'dark_mage', 'werewolf', 'stone_golem', 'phantom'];
+        } else if (floor === 4) {
+            // 第 4 层：高难度敌人（新增）
+            enemyPool = ['demon', 'dragon', 'stone_golem', 'phantom', 'necromancer'];
+        } else {
+            // 第 5 层：终极敌人
+            enemyPool = ['demon', 'dragon', 'necromancer', 'chaos_beast'];
+        }
         enemyType = enemyPool[randomInt(0, enemyPool.length - 1)];
         
         // 创建带难度调整的敌人
@@ -2335,16 +3394,20 @@ function startEliteBattle() {
     // 精英敌人难度系数（比普通敌人高 40%）
     const eliteMultiplier = 1.4 + (floor - 1) * 0.2;
     
-    // 根据层数选择精英敌人
+    // 根据层数选择精英敌人（扩展至 5 层）
     if (floor === 1) {
         // 第一层没有精英（配置为 0）
         startBattle(false);
         return;
     } else if (floor === 2) {
         enemyType = 'elite_orc';
+    } else if (floor === 3) {
+        enemyType = 'elite_demon';
+    } else if (floor === 4) {
+        enemyType = 'elite_dragon';
     } else {
-        // 第三层随机选择精英
-        enemyType = randomInt(0, 1) === 0 ? 'elite_demon' : 'elite_dragon';
+        // 第 5 层终极精英
+        enemyType = 'elite_ancient_dragon';
     }
     
     const baseEnemy = ENEMY_DB[enemyType];
@@ -2718,6 +3781,7 @@ function executeCardEffect(cardData) {
         const times = effect.times || 1;
         for (let i = 0; i < times; i++) {
             damageEnemy(damage);
+            if (i === 0) playSFX(SFX_TYPES.attack);
         }
         
         gameState.battle.firstAttack = false;
@@ -2729,6 +3793,11 @@ function executeCardEffect(cardData) {
         // 敏捷加成
         block += player.stats.dexterity;
         player.block += block;
+        
+        // 记录格挡日志
+        addCombatLog('block', `获得格挡`, block);
+        
+        playSFX(SFX_TYPES.block);
         showDamage(document.querySelector('.player-area'), block, 'block');
     }
     
@@ -2760,6 +3829,25 @@ function executeCardEffect(cardData) {
         showFloatingText('虚弱!', document.querySelector('.enemy'), '#9b59b6');
     }
     
+    // 治疗
+    if (effect.heal) {
+        let healAmount = effect.heal;
+        
+        // 治疗量加成（如果有相关遗物或 buff）
+        // 例如：圣杯类遗物可以增加治疗效果
+        
+        // 执行治疗
+        const oldHp = player.hp;
+        player.hp = Math.min(player.hp + healAmount, player.maxHp);
+        const actualHeal = player.hp - oldHp;
+        
+        // 记录治疗日志
+        addCombatLog('heal', `恢复 ${actualHeal} 点生命`, actualHeal);
+        
+        playSFX(SFX_TYPES.heal);
+        showDamage(document.querySelector('.player-area'), actualHeal, 'heal');
+    }
+    
     // 生命代价
     if (effect.hpCost) {
         player.hp -= effect.hpCost;
@@ -2786,11 +3874,19 @@ function damageEnemy(amount) {
         const blockDamage = Math.min(enemy.block, amount);
         enemy.block -= blockDamage;
         amount -= blockDamage;
+        
+        // 记录格挡日志
+        if (amount > 0) {
+            addCombatLog('info', `${enemy.name}的格挡吸收了 ${blockDamage} 点伤害`);
+        }
     }
     
     // 扣除生命
     if (amount > 0) {
         enemy.currentHp -= amount;
+        
+        // 记录伤害日志
+        addCombatLog('damage', `造成`, amount);
         
         // 根据伤害大小决定震动强度和视觉效果
         const damagePercent = amount / enemy.maxHp;
@@ -3027,11 +4123,20 @@ function endTurn() {
             const blockAbsorb = Math.min(gameState.player.block, damage);
             gameState.player.block -= blockAbsorb;
             damage -= blockAbsorb;
+            
+            // 记录格挡日志
+            if (damage > 0) {
+                addCombatLog('block', `格挡吸收了 ${blockAbsorb} 点伤害`);
+            }
         }
         
         // 受到伤害
         if (damage > 0) {
             gameState.player.hp -= damage;
+            
+            // 记录受伤日志
+            addCombatLog('damage', `${gameState.battle.enemy.name}对你造成`, damage);
+            
             const playerArea = document.querySelector('.player-area');
             showDamage(playerArea, damage, 'damage');
             shakeElement(playerArea);
@@ -3072,6 +4177,9 @@ function endTurn() {
 function winBattle() {
     // 停止 Boss 战震动
     stopBossShake();
+    
+    // 播放胜利音效
+    playSFX(SFX_TYPES.win);
     
     gameState.stats.enemiesKilled++;
     
@@ -3268,6 +4376,9 @@ function healPlayer(amount) {
     gameState.player.hp = Math.min(gameState.player.maxHp, gameState.player.hp + amount);
     const actualHeal = gameState.player.hp - oldHp;
     if (actualHeal > 0) {
+        // 记录治疗日志
+        addCombatLog('heal', `恢复生命`, actualHeal);
+        
         const playerArea = document.querySelector('.player-area');
         showDamage(playerArea, actualHeal, 'heal');
         // 添加治疗粒子效果
@@ -3280,10 +4391,14 @@ function addCardToDeck(cardId) {
     gameState.player.deck.push(cardId);
     gameState.stats.cardsAdded++;
     
+    // 记录收藏
+    recordCard(cardId);
+    
     // 获取卡牌信息
     const card = CARD_DB[cardId];
     
     // 使用 alert 提示
+    playSFX(SFX_TYPES.card_get);
     alert('卡牌 ' + card.name + ' 已加入牌组!');
     
     // 永恒羽毛效果
@@ -3303,6 +4418,9 @@ function addRelic(relicId) {
     if (gameState.player.relics.includes(relicId)) return;
     gameState.player.relics.push(relicId);
     gameState.stats.relicsFound++;
+    
+    // 记录收藏
+    recordRelic(relicId);
 }
 
 // ==================== 商店系统 ====================
@@ -3752,6 +4870,13 @@ function gameOver(victory) {
     // 游戏结束（胜利或失败）时清除存档
     clearSave();
     
+    // 播放胜利或失败音效
+    if (victory) {
+        playSFX(SFX_TYPES.win);
+    } else {
+        playSFX(SFX_TYPES.lose);
+    }
+    
     updateGlobalStats(victory);
     
     const title = document.getElementById('game-over-title');
@@ -3803,7 +4928,6 @@ function showRelicsList() {
 
 function closeRelicsList() {
     showScreen('map-screen');
-    updateMapUI();
 }
 
 // ==================== 启动游戏 ====================
