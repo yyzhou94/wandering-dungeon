@@ -1,3 +1,32 @@
+/* === CSS Variables === */
+:root {
+  --clr-bg: #1a1a2e;
+  --clr-bg-light: #16213e;
+  --clr-primary: #0f3460;
+  --clr-accent: #e94560;
+  --clr-accent-alt: #533483;
+  --clr-gold: #f0c040;
+  --clr-text: #ffffff;
+  --clr-text-muted: #a0a0b0;
+  --clr-border: #303050;
+  --clr-success: #4caf50;
+  --clr-danger: #e94560;
+  --clr-warning: #ff9800;
+  --clr-card: #16213e;
+  --clr-card-hover: #1e2748;
+  --clr-blue: #2196f3;
+  --clr-green: #4caf50;
+  --clr-purple: #9c27b0;
+  --clr-orange: #ff9800;
+  --clr-yellow: #ffa000;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -460,6 +489,37 @@ button, .btn-small {
     justify-content: center;
     gap: 15px;
     font-size: 0.9em;
+}
+
+/* 职业背景故事 */
+.class-lore {
+    margin-top: 15px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    font-size: 0.75em;
+    color: #95a5a6;
+    line-height: 1.5;
+    max-height: 60px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.class-lore::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.2));
+}
+
+.class-card:hover .class-lore,
+.class-card.selected .class-lore {
+    max-height: 200px;
+    overflow: visible;
 }
 
 /* 地图界面 */
@@ -985,6 +1045,85 @@ button, .btn-small {
     animation: playCard 0.4s ease forwards;
 }
 
+@keyframes playCard {
+    0% {
+        transform: translateY(0) scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-100px) scale(1.2) rotate(10deg);
+        opacity: 0.8;
+        box-shadow: 0 20px 60px rgba(255, 255, 255, 0.3);
+    }
+    100% {
+        transform: translateY(-200px) scale(1.5) rotate(20deg);
+        opacity: 0;
+    }
+}
+
+/* 攻击卡牌打出特效 */
+.card.attack-play {
+    animation: playCardAttack 0.4s ease forwards;
+}
+
+@keyframes playCardAttack {
+    0% {
+        transform: translateY(0) scale(1) rotate(0deg);
+        box-shadow: 0 0 0 rgba(231, 76, 60, 0);
+    }
+    50% {
+        transform: translateY(-100px) scale(1.2) rotate(5deg);
+        box-shadow: 0 20px 40px rgba(231, 76, 60, 0.6);
+    }
+    100% {
+        transform: translateY(-200px) scale(1.5) rotate(10deg);
+        opacity: 0;
+        box-shadow: 0 0 0 rgba(231, 76, 60, 0);
+    }
+}
+
+/* 防御卡牌打出特效 */
+.card.defense-play {
+    animation: playCardDefense 0.4s ease forwards;
+}
+
+@keyframes playCardDefense {
+    0% {
+        transform: translateY(0) scale(1) rotate(0deg);
+        box-shadow: 0 0 0 rgba(52, 152, 219, 0);
+    }
+    50% {
+        transform: translateY(-100px) scale(1.2) rotate(-5deg);
+        box-shadow: 0 20px 40px rgba(52, 152, 219, 0.6);
+    }
+    100% {
+        transform: translateY(-200px) scale(1.5) rotate(-10deg);
+        opacity: 0;
+        box-shadow: 0 0 0 rgba(52, 152, 219, 0);
+    }
+}
+
+/* 技能卡牌打出特效 */
+.card.skill-play {
+    animation: playCardSkill 0.4s ease forwards;
+}
+
+@keyframes playCardSkill {
+    0% {
+        transform: translateY(0) scale(1) rotate(0deg);
+        box-shadow: 0 0 0 rgba(155, 89, 182, 0);
+    }
+    50% {
+        transform: translateY(-100px) scale(1.2) rotate(0deg);
+        box-shadow: 0 20px 40px rgba(155, 89, 182, 0.6);
+    }
+    100% {
+        transform: translateY(-200px) scale(1.5) rotate(0deg);
+        opacity: 0;
+        box-shadow: 0 0 0 rgba(155, 89, 182, 0);
+    }
+}
+
 /* 卡牌费用显示增强 */
 .card-cost {
     background: linear-gradient(135deg, #3498db, #2980b9);
@@ -1424,6 +1563,10 @@ button, .btn-small {
     border-radius: 5px;
     white-space: nowrap;
     z-index: 100;
+}
+
+.relic-item-small:hover .relic-desc {
+    display: block;
 }
 
 /* ==================== 新手引导样式 ==================== */
@@ -3265,6 +3408,196 @@ input[type="checkbox"], input[type="radio"] {
     border-left-color: #95a5a6;
 }
 
+/* ==================== 增强伤害数字效果 ==================== */
+
+/* 巨大伤害特效 */
+.damage-number.huge-damage {
+    font-size: 2.5em;
+    color: #ff4757;
+    text-shadow: 
+        0 0 20px rgba(255, 71, 87, 0.8),
+        0 0 40px rgba(255, 71, 87, 0.4);
+    animation: floatUpHuge 1.5s ease forwards;
+}
+
+@keyframes floatUpHuge {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(0.5);
+    }
+    20% {
+        transform: translateY(-20px) scale(1.3);
+    }
+    50% {
+        transform: translateY(-40px) scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-80px) scale(1);
+    }
+}
+
+/* 伤害粒子效果 */
+.damage-particle {
+    position: fixed;
+    font-size: 1.5em;
+    pointer-events: none;
+    z-index: 10000;
+    animation: particleExplode 0.8s ease-out forwards;
+}
+
+@keyframes particleExplode {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--end-x), var(--end-y)) scale(0.5) rotate(360deg);
+    }
+}
+
+/* 治疗数字增强 */
+.heal-number {
+    animation: floatUpHeal 1.2s ease forwards;
+}
+
+@keyframes floatUpHeal {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(0.8);
+    }
+    30% {
+        transform: translateY(-20px) scale(1.2);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-60px) scale(1);
+    }
+}
+
+/* ==================== 多敌人战斗样式 ==================== */
+
+/* 敌人数组容器 */
+.enemies-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+/* 单个敌人单元 */
+.enemy-unit {
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 10px;
+    padding: 15px;
+    border: 2px solid rgba(231, 76, 60, 0.5);
+    min-width: 150px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.enemy-unit:hover {
+    border-color: #f39c12;
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(243, 156, 18, 0.5);
+}
+
+.enemy-unit.selected {
+    border-color: #2ecc71;
+    box-shadow: 0 0 25px rgba(46, 204, 113, 0.7);
+    animation: enemySelected 1s ease-in-out infinite;
+}
+
+@keyframes enemySelected {
+    0%, 100% { box-shadow: 0 0 25px rgba(46, 204, 113, 0.7); }
+    50% { box-shadow: 0 0 35px rgba(46, 204, 113, 1); }
+}
+
+.enemy-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.enemy-avatar {
+    font-size: 2em;
+}
+
+.enemy-info {
+    flex: 1;
+    text-align: left;
+}
+
+.enemy-name {
+    font-size: 0.9em;
+    color: #e74c3c;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.enemy-hp-text {
+    font-size: 0.8em;
+    color: #ecf0f1;
+}
+
+.enemy-hp-bar {
+    width: 100%;
+    height: 15px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.enemy-hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #e74c3c, #c0392b);
+    transition: width 0.3s ease;
+}
+
+.enemy-intent {
+    font-size: 1.2em;
+    color: #f39c12;
+    text-align: center;
+    padding: 5px;
+    background: rgba(243, 156, 18, 0.2);
+    border-radius: 5px;
+}
+
+/* 多敌人时隐藏传统界面元素 */
+.enemy-sprite[style*="display: none"],
+.enemy-name[style*="display: none"],
+#enemy-hp[style*="display: none"],
+#enemy-intent[style*="display: none"] {
+    display: none !important;
+}
+
+
+/* 格挡数字增强 */
+.block-number {
+    animation: floatUpBlock 1s ease forwards;
+}
+
+@keyframes floatUpBlock {
+    0% {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-30px) rotate(180deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-60px) rotate(360deg);
+    }
+}
+
 .combat-log-turn {
     padding: 12px;
     margin: 15px 0 10px 0;
@@ -3309,3 +3642,43 @@ input[type="checkbox"], input[type="radio"] {
     color: #e74c3c;
 }
 
+
+ 
+ 
+/* 统计面板样式 */
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    transition: all 0.2s ease;
+}
+
+.stat-item:hover {
+    background: rgba(243, 156, 18, 0.15);
+    transform: translateX(4px);
+}
+
+.stat-icon {
+    font-size: 1.5em;
+    width: 40px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.stat-label {
+    flex: 1;
+    color: #bdc3c7;
+    font-size: 0.95em;
+}
+
+.stat-value {
+    color: #f39c12;
+    font-size: 1.1em;
+    font-weight: 700;
+    min-width: 50px;
+    text-align: right;
+}

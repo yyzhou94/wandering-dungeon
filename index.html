@@ -9,16 +9,17 @@
 <body>
     <div id="game-container">
         <!-- 主菜单 -->
-        <div id="main-menu" class="screen active">
+        <div id="main-menu" class="screen active" role="region" aria-label="主菜单">
             <h1>⚔️ 流浪地牢</h1>
             <p class="subtitle">Roguelike 卡牌构筑游戏</p>
             <div class="menu-buttons">
-                <button id="continue-game" class="btn-primary" style="display: none;">继续游戏</button>
-                <button id="start-game" class="btn-primary">开始游戏</button>
-                <button id="view-collection" class="btn-secondary">查看收藏</button>
-                <button id="view-achievements" class="btn-secondary">查看成就</button>
-                <button id="view-stats" class="btn-secondary">游戏统计</button>
-                <button id="view-changelog" class="btn-secondary">更新日志</button>
+                <button id="continue-game" class="btn-primary" style="display: none;" aria-label="继续游戏">继续游戏</button>
+                <button id="start-game" class="btn-primary" aria-label="开始游戏">开始游戏</button>
+                <button id="view-stats" class="btn-secondary" aria-label="游戏统计">游戏统计</button>
+                <button id="view-collection" class="btn-secondary" aria-label="查看收藏">查看收藏</button>
+                <button id="view-achievements" class="btn-secondary" aria-label="查看成就">查看成就</button>
+                <button id="view-changelog" class="btn-secondary" aria-label="更新日志">更新日志</button>
+                <button id="clear-save" class="btn-danger" style="display: none;" aria-label="清除进度">清除进度</button>
             </div>
             <div class="high-score">
                 最高分: <span id="menu-high-score">0</span>
@@ -29,7 +30,7 @@
         </div>
 
         <!-- 职业选择 -->
-        <div id="class-select" class="screen">
+        <div id="class-select" class="screen" role="region" aria-label="职业选择">
             <h2>选择你的职业</h2>
             <div class="class-list">
                 <div class="class-card selected" data-class="warrior">
@@ -40,6 +41,7 @@
                         <span>❤️ 80</span>
                         <span>⚡ 3</span>
                     </div>
+                    <div class="class-lore">曾经是一名王国精锐卫队的队长，在边境战役中失去了所有战友...</div>
                 </div>
                 <div class="class-card" data-class="mage">
                     <div class="class-icon">🔮</div>
@@ -49,6 +51,7 @@
                         <span>❤️ 60</span>
                         <span>⚡ 4</span>
                     </div>
+                    <div class="class-lore">来自古老魔法塔的天才学徒，因私自研究禁忌法术而被放逐...</div>
                 </div>
                 <div class="class-card" data-class="rogue">
                     <div class="class-icon">🗡️</div>
@@ -58,6 +61,7 @@
                         <span>❤️ 65</span>
                         <span>⚡ 3</span>
                     </div>
+                    <div class="class-lore">出身于地下黑市的孤儿，靠偷窃和暗杀维生...</div>
                 </div>
                 <div class="class-card" data-class="monk">
                     <div class="class-icon">🥋</div>
@@ -67,6 +71,7 @@
                         <span>❤️ 70</span>
                         <span>⚡ 3</span>
                     </div>
+                    <div class="class-lore">来自东方禅修寺院的修行者，为了寻求内心的平静而踏上旅程...</div>
                 </div>
                 <div class="class-card" data-class="paladin">
                     <div class="class-icon">✨</div>
@@ -76,6 +81,7 @@
                         <span>❤️ 90</span>
                         <span>⚡ 3</span>
                     </div>
+                    <div class="class-lore">神圣教廷的最后守护者，为了净化被诅咒的土地而独自深入黑暗地牢...</div>
                 </div>
             </div>
             
@@ -83,27 +89,27 @@
             <div class="difficulty-selection">
                 <h3>选择难度</h3>
                 <div class="difficulty-buttons">
-                    <button class="difficulty-btn" data-difficulty="easy">
+                    <button class="difficulty-btn" data-difficulty="easy" aria-label="简单难度">
                         <div class="diff-name">简单</div>
                         <div class="diff-desc">敌人伤害 -20%，初始生命 +20</div>
                     </button>
-                    <button class="difficulty-btn selected" data-difficulty="normal">
+                    <button class="difficulty-btn selected" data-difficulty="normal" aria-label="普通难度">
                         <div class="diff-name">普通</div>
                         <div class="diff-desc">标准游戏体验</div>
                     </button>
-                    <button class="difficulty-btn" data-difficulty="hard">
+                    <button class="difficulty-btn" data-difficulty="hard" aria-label="困难难度">
                         <div class="diff-name">困难</div>
                         <div class="diff-desc">敌人伤害 +30%，金币 -20%</div>
                     </button>
                 </div>
             </div>
             
-            <button id="confirm-class" class="btn-primary">确认选择</button>
-            <button id="back-to-menu" class="btn-secondary">返回主菜单</button>
+            <button id="confirm-class" class="btn-primary" aria-label="确认选择职业">确认选择</button>
+            <button id="back-to-menu" class="btn-secondary" aria-label="返回主菜单">返回主菜单</button>
         </div>
 
         <!-- 地图界面 -->
-        <div id="map-screen" class="screen">
+        <div id="map-screen" class="screen" role="region" aria-label="地图界面">
             <div class="map-header">
                 <div class="player-info">
                     <span id="map-player-hp">❤️ 80/80</span>
@@ -111,8 +117,8 @@
                 </div>
                 <span id="map-floor">第 1 层</span>
                 <div class="header-buttons">
-                    <button id="view-relics-map" class="btn-small">查看遗物</button>
-                    <button id="view-deck-map" class="btn-small">查看牌组</button>
+                    <button id="view-relics-map" class="btn-small" aria-label="查看遗物">查看遗物</button>
+                    <button id="view-deck-map" class="btn-small" aria-label="查看牌组">查看牌组</button>
                 </div>
             </div>
             <div id="map-nodes" class="map-nodes">
@@ -121,13 +127,14 @@
         </div>
 
         <!-- 战斗界面 -->
-        <div id="battle-screen" class="screen">
+        <div id="battle-screen" class="screen" role="region" aria-label="战斗界面">
             <div class="battle-header">
                 <span id="battle-floor">第 1 层</span>
+                <span id="battle-turn">回合: 1</span>
                 <div class="header-buttons">
-                    <button id="view-combat-log" class="btn-small">战斗日志</button>
-                    <button id="view-relics-battle" class="btn-small">查看遗物</button>
-                    <button id="view-deck" class="btn-small">查看牌组</button>
+                    <button id="view-combat-log" class="btn-small" aria-label="战斗日志">战斗日志</button>
+                    <button id="view-relics-battle" class="btn-small" aria-label="查看遗物">查看遗物</button>
+                    <button id="view-deck" class="btn-small" aria-label="查看牌组">查看牌组</button>
                 </div>
             </div>
             <div class="battle-area">
@@ -164,13 +171,13 @@
                 <div id="hand-cards" class="hand-cards">
                     <!-- 手牌 -->
                 </div>
-                <button id="end-turn" class="btn-primary">结束回合</button>
-                <button id="abandon-run" class="btn-danger" style="margin-top: 10px;">放弃游戏</button>
+                <button id="end-turn" class="btn-primary" aria-label="结束回合">结束回合</button>
+                <button id="abandon-run" class="btn-danger" style="margin-top: 10px;" aria-label="放弃游戏">放弃游戏</button>
             </div>
         </div>
 
         <!-- 奖励界面 -->
-        <div id="reward-screen" class="screen">
+        <div id="reward-screen" class="screen" role="region" aria-label="奖励界面">
             <h2>🎉 战斗胜利!</h2>
             <div class="rewards">
                 <div class="reward-section">
@@ -182,7 +189,7 @@
                     <div id="reward-cards" class="reward-cards">
                         <!-- 奖励卡牌 -->
                     </div>
-                    <button id="skip-card" class="btn-secondary">跳过</button>
+                    <button id="skip-card" class="btn-secondary" aria-label="跳过奖励">跳过</button>
                 </div>
                 <div id="relic-reward" class="reward-section" style="display: none;">
                     <h3>获得遗物</h3>
@@ -194,16 +201,16 @@
         </div>
 
         <!-- 遗物列表界面 -->
-        <div id="relics-screen" class="screen">
+        <div id="relics-screen" class="screen" role="region" aria-label="遗物收藏">
             <h2>🎒 我的遗物</h2>
             <div id="relics-list" class="relics-list">
                 <!-- 动态生成 -->
             </div>
-            <button id="close-relics" class="btn-secondary">返回</button>
+            <button id="close-relics" class="btn-secondary" aria-label="返回">返回</button>
         </div>
 
         <!-- 商店界面 -->
-        <div id="shop-screen" class="screen">
+        <div id="shop-screen" class="screen" role="region" aria-label="商店购买">
             <h2>🏪 神秘商店</h2>
             <div class="shop-gold">💰 <span id="shop-gold">0</span></div>
             <div class="shop-items">
@@ -225,29 +232,39 @@
                         <!-- 商品药水 -->
                     </div>
                 </div>
+                <div class="shop-section">
+                    <h3>编辑牌组</h3>
+                    <div id="shop-remove-section">
+                        <!-- 商店移除卡牌入口 -->
+                    </div>
+                </div>
             </div>
-            <button id="leave-shop" class="btn-secondary">离开商店</button>
+            <button id="leave-shop" class="btn-secondary" aria-label="离开商店">离开商店</button>
         </div>
 
         <!-- 休息处 -->
-        <div id="rest-screen" class="screen">
+        <div id="rest-screen" class="screen" role="region" aria-label="篝火休息">
             <h2>🔥 篝火</h2>
             <p class="rest-desc">温暖的火焰让你感到安心...</p>
             <div class="rest-options">
-                <button id="rest-heal">
+                <button id="rest-heal" aria-label="休息恢复30%生命">
                     <span class="option-icon">😴</span>
                     <span>休息 (恢复30%生命)</span>
                 </button>
-                <button id="rest-upgrade">
+                <button id="rest-upgrade" aria-label="锻造升级卡牌">
                     <span class="option-icon">🔨</span>
                     <span>锻造 (升级卡牌)</span>
                 </button>
+                <button id="rest-remove" aria-label="移除一张卡牌">
+                    <span class="option-icon">✂️</span>
+                    <span class="option-text">移除卡牌 (优化牌组)</span>
+                </button>
             </div>
-            <button id="leave-rest" class="btn-secondary">离开</button>
+            <button id="leave-rest" class="btn-secondary" aria-label="离开休息处">离开</button>
         </div>
 
         <!-- 事件界面 -->
-        <div id="event-screen" class="screen">
+        <div id="event-screen" class="screen" role="region" aria-label="事件选择">
             <h2 id="event-title">神秘事件</h2>
             <div id="event-sprite" class="event-sprite">❓</div>
             <p id="event-description">你遇到了一个神秘的事件...</p>
@@ -257,28 +274,29 @@
         </div>
 
         <!-- 牌组查看弹窗 -->
-        <div id="deck-modal" class="modal">
+        <div id="deck-modal" class="modal" role="dialog" aria-label="查看牌组">
             <div class="modal-content">
                 <h2>当前牌组</h2>
                 <div id="deck-list" class="deck-list">
                     <!-- 牌组列表 -->
                 </div>
-                <div id="relics-list" class="relics-list">
+                <div id="deck-relics-list" class="relics-list">
                     <!-- 遗物列表 -->
                 </div>
-                <button id="close-deck" class="btn-secondary">关闭</button>
+                <button id="close-deck" class="btn-secondary" aria-label="关闭牌组">关闭</button>
             </div>
         </div>
 
         <!-- 游戏结束 -->
-        <div id="game-over" class="screen">
+        <div id="game-over" class="screen" role="region" aria-label="游戏结束">
             <h1 id="game-over-title" class="victory">🎉 胜利!</h1>
+            <p id="game-over-quote" style="text-align:center; font-style:italic; color:#ccc; margin:10px 0; font-size:0.95em;"></p>
             <div class="game-over-stats">
                 <p>到达层数: <span id="final-floor">3</span></p>
                 <p>击败敌人: <span id="final-kills">12</span></p>
                 <p>获得金币: <span id="final-gold">150</span></p>
             </div>
-            <button id="return-menu" class="btn-primary">返回主菜单</button>
+            <button id="return-menu" class="btn-primary" aria-label="返回主菜单">返回主菜单</button>
         </div>
     </div>
 
@@ -288,6 +306,7 @@
             <h2>🏆 成就系统</h2>
             <div class="achievements-progress">已解锁：<span id="achievement-count">0</span>/30</div>
         </div>
+
         <div id="achievements-list">
             <!-- 动态生成 -->
         </div>
@@ -301,6 +320,7 @@
                 卡牌：0/0 (0%) | 遗物：0/0 (0%)
             </div>
         </div>
+
         <div id="collection-list">
             <!-- 动态生成 -->
         </div>
@@ -310,8 +330,9 @@
     <div id="changelog-panel" class="achievements-panel">
         <div class="achievements-header">
             <h2>📝 更新日志</h2>
-            <div class="changelog-version">当前版本：v1.2.1</div>
+            <div class="changelog-version">当前版本：v2.0.2</div>
         </div>
+
         <div id="changelog-list" class="changelog-list">
             <!-- 动态生成 -->
         </div>
@@ -328,6 +349,44 @@
         </div>
     </div>
 
+    <!-- 游戏统计面板 -->
+    <div id="stats-panel" class="achievements-panel">
+        <div class="achievements-header">
+            <h2>📊 游戏统计</h2>
+            <div class="achievements-progress" id="stats-summary"></div>
+        </div>
+
+        <div id="stats-list">
+            <!-- 动态生成 -->
+        </div>
+    </div>
+
     <script src="game.js"></script>
+    <script>
+        (function () {
+            if (window.__uiBootstrapped) return;
+
+            function boot() {
+                if (window.__uiBootstrapped) return;
+                window.__uiBootstrapped = true;
+
+                try {
+                    if (typeof initGame === 'function') {
+                        initGame();
+                    } else {
+                        console.error('[系统] initGame 不可用，无法绑定首页按钮事件');
+                    }
+                } catch (e) {
+                    console.error('[系统] 兜底启动失败:', e);
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', boot, { once: true });
+            } else {
+                boot();
+            }
+        })();
+    </script>
 </body>
 </html>
