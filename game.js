@@ -5392,6 +5392,24 @@ function showChangelogPanel() {
 
 const entries = [
     {
+        version: 'v3.2.0',
+        date: '2026-07-08',
+        type: 'minor',
+        title: '🎨 界面美化与全面响应式适配',
+        changes: [
+            { type: 'add', text: '<span class="changelog-highlight">全面响应式布局</span>:使用 clamp() 流式适配，支持从手机到桌面的全分辨率自适应' },
+            { type: 'add', text: '<span class="changelog-highlight">战斗界面紧凑化</span>:缩小怪物区与玩家区间隔、血条与怪物间距，提升可视空间' },
+            { type: 'add', text: '<span class="changelog-highlight">字体统一</span>:全局统一为微软雅黑，移除 Cinzel / JetBrains Mono 外链字体，减少首屏加载' },
+            { type: 'add', text: '战斗页面非卡牌字号提升：楼层标识、怪物名称、血量数字、战斗日志等均适当调大' },
+            { type: 'add', text: '地牢地图第一排信息字号统一（血量、金币、楼层、按钮）' },
+            { type: 'add', text: '卡牌尺寸与内边距缩小，同屏展示更多手牌' },
+            { type: 'add', text: '地牢地图节点、行间距、手牌区高度均支持响应式缩放' },
+            { type: 'fix', text: '修复 <span class="changelog-highlight">怪物血条样式不生效</span> 的问题（class 名称不匹配）' },
+            { type: 'fix', text: '修复 <span class="changelog-highlight">地牢进度条</span> 初始显示 0/0 节点的问题（已移除进度条）' },
+            { type: 'remove', text: '移除首页最高分显示' }
+        ]
+    },
+    {
         version: 'v3.1.0',
         date: '2026-07-08',
         type: 'minor',
