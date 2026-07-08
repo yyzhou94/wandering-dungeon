@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>流浪地牢 - 卡牌构筑 Roguelike</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=20260708-14">
 </head>
 <body>
     <div id="game-container">
@@ -21,8 +21,15 @@
                 <button id="view-changelog" class="btn-secondary" aria-label="更新日志">更新日志</button>
                 <button id="clear-save" class="btn-danger" style="display: none;" aria-label="清除进度">清除进度</button>
             </div>
-            <div class="high-score">
-                最高分: <span id="menu-high-score">0</span>
+            <div class="menu-extras">
+                <button id="open-ascension" class="menu-extra-btn" aria-label="Ascension设置">
+                    <span class="menu-extra-icon">⬆️</span>
+                    <span class="menu-extra-label">进阶挑战</span>
+                </button>
+                <button id="open-daily" class="menu-extra-btn" aria-label="每日挑战">
+                    <span class="menu-extra-icon">📅</span>
+                    <span class="menu-extra-label">每日挑战</span>
+                </button>
             </div>
             <div id="save-info" class="save-info" style="display: none;">
                 <p>上次保存：<span id="save-time"></span></p>
@@ -82,6 +89,36 @@
                         <span>⚡ 3</span>
                     </div>
                     <div class="class-lore">神圣教廷的最后守护者，为了净化被诅咒的土地而独自深入黑暗地牢...</div>
+                </div>
+                <div class="class-card" data-class="hunter">
+                    <div class="class-icon">🏹</div>
+                    <h3>游侠</h3>
+                    <p>精准叠加，陷阱控制</p>
+                    <div class="class-stats">
+                        <span>❤️ 68</span>
+                        <span>⚡ 3</span>
+                    </div>
+                    <div class="class-lore">来自密林深处的神射手，每一次射出都精准致命...</div>
+                </div>
+                <div class="class-card" data-class="necromancer">
+                    <div class="class-icon">💀</div>
+                    <h3>死灵法师</h3>
+                    <p>灵魂碎片，黑暗魔法</p>
+                    <div class="class-stats">
+                        <span>❤️ 75</span>
+                        <span>⚡ 3</span>
+                    </div>
+                    <div class="class-lore">被正统法师驱逐的异端，在黑暗中找到了力量的真谛...</div>
+                </div>
+                <div class="class-card" data-class="summoner">
+                    <div class="class-icon">📚</div>
+                    <h3>召唤师</h3>
+                    <p>召唤作战，协同攻击</p>
+                    <div class="class-stats">
+                        <span>❤️ 62</span>
+                        <span>⚡ 3</span>
+                    </div>
+                    <div class="class-lore">古老的召唤术传承者，能够驾驭来自异界的生物...</div>
                 </div>
             </div>
             
@@ -143,7 +180,7 @@
                         <div class="enemy-sprite">👹</div>
                         <div class="enemy-name">哥布林</div>
                         <div class="enemy-hp-bar">
-                            <div id="enemy-hp-fill" class="hp-fill" style="width: 100%"></div>
+                            <div id="enemy-hp-fill" class="enemy-hp-fill" style="width: 100%"></div>
                         </div>
                         <div class="enemy-stats">
                             <span id="enemy-hp">30/30</span>
@@ -172,7 +209,6 @@
                     <!-- 手牌 -->
                 </div>
                 <button id="end-turn" class="btn-primary" aria-label="结束回合">结束回合</button>
-                <button id="abandon-run" class="btn-danger" style="margin-top: 10px;" aria-label="放弃游戏">放弃游戏</button>
             </div>
         </div>
 
@@ -330,7 +366,7 @@
     <div id="changelog-panel" class="achievements-panel">
         <div class="achievements-header">
             <h2>📝 更新日志</h2>
-            <div class="changelog-version">当前版本：v2.0.2</div>
+            <div class="changelog-version">当前版本：v3.1.0</div>
         </div>
 
         <div id="changelog-list" class="changelog-list">
@@ -361,7 +397,52 @@
         </div>
     </div>
 
-    <script src="game.js"></script>
+    <!-- P2: Ascension 设置面板 -->
+    <div id="ascension-panel" class="achievements-panel">
+        <div class="achievements-header">
+            <h2>⬆️ 进阶挑战</h2>
+            <div class="achievements-progress" id="ascension-summary"></div>
+        </div>
+
+        <div class="ascension-section">
+            <p style="font-size:13px; color:var(--clr-text-muted); margin-bottom:15px;">
+                开启进阶挑战以增加难度。通关后可以解锁更多挑战。
+            </p>
+            <div id="ascension-list" class="ascension-list">
+                <!-- 动态生成 -->
+            </div>
+        </div>
+
+        <div style="margin-top:15px; display:flex; gap:10px;">
+            <button id="ascension-select-all" class="btn-secondary" style="flex:1;">全部选择</button>
+            <button id="ascension-reset" class="btn-danger" style="flex:1;">全部取消</button>
+        </div>
+    </div>
+
+    <!-- P2: 每日挑战面板 -->
+    <div id="daily-panel" class="achievements-panel">
+        <div class="achievements-header">
+            <h2>📅 每日挑战</h2>
+            <div class="achievements-progress" id="daily-summary"></div>
+        </div>
+
+        <div class="daily-challenge-banner">
+            <h3 id="daily-title">今日挑战</h3>
+            <div class="daily-seed" id="daily-seed">SEED</div>
+            <div class="daily-class-rotation" id="daily-class-info"></div>
+        </div>
+
+        <div style="margin-top:15px; display:flex; flex-direction:column; gap:10px;">
+            <button id="start-daily" class="btn-primary">开始今日挑战</button>
+            <p style="font-size:12px; color:var(--clr-text-muted); text-align:center;">
+                每日挑战使用固定种子和指定职业，所有人面对相同的地牢。<br>
+                种子每天午夜重置。
+            </p>
+        </div>
+        </div>
+    </div>
+
+    <script src="game.js?v=20260708-12"></script>
     <script>
         (function () {
             if (window.__uiBootstrapped) return;
