@@ -4,35 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>流浪地牢 - 卡牌构筑 Roguelike</title>
-    <link rel="stylesheet" href="styles.css?v=20260708-15">
+    <link rel="stylesheet" href="styles.css?v=20260710-08">
 </head>
 <body>
     <div id="game-container">
         <!-- 主菜单 -->
         <div id="main-menu" class="screen active" role="region" aria-label="主菜单">
-            <h1>⚔️ 流浪地牢</h1>
-            <p class="subtitle">Roguelike 卡牌构筑游戏</p>
-            <div class="menu-buttons">
-                <button id="continue-game" class="btn-primary" style="display: none;" aria-label="继续游戏">继续游戏</button>
-                <button id="start-game" class="btn-primary" aria-label="开始游戏">开始游戏</button>
-                <button id="view-stats" class="btn-secondary" aria-label="游戏统计">游戏统计</button>
-                <button id="view-collection" class="btn-secondary" aria-label="查看收藏">查看收藏</button>
-                <button id="view-achievements" class="btn-secondary" aria-label="查看成就">查看成就</button>
-                <button id="view-changelog" class="btn-secondary" aria-label="更新日志">更新日志</button>
-                <button id="clear-save" class="btn-danger" style="display: none;" aria-label="清除进度">清除进度</button>
-            </div>
-            <div class="menu-extras">
-                <button id="open-ascension" class="menu-extra-btn" aria-label="Ascension设置">
-                    <span class="menu-extra-icon">⬆️</span>
-                    <span class="menu-extra-label">进阶挑战</span>
-                </button>
-                <button id="open-daily" class="menu-extra-btn" aria-label="每日挑战">
-                    <span class="menu-extra-icon">📅</span>
-                    <span class="menu-extra-label">每日挑战</span>
-                </button>
-            </div>
-            <div id="save-info" class="save-info" style="display: none;">
-                <p>上次保存：<span id="save-time"></span></p>
+            <div class="menu-card">
+                <h1 class="title">流浪地牢</h1>
+                <div class="subtitle">WANDERING DUNGEON · 卡牌构筑 Roguelike</div>
+                <div class="ornament" aria-hidden="true"><span class="ornament-diamond"></span></div>
+                <div class="menu-actions">
+                    <button id="start-game" class="btn-primary menu-action" aria-label="开始探险">开始探险</button>
+                    <button id="continue-game" class="btn-secondary menu-action" style="display: none;" aria-label="继续游戏">继续游戏</button>
+                    <button id="start-endless" class="btn-secondary menu-action" aria-label="无尽地牢">无尽地牢</button>
+                    <button id="open-daily" class="btn-secondary menu-action" aria-label="每日挑战">每日挑战</button>
+                    <button id="open-ascension" class="btn-secondary menu-action" aria-label="进阶挑战">进阶挑战</button>
+                </div>
+                <div class="menu-row">
+                    <button id="view-stats" class="btn-small" aria-label="游戏统计">游戏统计</button>
+                    <button id="view-collection" class="btn-small" aria-label="收藏">收藏</button>
+                    <button id="view-achievements" class="btn-small" aria-label="成就">成就</button>
+                    <button id="view-changelog" class="btn-small" aria-label="更新日志">更新日志</button>
+                    <button id="clear-save" class="btn-small btn-danger" style="display: none;" aria-label="清除进度">清除进度</button>
+                </div>
+                <div id="save-info" class="save-info" style="display: none;">
+                    <p>上次保存：<span id="save-time"></span></p>
+                </div>
             </div>
         </div>
 
@@ -41,84 +39,84 @@
             <h2>选择你的职业</h2>
             <div class="class-list">
                 <div class="class-card selected" data-class="warrior">
-                    <div class="class-icon">⚔️</div>
+                    <img class="class-avatar-img" src="generated-images/class_warrior.png" alt="战士">
                     <h3>战士</h3>
                     <p>高生命值，稳扎稳打</p>
                     <div class="class-stats">
                         <span>❤️ 80</span>
                         <span>⚡ 3</span>
                     </div>
-                    <div class="class-lore">曾经是一名王国精锐卫队的队长，在边境战役中失去了所有战友...</div>
+                    <div class="class-lore">前王国精锐卫队队长，巨剑近战、血厚防高，是队伍坚不可摧的前线铁壁。</div>
                 </div>
                 <div class="class-card" data-class="mage">
-                    <div class="class-icon">🔮</div>
+                    <img class="class-avatar-img" src="generated-images/class_mage.png" alt="法师">
                     <h3>法师</h3>
                     <p>高能量，强力法术</p>
                     <div class="class-stats">
                         <span>❤️ 60</span>
                         <span>⚡ 4</span>
                     </div>
-                    <div class="class-lore">来自古老魔法塔的天才学徒，因私自研究禁忌法术而被放逐...</div>
+                    <div class="class-lore">被放逐的天才法师，以禁忌奥术远程爆发，用范围灼烧撕裂敌人阵线。</div>
                 </div>
                 <div class="class-card" data-class="rogue">
-                    <div class="class-icon">🗡️</div>
+                    <img class="class-avatar-img" src="generated-images/class_rogue.png" alt="盗贼">
                     <h3>盗贼</h3>
                     <p>快速连击，灵活机动</p>
                     <div class="class-stats">
                         <span>❤️ 65</span>
                         <span>⚡ 3</span>
                     </div>
-                    <div class="class-lore">出身于地下黑市的孤儿，靠偷窃和暗杀维生...</div>
+                    <div class="class-lore">出身于地下黑市的孤儿，靠偷窃和暗杀维生。无声的脚步与淬毒的匕首，是他在这险恶世界中唯一的依靠。</div>
                 </div>
                 <div class="class-card" data-class="monk">
-                    <div class="class-icon">🥋</div>
+                    <img class="class-avatar-img" src="generated-images/class_monk.png" alt="武僧">
                     <h3>武僧</h3>
                     <p>平衡攻防，冥想回血</p>
                     <div class="class-stats">
                         <span>❤️ 70</span>
                         <span>⚡ 3</span>
                     </div>
-                    <div class="class-lore">来自东方禅修寺院的修行者，为了寻求内心的平静而踏上旅程...</div>
+                    <div class="class-lore">来自东方禅修寺院的修行者，为了寻求内心的平静而踏上旅程。拳锋之上，是千日苦修炼就的刚柔并济之力。</div>
                 </div>
                 <div class="class-card" data-class="paladin">
-                    <div class="class-icon">✨</div>
+                    <img class="class-avatar-img" src="generated-images/class_paladin.png" alt="圣骑士">
                     <h3>圣骑士</h3>
                     <p>高血量，治愈能力强</p>
                     <div class="class-stats">
                         <span>❤️ 90</span>
                         <span>⚡ 3</span>
                     </div>
-                    <div class="class-lore">神圣教廷的最后守护者，为了净化被诅咒的土地而独自深入黑暗地牢...</div>
+                    <div class="class-lore">神圣教廷的最后守护者，为了净化被诅咒的土地而独自深入黑暗地牢。圣光在其盾上燃烧，驱散一切不洁之物。</div>
                 </div>
                 <div class="class-card" data-class="hunter">
-                    <div class="class-icon">🏹</div>
+                    <img class="class-avatar-img" src="generated-images/class_hunter.png" alt="游侠">
                     <h3>游侠</h3>
                     <p>精准叠加，陷阱控制</p>
                     <div class="class-stats">
                         <span>❤️ 68</span>
                         <span>⚡ 3</span>
                     </div>
-                    <div class="class-lore">来自密林深处的神射手，每一次射出都精准致命...</div>
+                    <div class="class-lore">来自密林深处的神射手，每一次射出都精准致命。她与森林的生灵立下契约，誓要猎尽盘踞地牢的邪物。</div>
                 </div>
                 <div class="class-card" data-class="necromancer">
-                    <div class="class-icon">💀</div>
+                    <img class="class-avatar-img" src="generated-images/class_necromancer.png" alt="死灵法师">
                     <h3>死灵法师</h3>
                     <p>灵魂碎片，黑暗魔法</p>
                     <div class="class-stats">
                         <span>❤️ 75</span>
                         <span>⚡ 3</span>
                     </div>
-                    <div class="class-lore">被正统法师驱逐的异端，在黑暗中找到了力量的真谛...</div>
+                    <div class="class-lore">被正统法师驱逐的异端，在黑暗中找到了力量的真谛。腐朽的骸骨在他低语中起身，成为最忠诚的随从。</div>
                 </div>
                 <div class="class-card" data-class="summoner">
-                    <div class="class-icon">📚</div>
+                    <img class="class-avatar-img" src="generated-images/class_summoner.png" alt="召唤师">
                     <h3>召唤师</h3>
                     <p>召唤作战，协同攻击</p>
                     <div class="class-stats">
                         <span>❤️ 62</span>
                         <span>⚡ 3</span>
                     </div>
-                    <div class="class-lore">古老的召唤术传承者，能够驾驭来自异界的生物...</div>
+                    <div class="class-lore">古老的召唤术传承者，能够驾驭来自异界的生物。契约之书翻动间，裂隙之中涌出效忠于他的奇异造物。</div>
                 </div>
             </div>
             
@@ -148,15 +146,23 @@
         <!-- 地图界面 -->
         <div id="map-screen" class="screen" role="region" aria-label="地图界面">
             <div class="map-header">
+                <span id="map-floor">第 1 层</span>
                 <div class="player-info">
                     <span id="map-player-hp">❤️ 80/80</span>
                     <span id="map-player-gold">💰 0</span>
                 </div>
-                <span id="map-floor">第 1 层</span>
                 <div class="header-buttons">
                     <button id="view-relics-map" class="btn-small" aria-label="查看遗物">查看遗物</button>
                     <button id="view-deck-map" class="btn-small" aria-label="查看牌组">查看牌组</button>
                 </div>
+            </div>
+            <div class="map-legend">
+                <span>⚔️ 战斗</span> <i></i>
+                <span>🏪 商店</span> <i></i>
+                <span>🔥 休息</span> <i></i>
+                <span>❓ 事件</span> <i></i>
+                <span>⚡ 精英</span> <i></i>
+                <span>👑 Boss</span>
             </div>
             <div id="map-nodes" class="map-nodes">
                 <!-- 动态生成 -->
@@ -166,6 +172,7 @@
         <!-- 战斗界面 -->
         <div id="battle-screen" class="screen" role="region" aria-label="战斗界面">
             <div class="battle-header">
+                <span id="battle-class"></span>
                 <span id="battle-floor">第 1 层</span>
                 <span id="battle-turn">回合: 1</span>
                 <div class="header-buttons">
@@ -184,7 +191,7 @@
                         </div>
                         <div class="enemy-stats">
                             <span id="enemy-hp">30/30</span>
-                            <span id="enemy-intent">⚔️ 攻击 8</span>
+                            <span id="enemy-intent" class="enemy-intent">⚔️ 攻击 8</span>
                         </div>
                     </div>
                 </div>
@@ -213,36 +220,23 @@
         </div>
 
         <!-- 奖励界面 -->
-        <div id="reward-screen" class="screen" role="region" aria-label="奖励界面">
-            <h2>🎉 战斗胜利!</h2>
-            <div class="rewards">
-                <div class="reward-section">
-                    <h3>获得金币</h3>
-                    <div id="reward-gold" class="reward-gold">💰 15</div>
-                </div>
-                <div class="reward-section">
-                    <h3>选择一张卡牌加入牌组</h3>
-                    <div id="reward-cards" class="reward-cards">
-                        <!-- 奖励卡牌 -->
-                    </div>
-                    <button id="skip-card" class="btn-secondary" aria-label="跳过奖励">跳过</button>
-                </div>
-                <div id="relic-reward" class="reward-section" style="display: none;">
-                    <h3>获得遗物</h3>
-                    <div id="reward-relic" class="reward-relic">
-                        <!-- 奖励遗物 -->
-                    </div>
-                </div>
+        <div id="reward-screen" class="screen reward-wrap" role="region" aria-label="奖励界面">
+            <h1 class="title">战斗胜利</h1>
+            <div class="subtitle">选择一张卡牌加入你的牌组</div>
+            <div id="reward-gold" class="reward-gold">🪙 获得 15 金币</div>
+            <div id="reward-cards" class="reward-cards">
+                <!-- 奖励卡牌 -->
             </div>
-        </div>
-
-        <!-- 遗物列表界面 -->
-        <div id="relics-screen" class="screen" role="region" aria-label="遗物收藏">
-            <h2>🎒 我的遗物</h2>
-            <div id="relics-list" class="relics-list">
-                <!-- 动态生成 -->
+            <div id="relic-reward" style="display: none;">
+                <div id="reward-relic"></div>
             </div>
-            <button id="close-relics" class="btn-secondary" aria-label="返回">返回</button>
+            <div class="divider"></div>
+            <div class="ornament">
+                <svg viewBox="0 0 34 18" fill="none" stroke="currentColor" stroke-width="1.4">
+                    <path d="M2 9h10M22 9h10M17 3l3 6-3 6-3-6z"/>
+                </svg>
+            </div>
+            <button id="skip-card" class="btn-secondary" aria-label="跳过奖励">跳过奖励，前往地图</button>
         </div>
 
         <!-- 商店界面 -->
@@ -316,10 +310,18 @@
                 <div id="deck-list" class="deck-list">
                     <!-- 牌组列表 -->
                 </div>
-                <div id="deck-relics-list" class="relics-list">
-                    <!-- 遗物列表 -->
+                    <button id="close-deck" class="btn-secondary" aria-label="关闭牌组">关闭</button>
+            </div>
+        </div>
+
+        <!-- 遗物查看弹窗 -->
+        <div id="relics-modal" class="modal" role="dialog" aria-label="查看遗物">
+            <div class="modal-content relics-modal-content">
+                <h2>当前遗物</h2>
+                <div id="relics-modal-list" class="relics-modal-list">
+                    <!-- 遗物列表动态生成 -->
                 </div>
-                <button id="close-deck" class="btn-secondary" aria-label="关闭牌组">关闭</button>
+                <button id="close-relics-modal" class="btn-secondary" aria-label="关闭遗物">关闭</button>
             </div>
         </div>
 
@@ -442,7 +444,7 @@
         </div>
     </div>
 
-    <script src="game.js?v=20260708-15"></script>
+    <script src="game.js?v=20260710-03"></script>
     <script>
         (function () {
             if (window.__uiBootstrapped) return;

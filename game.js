@@ -1,4 +1,4 @@
-﻿// ==================== 战斗日志 ====================
+// ==================== 战斗日志 ====================
 
 function addCombatLog(type, message) {
     const list = document.getElementById('combat-log-list');
@@ -484,6 +484,225 @@ function updateMainMenu() {
     }
 }
 
+// ==================== 概念原画资产映射（接入 generated-images/） ====================
+const ASSET_DIR = 'generated-images/';
+
+// 玩家职业原画（与 CLASSES 的 key 对应）
+const CLASS_ART = {
+    warrior:     'class_warrior.png',
+    mage:        'class_mage.png',
+    rogue:       'class_rogue.png',
+    monk:        'class_monk.png',
+    paladin:     'class_paladin.png',
+    hunter:      'class_hunter.png',
+    necromancer: 'class_necromancer.png',
+    summoner:    'class_summoner.png'
+};
+
+// 敌人/Boss 原画（与 ENEMY_DB 的 key 对应；未列出的敌人回退到 SVG/emoji）
+// 命名规范：enemy_<id>.png（普通敌人）、enemy_boss_<id>.png（Boss）
+const ENEMY_ART = {
+    /* 普通敌人 */
+    goblin:                     'enemy_goblin.png',
+    slime:                      'enemy_slime.png',
+    skeleton:                   'enemy_skeleton.png',
+    orc:                        'enemy_orc.png',
+    dark_mage:                  'enemy_dark_mage.png',
+    werewolf:                   'enemy_werewolf.png',
+    demon:                      'enemy_demon.png',
+    dragon:                     'enemy_dragon.png',
+    gargoyle:                   'enemy_gargoyle.png',
+    phoenix:                    'enemy_phoenix.png',
+    spider:                     'enemy_spider.png',
+    vampire:                    'enemy_vampire.png',
+    witch_knight:               'enemy_witch_knight.png',
+    /* 精英敌人 */
+    elite_demon:                'enemy_elite_demon.png',
+    elite_dragon:               'enemy_elite_dragon.png',
+    elite_orc:                  'enemy_elite_orc.png',
+    elite_phoenix:              'enemy_elite_phoenix.png',
+    elite_skeleton_warlord:     'enemy_elite_skeleton_warlord.png',
+    elite_spider:               'enemy_elite_spider.png',
+    elite_vampire:              'enemy_elite_vampire.png',
+    /* Boss */
+    boss_goblin_king:           'enemy_boss_goblin_king.png',
+    boss_lich:                  'enemy_boss_lich.png',
+    boss_dragon:                'enemy_dragon.png',
+    boss_lich_king:             'enemy_boss_lich_king.png',
+    boss_ancient_dragon_evil:   'enemy_boss_ancient_dragon_evil.png'
+};
+
+// 卡牌原画（与 CARD_DB 的 key 对应；未列出的卡牌回退到 emoji icon）
+// 卡牌原画（与 CARD_DB 的 key 对应；未列出的卡牌回退到 emoji icon）
+// 注意：使用与 ui-prototype.html 同一批 vivid 原画（Dark_fantasy_game_CARD_illustr_*），
+// 此前误指向另一批（Card_*）导致卡面观感偏灰暗，已对齐回原型所用文件。
+const CARD_ART = {
+    /* 全部 55 张卡牌原画，统一命名规则 card_<id>.png */
+    aimed_shot:     'card_aimed_shot.png',
+    ambush:         'card_ambush.png',
+    arcane_intellect: 'card_arcane_intellect.png',
+    arrow_rain:     'card_arrow_rain.png',
+    backstab:       'card_backstab.png',
+    bash:           'card_bash.png',
+    blessing:       'card_blessing.png',
+    blood_bat:      'card_blood_bat.png',
+    blood_ritual:   'card_blood_ritual.png',
+    cheetah_step:   'card_cheetah_step.png',
+    dagger_throw:   'card_dagger_throw.png',
+    dark_pact:      'card_dark_pact.png',
+    death_embrace:  'card_death_embrace.png',
+    defend:         'card_defend.png',
+    divine_shield:  'card_divine_shield.png',
+    dodge:          'card_dodge.png',
+    eagle_eye:      'card_eagle_eye.png',
+    explosive_arrow: 'card_explosive_arrow.png',
+    fear_whisper:   'card_fear_whisper.png',
+    fireball:       'card_fireball.png',
+    flying_kick:    'card_flying_kick.png',
+    focus_mind:     'card_focus_mind.png',
+    frost_bolt:     'card_frost_bolt.png',
+    heal:           'card_heal.png',
+    heavy_blade:    'card_heavy_blade.png',
+    hound_hawk:     'card_hound_hawk.png',
+    hunt_finish:    'card_hunt_finish.png',
+    hunt_mark:      'card_hunt_mark.png',
+    hunting_trap:   'card_hunting_trap.png',
+    iron_body:      'card_iron_body.png',
+    iron_wave:      'card_iron_wave.png',
+    justice_strike: 'card_justice_strike.png',
+    lethal_focus:   'card_lethal_focus.png',
+    life_reap:      'card_life_reap.png',
+    magic_missile:  'card_magic_missile.png',
+    mana_burst:     'card_mana_burst.png',
+    mark_target:    'card_mark_target.png',
+    pommel_strike:  'card_pommel_strike.png',
+    quick_attack:   'card_quick_attack.png',
+    shadow_bolt:    'card_shadow_bolt.png',
+    shadow_veil:    'card_shadow_veil.png',
+    shield:         'card_shield.png',
+    shrug_it_off:   'card_shrug_it_off.png',
+    slice:          'card_slice.png',
+    soul_burn:      'card_soul_burn.png',
+    soul_link:      'card_soul_link.png',
+    soul_reap:      'card_soul_reap.png',
+    soul_shield:    'card_soul_shield.png',
+    strike:         'card_strike.png',
+    summon_golem:   'card_summon_golem.png',
+    sword_boomerang: 'card_sword_boomerang.png',
+    trap_master:    'card_trap_master.png',
+    twin_strike:    'card_twin_strike.png',
+    undead_army:    'card_undead_army.png',
+    underworld_walker:'card_underworld_walker.png',
+    venom_arrow:    'card_venom_arrow.png',
+    volleys:        'card_volleys.png',
+
+    /* 新增 39 张卡牌原画 */
+    anger:          'card_anger.png',
+    antitoxin:      'card_antitoxin.png',
+    battle_trance:  'card_battle_trance.png',
+    bloodletting:   'card_bloodletting.png',
+    burn:           'card_burn.png',
+    cleave:         'card_cleave.png',
+    combo_meditate: 'card_combo_meditate.png',
+    combo_punch:    'card_combo_punch.png',
+    curse_card:     'card_curse_card.png',
+    empower_summons:'card_empower_summons.png',
+    finisher:       'card_finisher.png',
+    fire_bolt:      'card_fire_bolt.png',
+    flame_storm:    'card_flame_storm.png',
+    footwork:       'card_footwork.png',
+    ghostly_armor:  'card_ghostly_armor.png',
+    heal_spell:     'card_heal_spell.png',
+    holy_strike:    'card_holy_strike.png',
+    iron_guard:     'card_iron_guard.png',
+    judgment:       'card_judgment.png',
+    lava_armor:     'card_lava_armor.png',
+    lightning_chain:'card_lightning_chain.png',
+    plague_spread:  'card_plague_spread.png',
+    seeing_red:     'card_seeing_red.png',
+    soul_resonance: 'card_soul_resonance.png',
+    spinning_kick:  'card_spinning_kick.png',
+    summon_flower:  'card_summon_flower.png',
+    summon_lightning:'card_summon_lightning.png',
+    summon_master:  'card_summon_master.png',
+    summon_phoenix: 'card_summon_phoenix.png',
+    summon_replace: 'card_summon_replace.png',
+    summon_spirit:  'card_summon_spirit.png',
+    summon_storm:   'card_summon_storm.png',
+    summon_synergy: 'card_summon_synergy.png',
+    summon_wolf:    'card_summon_wolf.png',
+    toxic_blade:    'card_toxic_blade.png',
+    toxic_cloud:    'card_toxic_cloud.png',
+    toxin_burst:    'card_toxin_burst.png'
+};
+
+// 遗物原画（与 RELIC_DB 的 key 对应；未列出的遗物回退到 emoji icon）
+// 风格：glowing fantasy relic badge（暗底发光徽章/图标，区别于卡牌的暗黑奇幻插画）
+const RELIC_ART = {
+    akabeko:        'relic_akabeko.png',
+    anchor:         'relic_anchor.png',
+    ancient_tea_set:'relic_ancient_tea_set.png',
+    bead_of_power:  'relic_bead_of_power.png',
+    blood_vial:     'relic_blood_vial.png',
+    bone_ring:      'relic_bone_ring.png',
+    bronze_scales:  'relic_bronze_scales.png',
+    burning_blood:  'relic_burning_blood.png',
+    coffin:         'relic_coffin.png',
+    cursed_key:     'relic_cursed_key.png',
+    eagle_bow:      'relic_eagle_bow.png',
+    element_core:   'relic_element_core.png',
+    eternal_feather:'relic_eternal_feather.png',
+    gambling_chip:  'relic_gambling_chip.png',
+    holy_badge:     'relic_holy_badge.png',
+    hound_collar:   'relic_hound_collar.png',
+    ice_heart:      'relic_ice_heart.png',
+    lava_core:      'relic_lava_core.png',
+    mercury_hourglass:'relic_mercury_hourglass.png',
+    obsidian:       'relic_obsidian.png',
+    ornamental_fan: 'relic_ornamental_fan.png',
+    phoenix_feather:'relic_phoenix_feather.png',
+    ring_of_the_snake:'relic_ring_of_the_snake.png',
+    sniper_scope:   'relic_sniper_scope.png',
+    stone_heart:    'relic_stone_heart.png',
+    summoner_manual:'relic_summoner_manual.png',
+    trap_box:       'relic_trap_box.png',
+    viper_fang:     'relic_viper_fang.png',
+    wolf_totem:     'relic_wolf_totem.png'
+};
+
+// 辅助函数：根据 key 返回 <img> 标签，无对应原画时回退到 SVG/emoji
+function enemySpriteHTML(enemyType, enemy) {
+    const file = ENEMY_ART[enemyType];
+    if (file) {
+        const name = (enemy && enemy.name) ? enemy.name : enemyType;
+        return '<img class="enemy-sprite-img" src="' + ASSET_DIR + file + '" alt="' + name + '">';
+    }
+    return ENEMY_SPRITES[enemyType] || (enemy && enemy.icon) || '👹';
+}
+
+function playerAvatarHTML(cls) {
+    const file = CLASS_ART[cls];
+    if (file) return '<img class="avatar-img" src="' + ASSET_DIR + file + '" alt="' + cls + '">';
+    const fallback = { warrior: '⚔️', mage: '🔮', rogue: '🗡️', monk: '🧘', paladin: '🛡️', hunter: '🏹', necromancer: '💀', summoner: '✨' };
+    return fallback[cls] || '⚔️';
+}
+
+function cardIconHTML(cardId, cardData) {
+    const file = CARD_ART[cardId];
+    if (file) return '<img class="card-art-img" src="' + ASSET_DIR + file + '" alt="' + (cardData ? cardData.name : cardId) + '">';
+    return cardData ? cardData.icon : '';
+}
+
+// 辅助函数：根据遗物 key 返回 <img> 标签，无对应原画时回退到 emoji icon
+function relicIconHTML(relicId, relicData) {
+    const file = RELIC_ART[relicId];
+    if (file) return '<img class="relic-art-img" src="' + ASSET_DIR + file + '" alt="">';
+    return relicData ? relicData.icon : '';
+}
+
+// 卡牌类型中文标签（对齐原型/规范 .card-type：攻击/防御/技能/诅咒）
+const CARD_TYPE_LABEL = { attack: '攻击', defense: '防御', skill: '技能', curse: '诅咒' };
+
 // ==================== 游戏数据 ====================
 
 // 职业配置
@@ -552,109 +771,109 @@ const CLASSES = {
 // 卡牌数据库
 const CARD_DB = {
     // 基础牌
-    strike: { name: '打击', cost: 1, type: 'attack', icon: '⚔️', desc: '造成 6 点伤害', effect: { damage: 6 } },
-    defend: { name: '防御', cost: 1, type: 'defense', icon: '🛡️', desc: '获得 5 点格挡', effect: { block: 5 } },
+    strike: { rarity: 'common', name: '打击', cost: 1, type: 'attack', icon: '⚔️', desc: '造成 6 点伤害', effect: { damage: 6 } },
+    defend: { rarity: 'common', name: '防御', cost: 1, type: 'defense', icon: '🛡️', desc: '获得 5 点格挡', effect: { block: 5 } },
 
     // 战士牌
-    bash: { name: '重击', cost: 2, type: 'attack', icon: '🔨', desc: '造成 8 点伤害,获得 2 点格挡', effect: { damage: 8, block: 2 } },
-    heavy_blade: { name: '巨剑', cost: 2, type: 'attack', icon: '⚔️', desc: '造成 14 点伤害', effect: { damage: 14 } },
-    iron_wave: { name: '铁波', cost: 1, type: 'attack', icon: '〰️', desc: '造成 5 点伤害,获得 5 点格挡', effect: { damage: 5, block: 5 } },
-    shrug_it_off: { name: '耸肩', cost: 1, type: 'skill', icon: '🤷', desc: '获得 8 点格挡,抽 1 张牌', effect: { block: 8, draw: 1 } },
-    pommel_strike: { name: '剑柄打击', cost: 1, type: 'attack', icon: '🗡️', desc: '造成 9 点伤害,抽 1 张牌', effect: { damage: 9, draw: 1 } },
+    bash: { rarity: 'uncommon', name: '重击', cost: 2, type: 'attack', icon: '🔨', desc: '造成 8 点伤害,获得 2 点格挡', effect: { damage: 8, block: 2 } },
+    heavy_blade: { rarity: 'uncommon', name: '巨剑', cost: 2, type: 'attack', icon: '⚔️', desc: '造成 14 点伤害', effect: { damage: 14 } },
+    iron_wave: { rarity: 'common', name: '铁波', cost: 1, type: 'attack', icon: '〰️', desc: '造成 5 点伤害,获得 5 点格挡', effect: { damage: 5, block: 5 } },
+    shrug_it_off: { rarity: 'uncommon', name: '耸肩', cost: 1, type: 'skill', icon: '🤷', desc: '获得 8 点格挡,抽 1 张牌', effect: { block: 8, draw: 1 } },
+    pommel_strike: { rarity: 'common', name: '剑柄打击', cost: 1, type: 'attack', icon: '🗡️', desc: '造成 9 点伤害,抽 1 张牌', effect: { damage: 9, draw: 1 } },
 
     // 法师牌
-    magic_missile: { name: '魔法飞弹', cost: 1, type: 'attack', icon: '✨', desc: '造成 8 点伤害', effect: { damage: 8 } },
-    fireball: { name: '火球术', cost: 2, type: 'attack', icon: '🔥', desc: '造成 20 点火焰伤害', effect: { damage: 20 }, keywords: ['fire'] },
-    shield: { name: '魔法盾', cost: 1, type: 'defense', icon: '🔷', desc: '获得 10 点格挡', effect: { block: 10 } },
-    mana_burst: { name: '魔力爆发', cost: 0, type: 'attack', icon: '💥', desc: '造成 4 点伤害,抽 1 张牌', effect: { damage: 4, draw: 1 } },
-    frost_bolt: { name: '寒冰箭', cost: 1, type: 'attack', icon: '❄️', desc: '造成 6 点伤害,敌人下回合伤害-3', effect: { damage: 6, weak: 1 }, keywords: ['frost'] },
-    arcane_intellect: { name: '奥术智慧', cost: 1, type: 'skill', icon: '📖', desc: '抽 2 张牌', effect: { draw: 2 } },
+    magic_missile: { rarity: 'common', name: '魔法飞弹', cost: 1, type: 'attack', icon: '✨', desc: '造成 8 点伤害', effect: { damage: 8 } },
+    fireball: { rarity: 'uncommon', name: '火球术', cost: 2, type: 'attack', icon: '🔥', desc: '造成 20 点火焰伤害', effect: { damage: 20 }, keywords: ['fire'] },
+    shield: { rarity: 'common', name: '魔法盾', cost: 1, type: 'defense', icon: '🔷', desc: '获得 10 点格挡', effect: { block: 10 } },
+    mana_burst: { rarity: 'common', name: '魔力爆发', cost: 0, type: 'attack', icon: '💥', desc: '造成 4 点伤害,抽 1 张牌', effect: { damage: 4, draw: 1 } },
+    frost_bolt: { rarity: 'uncommon', name: '寒冰箭', cost: 1, type: 'attack', icon: '❄️', desc: '造成 6 点伤害,敌人下回合伤害-3', effect: { damage: 6, weak: 1 }, keywords: ['frost'] },
+    arcane_intellect: { rarity: 'common', name: '奥术智慧', cost: 1, type: 'skill', icon: '📖', desc: '抽 2 张牌', effect: { draw: 2 } },
 
     // 盗贼牌
-    quick_attack: { name: '快速攻击', cost: 0, type: 'attack', icon: '⚡', desc: '造成 4 点伤害', effect: { damage: 4 } },
-    dagger_throw: { name: '飞刀', cost: 1, type: 'attack', icon: '🗡️', desc: '造成 6 点伤害,抽 1 张牌', effect: { damage: 6, draw: 1 } },
-    backstab: { name: '背刺', cost: 2, type: 'attack', icon: '🔪', desc: '造成 16 点伤害', effect: { damage: 16 }, keywords: ['backstab'] },
-    dodge: { name: '闪避', cost: 1, type: 'defense', icon: '💨', desc: '获得 6 点格挡,抽 1 张牌', effect: { block: 6, draw: 1 } },
-    slice: { name: '切割', cost: 1, type: 'attack', icon: '✂️', desc: '造成 7 点伤害', effect: { damage: 7 } },
+    quick_attack: { rarity: 'common', name: '快速攻击', cost: 0, type: 'attack', icon: '⚡', desc: '造成 4 点伤害', effect: { damage: 4 } },
+    dagger_throw: { rarity: 'common', name: '飞刀', cost: 1, type: 'attack', icon: '🗡️', desc: '造成 6 点伤害,抽 1 张牌', effect: { damage: 6, draw: 1 } },
+    backstab: { rarity: 'rare', name: '背刺', cost: 2, type: 'attack', icon: '🔪', desc: '造成 16 点伤害', effect: { damage: 16 }, keywords: ['backstab'] },
+    dodge: { rarity: 'common', name: '闪避', cost: 1, type: 'defense', icon: '💨', desc: '获得 6 点格挡,抽 1 张牌', effect: { block: 6, draw: 1 } },
+    slice: { rarity: 'common', name: '切割', cost: 1, type: 'attack', icon: '✂️', desc: '造成 7 点伤害', effect: { damage: 7 } },
 
     // 武僧牌
-    flying_kick: { name: '飞踢', cost: 1, type: 'attack', icon: '🦵', desc: '造成 10 点伤害', effect: { damage: 10 }, keywords: ['combo'] },
-    focus_mind: { name: '专注', cost: 0, type: 'skill', icon: '👁️', desc: '下张牌费用 -1,抽 1 张牌', effect: { draw: 1, discount: 1 } },
-    iron_body: { name: '铁布衫', cost: 1, type: 'defense', icon: '💪', desc: '获得 7 点格挡', effect: { block: 7 } },
+    flying_kick: { rarity: 'uncommon', name: '飞踢', cost: 1, type: 'attack', icon: '🦵', desc: '造成 10 点伤害', effect: { damage: 10 }, keywords: ['combo'] },
+    focus_mind: { rarity: 'common', name: '专注', cost: 0, type: 'skill', icon: '👁️', desc: '下张牌费用 -1,抽 1 张牌', effect: { draw: 1, discount: 1 } },
+    iron_body: { rarity: 'common', name: '铁布衫', cost: 1, type: 'defense', icon: '💪', desc: '获得 7 点格挡', effect: { block: 7 } },
 
     // 圣骑士牌
-    divine_shield: { name: '圣盾术', cost: 1, type: 'defense', icon: '✨', desc: '获得 12 点格挡,抽 1 张牌', effect: { block: 12, draw: 1 } },
-    heal: { name: '治疗', cost: 1, type: 'skill', icon: '💚', desc: '恢复 6 点生命', effect: { heal: 6 }, keywords: ['holy'] },
-    justice_strike: { name: '正义打击', cost: 2, type: 'attack', icon: '⚖️', desc: '造成 12 点伤害,恢复 3 点生命', effect: { damage: 12, heal: 3 }, keywords: ['holy'] },
-    blessing: { name: '祝福', cost: 0, type: 'skill', icon: '🙏', desc: '获得 2 点能量', effect: { energy: 2 } },
+    divine_shield: { rarity: 'uncommon', name: '圣盾术', cost: 1, type: 'defense', icon: '✨', desc: '获得 12 点格挡,抽 1 张牌', effect: { block: 12, draw: 1 } },
+    heal: { rarity: 'common', name: '治疗', cost: 1, type: 'skill', icon: '💚', desc: '恢复 6 点生命', effect: { heal: 6 }, keywords: ['holy'] },
+    justice_strike: { rarity: 'uncommon', name: '正义打击', cost: 2, type: 'attack', icon: '⚖️', desc: '造成 12 点伤害,恢复 3 点生命', effect: { damage: 12, heal: 3 }, keywords: ['holy'] },
+    blessing: { rarity: 'common', name: '祝福', cost: 0, type: 'skill', icon: '🙏', desc: '获得 2 点能量', effect: { energy: 2 } },
 
     // ===== 🏹 游侠专属牌 =====
-    aimed_shot: { name: '瞄准射击', cost: 1, type: 'attack', icon: '🎯', desc: '造成 7 点伤害,精准 +1', effect: { damage: 7 }, keywords: ['precision'] },
-    hunting_trap: { name: '狩猎陷阱', cost: 1, type: 'skill', icon: '⚠️', desc: '布置一个陷阱(敌人下回合受到 8 点伤害)', effect: { trap: 8 }, keywords: ['precision'] },
-    venom_arrow: { name: '毒蛇箭', cost: 1, type: 'attack', icon: '🐍', desc: '造成 5 点伤害,施加 2 层毒', effect: { damage: 5, poison: 4, poisonLabel: '毒', poisonTurns: 2 }, keywords: ['precision', 'poison'] },
+    aimed_shot: { rarity: 'uncommon', name: '瞄准射击', cost: 1, type: 'attack', icon: '🎯', desc: '造成 7 点伤害,精准 +1', effect: { damage: 7 }, keywords: ['precision'] },
+    hunting_trap: { rarity: 'uncommon', name: '狩猎陷阱', cost: 1, type: 'skill', icon: '⚠️', desc: '布置一个陷阱(敌人下回合受到 8 点伤害)', effect: { trap: 8 }, keywords: ['precision'] },
+    venom_arrow: { rarity: 'uncommon', name: '毒蛇箭', cost: 1, type: 'attack', icon: '🐍', desc: '造成 5 点伤害,施加 2 层毒', effect: { damage: 5, poison: 4, poisonLabel: '毒', poisonTurns: 2 }, keywords: ['precision', 'poison'] },
     volleys: { name: '连珠箭', cost: 2, type: 'attack', icon: '🏹', desc: '造成 5 点伤害 3 次,精准 +2', effect: { damage: 5, times: 3 }, keywords: ['precision'], rarity: 'uncommon' },
-    eagle_eye: { name: '鹰眼', cost: 0, type: 'skill', icon: '🦅', desc: '精准 +2,抽 1 张牌', effect: { draw: 1 }, keywords: ['precision', 'precision2'], rarity: 'uncommon' },
+    eagle_eye: { name: '鹰眼', cost: 0, type: 'skill', icon: '🦅', desc: '精准 +2,抽 1 张牌', effect: { draw: 1, precision2: true }, keywords: ['precision'], rarity: 'uncommon' },
     cheetah_step: { name: '猎豹脚步', cost: 1, type: 'skill', icon: '🐆', desc: '获得 6 点格挡,精准 +1,下回合多抽 1 张', effect: { block: 6, nextDraw: 1 }, keywords: ['precision'], rarity: 'uncommon' },
     explosive_arrow: { name: '爆破箭', cost: 2, type: 'attack', icon: '💥', desc: '造成 10 点伤害。精准 ≥ 3 时额外造成 8 点', effect: { damage: 10, precisionBonus: 8, precisionThreshold: 3 }, keywords: ['precision'], rarity: 'uncommon' },
     hunt_finish: { name: '猎杀时刻', cost: 3, type: 'attack', icon: '💀', desc: '造成 15 + 精准×4 伤害,施加 3 层虚弱,重置精准', effect: { damage: 15, precisionFinish: 4, weak: 3, resetPrecision: true }, keywords: ['precision'], rarity: 'rare' },
     mark_target: { name: '标记目标', cost: 1, type: 'skill', icon: '🎯', desc: '敌人受到伤害 +2,持续 3 回合,精准 +1', effect: { enemyVulnerable: 3, enemyBonusDmg: 2 }, keywords: ['precision'], rarity: 'uncommon' },
     trap_master: { name: '陷阱大师', cost: 0, type: 'skill', icon: '💣', desc: '布置 2 个陷阱(敌人下回合受到 5 点伤害),重置精准', effect: { trap: 5, trapCount: 2, resetPrecision: true }, keywords: ['precision'], rarity: 'uncommon' },
-    hound_hawk: { name: '猎鹰', cost: 2, type: 'skill', icon: '🦅', desc: '召唤猎鹰(HP 20,伤害 5,持续 3 回合)', effect: { summon: { id: 'hawk', name: '猎鹰', hp: 20, maxHp: 20, damage: 5, turns: 3, maxTurns: 3, type: 'output', icon: '🦅' } }, keywords: ['precision'] },
-    arrow_rain: { name: '万箭穿心', cost: 3, type: 'attack', icon: '🌧️', desc: '造成精准×3 伤害。敌人有 3+ 负面状态时额外 +15', effect: { precisionDamage: 3, statusBonus: 15, statusThreshold: 3 }, keywords: ['precision', 'poison'] },
-    lethal_focus: { name: '致命专注', cost: 0, type: 'skill', icon: '🔍', desc: '精准 +3,下张攻击牌伤害翻倍', effect: { precision3: true, nextAttackDouble: true }, keywords: ['precision'] },
-    ambush: { name: '伏击', cost: 2, type: 'attack', icon: '🗡️', desc: '敌人有减益时造成 18 点,否则 8 点', effect: { debuffDamage: 18, normalDamage: 8 }, keywords: ['precision', 'backstab'] },
+    hound_hawk: { rarity: 'uncommon', name: '猎鹰', cost: 2, type: 'skill', icon: '🦅', desc: '召唤猎鹰(HP 20,伤害 5,持续 3 回合)', effect: { summon: { id: 'hawk', name: '猎鹰', hp: 20, maxHp: 20, damage: 5, turns: 3, maxTurns: 3, type: 'output', icon: '🦅' } }, keywords: ['precision'] },
+    arrow_rain: { rarity: 'uncommon', name: '万箭穿心', cost: 3, type: 'attack', icon: '🌧️', desc: '造成精准×3 伤害。敌人有 3+ 负面状态时额外 +15', effect: { precisionDamage: 3, statusBonus: 15, statusThreshold: 3 }, keywords: ['precision', 'poison'] },
+    lethal_focus: { rarity: 'uncommon', name: '致命专注', cost: 0, type: 'skill', icon: '🔍', desc: '精准 +3,下张攻击牌伤害翻倍', effect: { precision3: true, nextAttackDouble: true }, keywords: ['precision'] },
+    ambush: { rarity: 'uncommon', name: '伏击', cost: 2, type: 'attack', icon: '🗡️', desc: '敌人有减益时造成 18 点,否则 8 点', effect: { debuffDamage: 18, normalDamage: 8 }, keywords: ['precision', 'backstab'] },
     hunt_mark: { name: '狩猎印记', cost: 1, type: 'skill', icon: '🔖', desc: '敌人每次被攻击额外受到 3 点伤害,持续 2 回合,精准 +1', effect: { huntMark: 2, huntMarkDmg: 3 }, keywords: ['precision'], rarity: 'uncommon' },
 
     // ===== 💀 死灵法师专属牌 =====
-    shadow_bolt: { name: '暗影冲击', cost: 1, type: 'attack', icon: '🌑', desc: '造成 8 点伤害,失去 2 点生命', effect: { damage: 8, hpCost: 2 }, keywords: ['sacrifice', 'shadow'] },
-    blood_ritual: { name: '鲜血仪式', cost: 2, type: 'skill', icon: '🩸', desc: '失去 8 点生命,获得 8 个灵魂碎片', effect: { hpCost: 8, gainShards: 8 }, keywords: ['sacrifice'] },
-    soul_reap: { name: '灵魂收割', cost: 1, type: 'attack', icon: '👻', desc: '造成 6 点伤害,消耗 2 碎片,额外造成碎片×3 伤害', effect: { damage: 6, consumeShards: 2, shardDamage: 3 }, keywords: ['shadow'] },
-    soul_shield: { name: '灵魂护盾', cost: 1, type: 'defense', icon: '🛡️', desc: '获得 7 点格挡,消耗 2 碎片,额外获得碎片×2 格挡', effect: { block: 7, consumeShards: 2, shardBlock: 2 }, keywords: ['shadow'] },
+    shadow_bolt: { rarity: 'uncommon', name: '暗影冲击', cost: 1, type: 'attack', icon: '🌑', desc: '造成 8 点伤害,失去 2 点生命', effect: { damage: 8, hpCost: 2 }, keywords: ['sacrifice', 'shadow'] },
+    blood_ritual: { rarity: 'uncommon', name: '鲜血仪式', cost: 2, type: 'skill', icon: '🩸', desc: '失去 8 点生命,获得 8 个灵魂碎片', effect: { hpCost: 8, gainShards: 8 }, keywords: ['sacrifice'] },
+    soul_reap: { rarity: 'uncommon', name: '灵魂收割', cost: 1, type: 'attack', icon: '👻', desc: '造成 6 点伤害,消耗 2 碎片,额外造成碎片×3 伤害', effect: { damage: 6, consumeShards: 2, shardDamage: 3 }, keywords: ['shadow'] },
+    soul_shield: { rarity: 'uncommon', name: '灵魂护盾', cost: 1, type: 'defense', icon: '🛡️', desc: '获得 7 点格挡,消耗 2 碎片,额外获得碎片×2 格挡', effect: { block: 7, consumeShards: 2, shardBlock: 2 }, keywords: ['shadow'] },
     blood_bat: { name: '噬血蝙蝠', cost: 1, type: 'attack', icon: '🦇', desc: '造成 7 点伤害,恢复 50% 伤害值', effect: { damage: 7, lifesteal: 0.5 }, keywords: ['sacrifice'], rarity: 'uncommon' },
     dark_pact: { name: '黑暗契约', cost: 2, type: 'skill', icon: '📜', desc: '失去 15% 当前生命,获得 5 碎片,下张牌减费', effect: { hpPercentCost: 0.15, gainShards: 5, discount: 1 }, keywords: ['sacrifice'], rarity: 'uncommon' },
     undead_army: { name: '亡灵军团', cost: 3, type: 'skill', icon: '💀', desc: '召唤 2 个骷髅兵(HP 15,伤害 5,2 回合),消耗 5 碎片', effect: { summonArmy: true, consumeShards: 5 }, keywords: ['shadow', 'summon'], rarity: 'uncommon' },
     soul_burn: { name: '灵魂燃烧', cost: 0, type: 'attack', icon: '🔥', desc: '造成灵魂碎片×2 伤害,清空碎片', effect: { shardBurnDamage: 2, consumeAllShards: true }, keywords: ['shadow'], rarity: 'rare' },
     fear_whisper: { name: '恐惧低语', cost: 1, type: 'skill', icon: '😱', desc: '敌人跳过下回合攻击,失去 3 点生命,获得 3 碎片', effect: { enemySkip: true, hpCost: 3, gainShards: 3 }, keywords: ['sacrifice'], rarity: 'uncommon' },
     shadow_veil: { name: '暗影帷幕', cost: 2, type: 'defense', icon: '🌑', desc: '获得 12 点格挡,消耗 3 碎片,额外碎片×3 格挡', effect: { block: 12, consumeShards: 3, shardBlock: 3 }, keywords: ['shadow'], rarity: 'uncommon' },
-    life_reap: { name: '生命收割', cost: 1, type: 'attack', icon: '⚔️', desc: '造成 10 点伤害。敌人生命 > 50% 时额外造成已损失 10% 伤害', effect: { damage: 10, percentBonus: 0.1 }, keywords: ['shadow'] },
-    soul_link: { name: '灵魂链接', cost: 0, type: 'skill', icon: '🔗', desc: '本回合受伤减半,获得碎片翻倍', effect: { damageHalve: true, shardDouble: true }, keywords: ['sacrifice'] },
-    death_embrace: { name: '死亡之拥', cost: 3, type: 'attack', icon: '☠️', desc: '造成 25 伤害,失去 10 生命。累计献血 ≥ 50 时额外 +20', effect: { damage: 25, hpCost: 10, sacrificeBonus: 20, sacrificeThreshold: 50 }, keywords: ['sacrifice', 'shadow'] },
-    underworld_walker: { name: '冥界行者', cost: 1, type: 'skill', icon: '🚶', desc: '如果本回合献过血,恢复 10 点生命,抽 2 张牌', effect: { conditionalHeal: 10, draw: 2, checkSacrifice: true }, keywords: ['sacrifice'] },
-    plague_spread: { name: '瘟疫传播', cost: 2, type: 'skill', icon: '🦠', desc: '对敌人施加 3 层毒 + 2 层虚弱,失去 5 点生命', effect: { poison: 6, poisonLabel: '毒', poisonTurns: 2, weak: 2, hpCost: 5 }, keywords: ['sacrifice', 'poison'], rarity: 'uncommon' },
+    life_reap: { rarity: 'uncommon', name: '生命收割', cost: 1, type: 'attack', icon: '⚔️', desc: '造成 10 点伤害。敌人生命 > 50% 时额外造成已损失 10% 伤害', effect: { damage: 10, percentBonus: 0.1 }, keywords: ['shadow'] },
+    soul_link: { rarity: 'common', name: '灵魂链接', cost: 0, type: 'skill', icon: '🔗', desc: '本回合受伤减半,获得碎片翻倍', effect: { damageHalve: true, shardDouble: true }, keywords: ['sacrifice'] },
+    death_embrace: { rarity: 'rare', name: '死亡之拥', cost: 3, type: 'attack', icon: '☠️', desc: '造成 25 伤害,失去 10 生命。累计献血 ≥ 50 时额外 +20', effect: { damage: 25, hpCost: 10, sacrificeBonus: 20, sacrificeThreshold: 50 }, keywords: ['sacrifice', 'shadow'] },
+    underworld_walker: { rarity: 'uncommon', name: '冥界行者', cost: 1, type: 'skill', icon: '🚶', desc: '如果本回合献过血,恢复 10 点生命,抽 2 张牌', effect: { conditionalHeal: 10, draw: 2, checkSacrifice: true }, keywords: ['sacrifice'] },
+    plague_spread: { name: '瘟疫传播', cost: 2, type: 'skill', icon: '🦠', desc: '对敌人施加 3 层毒 + 2 层虚弱,失去 5 点生命', effect: { poison: 3, poisonLabel: '毒', poisonTurns: 2, weak: 2, hpCost: 5 }, keywords: ['sacrifice', 'poison'], rarity: 'uncommon' },
 
     // ===== 📚 召唤师专属牌 =====
-    summon_golem: { name: '召唤石像兵', cost: 2, type: 'skill', icon: '🗿', desc: '召唤石像兵(HP 30,伤害 6,3 回合)', effect: { summon: { id: 'golem', name: '石像兵', hp: 30, maxHp: 30, damage: 6, turns: 3, maxTurns: 3, type: 'tank', icon: '🗿' } }, keywords: ['summon'] },
-    summon_spirit: { name: '元素精灵', cost: 2, type: 'skill', icon: '🧚', desc: '召唤元素精灵(HP 20,伤害 10,2 回合)', effect: { summon: { id: 'spirit', name: '元素精灵', hp: 20, maxHp: 20, damage: 10, turns: 2, maxTurns: 2, type: 'output', icon: '🧚' } }, keywords: ['summon'] },
-    heal_spell: { name: '治疗术', cost: 1, type: 'skill', icon: '💚', desc: '恢复 8 点生命', effect: { heal: 8 } },
+    summon_golem: { rarity: 'uncommon', name: '召唤石像兵', cost: 2, type: 'skill', icon: '🗿', desc: '召唤石像兵(HP 30,伤害 6,3 回合)', effect: { summon: { id: 'golem', name: '石像兵', hp: 30, maxHp: 30, damage: 6, turns: 3, maxTurns: 3, type: 'tank', icon: '🗿' } }, keywords: ['summon'] },
+    summon_spirit: { rarity: 'uncommon', name: '元素精灵', cost: 2, type: 'skill', icon: '🧚', desc: '召唤元素精灵(HP 20,伤害 10,2 回合)', effect: { summon: { id: 'spirit', name: '元素精灵', hp: 20, maxHp: 20, damage: 10, turns: 2, maxTurns: 2, type: 'output', icon: '🧚' } }, keywords: ['summon'] },
+    heal_spell: { rarity: 'common', name: '治疗术', cost: 1, type: 'skill', icon: '💚', desc: '恢复 8 点生命', effect: { heal: 8 } },
     summon_wolf: { name: '召唤影狼', cost: 2, type: 'skill', icon: '🐺', desc: '召唤影狼(HP 25,伤害 8,2 回合)', effect: { summon: { id: 'wolf', name: '影狼', hp: 25, maxHp: 25, damage: 8, turns: 2, maxTurns: 2, type: 'balanced', icon: '🐺' } }, keywords: ['summon'], rarity: 'uncommon' },
     summon_phoenix: { name: '召唤凤凰', cost: 3, type: 'skill', icon: '🦅', desc: '召唤凤凰(HP 40,伤害 5,3 回合,死亡恢复 15 HP)', effect: { summon: { id: 'phoenix', name: '凤凰', hp: 40, maxHp: 40, damage: 5, turns: 3, maxTurns: 3, type: 'heal', icon: '🦅', deathHeal: 15 } }, keywords: ['summon'], rarity: 'rare' },
     empower_summons: { name: '强化召唤', cost: 1, type: 'skill', icon: '⬆️', desc: '所有召唤物伤害 +3,持续 2 回合', effect: { empowerDamage: 3, empowerTurns: 2 }, keywords: ['summon'], rarity: 'uncommon' },
     summon_synergy: { name: '召唤协同', cost: 1, type: 'skill', icon: '🔗', desc: '场上有 2+ 召唤物时抽 2 张牌,否则抽 1 张', effect: { conditionalDraw: { threshold: 2, draw: 2, fallbackDraw: 1 } }, keywords: ['summon'], rarity: 'uncommon' },
     summon_storm: { name: '召唤风暴', cost: 3, type: 'skill', icon: '⛈️', desc: '所有召唤物立即攻击 1 次,然后 -1 持续时间', effect: { storm: true }, keywords: ['summon'], rarity: 'rare' },
     summon_flower: { name: '治疗花', cost: 2, type: 'skill', icon: '🌸', desc: '召唤治疗花(HP 15,每回合恢复玩家 4 HP,2 回合)', effect: { summon: { id: 'flower', name: '治疗花', hp: 15, maxHp: 15, damage: 0, turns: 2, maxTurns: 2, type: 'heal', icon: '🌸', healPerTurn: 4 } }, keywords: ['summon'], rarity: 'uncommon' },
-    summon_master: { name: '召唤大师', cost: 2, type: 'skill', icon: '🎓', desc: '召唤 2 个随机召唤物', effect: { summonRandom: 2 }, keywords: ['summon'] },
-    soul_resonance: { name: '灵魂共鸣', cost: 0, type: 'skill', icon: '🎵', desc: '如果场上有 3 个召唤物,获得 2 点能量', effect: { conditionalEnergy: { threshold: 3, energy: 2 } }, keywords: ['summon'] },
-    iron_guard: { name: '铁壁守卫', cost: 3, type: 'skill', icon: '🛡️', desc: '召唤铁卫(HP 50,伤害 4,4 回合)', effect: { summon: { id: 'guard', name: '铁卫', hp: 50, maxHp: 50, damage: 4, turns: 4, maxTurns: 4, type: 'tank', icon: '🛡️' } }, keywords: ['summon'] },
-    summon_replace: { name: '召唤替换', cost: 1, type: 'skill', icon: '🔄', desc: '移除一个召唤物,召唤一个随机召唤物', effect: { replace: true }, keywords: ['summon'] },
+    summon_master: { rarity: 'uncommon', name: '召唤大师', cost: 2, type: 'skill', icon: '🎓', desc: '召唤 2 个随机召唤物', effect: { summonRandom: 2 }, keywords: ['summon'] },
+    soul_resonance: { rarity: 'common', name: '灵魂共鸣', cost: 0, type: 'skill', icon: '🎵', desc: '如果场上有 3 个召唤物,获得 2 点能量', effect: { conditionalEnergy: { threshold: 3, energy: 2 } }, keywords: ['summon'] },
+    iron_guard: { rarity: 'uncommon', name: '铁壁守卫', cost: 3, type: 'skill', icon: '🛡️', desc: '召唤铁卫(HP 50,伤害 4,4 回合)', effect: { summon: { id: 'guard', name: '铁卫', hp: 50, maxHp: 50, damage: 4, turns: 4, maxTurns: 4, type: 'tank', icon: '🛡️' } }, keywords: ['summon'] },
+    summon_replace: { rarity: 'common', name: '召唤替换', cost: 1, type: 'skill', icon: '🔄', desc: '移除一个召唤物,召唤一个随机召唤物', effect: { replace: true }, keywords: ['summon'] },
     summon_lightning: { name: '闪电鸟', cost: 2, type: 'skill', icon: '⚡', desc: '召唤闪电鸟(HP 18,伤害 14,AOE,2 回合)', effect: { summon: { id: 'lightning', name: '闪电鸟', hp: 18, maxHp: 18, damage: 14, turns: 2, maxTurns: 2, type: 'aoe', icon: '⚡', aoe: true } }, keywords: ['summon', 'lightning'], rarity: 'uncommon' },
 
     // 通用强力牌
-    sword_boomerang: { name: '回旋剑', cost: 1, type: 'attack', icon: '🔄', desc: '随机造成 3 点伤害 3 次', effect: { damage: 3, times: 3 } },
-    twin_strike: { name: '双重打击', cost: 1, type: 'attack', icon: '👊', desc: '造成 5 点伤害 2 次', effect: { damage: 5, times: 2 }, keywords: ['combo'] },
-    anger: { name: '愤怒', cost: 0, type: 'attack', icon: '😤', desc: '造成 6 点伤害,将一张愤怒放入弃牌堆', effect: { damage: 6, addCard: 'anger' } },
-    cleave: { name: '顺劈斩', cost: 1, type: 'attack', icon: '⚔️', desc: '对所有敌人造成 8 点伤害', effect: { damage: 8, aoe: true } },
+    sword_boomerang: { rarity: 'common', name: '回旋剑', cost: 1, type: 'attack', icon: '🔄', desc: '随机造成 3 点伤害 3 次', effect: { damage: 3, times: 3 } },
+    twin_strike: { rarity: 'common', name: '双重打击', cost: 1, type: 'attack', icon: '👊', desc: '造成 5 点伤害 2 次', effect: { damage: 5, times: 2 }, keywords: ['combo'] },
+    anger: { rarity: 'common', name: '愤怒', cost: 0, type: 'attack', icon: '😤', desc: '造成 6 点伤害,将一张愤怒放入弃牌堆', effect: { damage: 6, addCard: 'anger' } },
+    cleave: { rarity: 'uncommon', name: '顺劈斩', cost: 1, type: 'attack', icon: '⚔️', desc: '对所有敌人造成 8 点伤害', effect: { damage: 8, aoe: true } },
 
     // 防御牌
-    footwork: { name: '步法', cost: 1, type: 'skill', icon: '👟', desc: '获得 3 点敏捷(每打出防御牌额外+1格挡)', effect: { dexterity: 3 } },
-    ghostly_armor: { name: '幽灵护甲', cost: 1, type: 'defense', icon: '👻', desc: '获得 10 点格挡,不能被打出', effect: { block: 10, ethereal: true } },
+    footwork: { rarity: 'uncommon', name: '步法', cost: 1, type: 'skill', icon: '👟', desc: '获得 3 点敏捷(每打出防御牌额外+1格挡)', effect: { dexterity: 3 } },
+    ghostly_armor: { rarity: 'uncommon', name: '幽灵护甲', cost: 1, type: 'defense', icon: '👻', desc: '获得 10 点格挡,不能被打出', effect: { block: 10, ethereal: true } },
 
     // 技能牌
-    battle_trance: { name: '战斗专注', cost: 0, type: 'skill', icon: '🧘', desc: '抽 3 张牌,本回合不能再抽牌', effect: { draw: 3, noDraw: true } },
-    bloodletting: { name: '放血', cost: 0, type: 'skill', icon: '🩸', desc: '失去 3 点生命,获得 2 点能量', effect: { hpCost: 3, energy: 2 } },
-    seeing_red: { name: '看见红色', cost: 1, type: 'skill', icon: '🔴', desc: '获得 2 点能量,将这张牌放入抽牌堆', effect: { energy: 2, shuffle: true } },
+    battle_trance: { rarity: 'common', name: '战斗专注', cost: 0, type: 'skill', icon: '🧘', desc: '抽 3 张牌,本回合不能再抽牌', effect: { draw: 3, noDraw: true } },
+    bloodletting: { rarity: 'common', name: '放血', cost: 0, type: 'skill', icon: '🩸', desc: '失去 3 点生命,获得 2 点能量', effect: { hpCost: 3, energy: 2 } },
+    seeing_red: { rarity: 'common', name: '看见红色', cost: 1, type: 'skill', icon: '🔴', desc: '获得 2 点能量,将这张牌放入抽牌堆', effect: { energy: 2, shuffle: true } },
 
     // 诅咒牌(Ascension A7 使用)
-    curse_card: { name: '诅咒', cost: 0, type: 'curse', icon: '💀', desc: '无法打出,每回合开始时损失 2 点生命', effect: { hpCost: 2 } },
+    curse_card: { rarity: 'common', name: '诅咒', cost: 0, type: 'curse', icon: '💀', desc: '无法打出,每回合开始时损失 2 点生命', effect: { hpCost: 2 } },
 
     // ===== 🔥 火焰路线 =====
     fire_bolt: { name: '火焰冲击', cost: 1, type: 'attack', icon: '🔥', desc: '造成 8 点火焰伤害', effect: { damage: 8 }, keywords: ['fire'], rarity: 'uncommon' },
@@ -773,54 +992,105 @@ const FLOOR_NODE_CONFIG = {
 
 // 遗物数据库
 const RELIC_DB = {
-    burning_blood: { name: '燃烧之血', icon: '🩸', desc: '战斗结束时恢复 6 点生命', rarity: 'common' },
-    ring_of_the_snake: { name: '蛇之戒指', icon: '💍', desc: '战斗开始时额外抽 2 张牌', rarity: 'common' },
-    akabeko: { name: '赤猫', icon: '🐱', desc: '每场战斗第一次攻击造成 8 点额外伤害', rarity: 'common' },
-    anchor: { name: '船锚', icon: '⚓', desc: '每场战斗开始时获得 10 点格挡', rarity: 'common' },
-    ancient_tea_set: { name: '古茶具', icon: '🍵', desc: '在休息处恢复额外 10 点生命', rarity: 'common' },
+    // === 🩸 鲜血盟约 ===
+    burning_blood: { name: '燃烧之血', icon: '🩸', desc: '战斗结束时恢复 6 点生命', rarity: 'common', tag: 'blood' },
+    
+    // === 🛡️ 守护者 ===
+    anchor: { name: '船锚', icon: '⚓', desc: '每场战斗开始时获得 10 点格挡', rarity: 'common', tag: 'warden' },
+    
+    // === 💰 贪婪 ===
+    ring_of_the_snake: { name: '蛇之戒指', icon: '💍', desc: '战斗开始时额外抽 2 张牌', rarity: 'common', tag: 'greed' },
+    
+    // === ⚔️ 战斗 ===
+    akabeko: { name: '赤猫', icon: '🐱', desc: '每场战斗第一次攻击造成 8 点额外伤害', rarity: 'common', tag: 'combat' },
+    ancient_tea_set: { name: '古茶具', icon: '🍵', desc: '在休息处恢复额外 10 点生命', rarity: 'common', tag: 'recovery' },
 
-    bronze_scales: { name: '青铜鳞', icon: '🐍', desc: '每当你受到伤害,对攻击者造成 3 点伤害', rarity: 'uncommon' },
-    mercury_hourglass: { name: '水银沙漏', icon: '⏳', desc: '每回合开始时对所有敌人造成 3 点伤害', rarity: 'uncommon' },
-    ornamental_fan: { name: '装饰扇', icon: '🪭', desc: '每打出 3 张攻击牌,获得 4 点格挡', rarity: 'uncommon' },
+    // === ☠️ 暗影之手 ===
+    bronze_scales: { name: '青铜鳞', icon: '🐍', desc: '每当你受到伤害,对攻击者造成 3 点伤害', rarity: 'uncommon', tag: 'shadow' },
+    mercury_hourglass: { name: '水银沙漏', icon: '⏳', desc: '每回合开始时对所有敌人造成 3 点伤害', rarity: 'uncommon', tag: 'shadow' },
+    
+    // === 🛡️ 守护者 ===
+    ornamental_fan: { name: '装饰扇', icon: '🪭', desc: '每打出 3 张攻击牌,获得 4 点格挡', rarity: 'uncommon', tag: 'warden' },
 
-    cursed_key: { name: '诅咒钥匙', icon: '🗝️', desc: '获得时获得 1 个普通遗物,但宝箱变成诅咒', rarity: 'rare' },
-    eternal_feather: { name: '永恒羽毛', icon: '🪶', desc: '每添加一张牌到牌组,恢复 3 点生命', rarity: 'rare' },
-    gambling_chip: { name: '赌博筹码', icon: '🎰', desc: '战斗开始时丢弃任意张牌并抽等量牌', rarity: 'rare' },
+    // === 💰 贪婪 ===
+    cursed_key: { name: '诅咒钥匙', icon: '🗝️', desc: '获得时获得 1 个普通遗物,但宝箱变成诅咒', rarity: 'rare', tag: 'greed' },
+    eternal_feather: { name: '永恒羽毛', icon: '🪶', desc: '每添加一张牌到牌组,恢复 3 点生命', rarity: 'rare', tag: 'recovery' },
+    gambling_chip: { name: '赌博筹码', icon: '🎰', desc: '战斗开始时丢弃任意张牌并抽等量牌', rarity: 'rare', tag: 'greed' },
 
-    // ===== 🔥 火焰关键词遗物 =====
-    lava_core: { name: '熔岩核心', icon: '🔥', desc: '火焰牌费用 -1', rarity: 'rare', keywordRelic: 'fire' },
+    // === 🔥 烈焰之心 ===
+    lava_core: { name: '熔岩核心', icon: '🔥', desc: '火焰牌费用 -1', rarity: 'rare', tag: 'inferno', keywordRelic: 'fire' },
 
-    // ===== ❄️ 冰霜关键词遗物 =====
-    ice_heart: { name: '冰之心', icon: '❄️', desc: '冰霜牌额外施加 1 层虚弱', rarity: 'rare', keywordRelic: 'frost' },
+    // === ❄️ 冰霜 ===
+    ice_heart: { name: '冰之心', icon: '❄️', desc: '冰霜牌额外施加 1 层虚弱', rarity: 'rare', tag: 'frost', keywordRelic: 'frost' },
 
-    // ===== ☠️ 毒关键词遗物 =====
-    viper_fang: { name: '毒蛇之牙', icon: '🐍', desc: '毒层数上限 +3', rarity: 'rare', keywordRelic: 'poison' },
+    // === ☠️ 暗影之手 ===
+    viper_fang: { name: '毒蛇之牙', icon: '🐍', desc: '毒层数上限 +3', rarity: 'rare', tag: 'shadow', keywordRelic: 'poison' },
 
-    // ===== 🔄 连击关键词遗物 =====
-    bead_of_power: { name: '连环珠', icon: '📿', desc: '每回合额外 +1 连击计数', rarity: 'rare', keywordRelic: 'combo' },
+    // === 🔄 连击 ===
+    bead_of_power: { name: '连环珠', icon: '📿', desc: '每回合额外 +1 连击计数', rarity: 'rare', tag: 'combo', keywordRelic: 'combo' },
 
-    // ===== ✨ 神圣关键词遗物 =====
-    holy_badge: { name: '圣光徽章', icon: '✨', desc: '神圣牌额外造成 5 点伤害', rarity: 'rare', keywordRelic: 'holy' },
+    // === ✨ 神圣 ===
+    holy_badge: { name: '圣光徽章', icon: '✨', desc: '神圣牌额外造成 5 点伤害', rarity: 'rare', tag: 'holy', keywordRelic: 'holy' },
 
-    // ===== 🏹 游侠专属遗物 =====
-    eagle_bow: { name: '鹰眼之弓', icon: '🏹', desc: '攻击牌精准计数额外 +1', rarity: 'common' },
-    hound_collar: { name: '猎犬项圈', icon: '🐺', desc: '每回合开始时,如果精准 ≥ 2,敌人获得 1 层虚弱', rarity: 'uncommon' },
-    sniper_scope: { name: '狙击镜', icon: '🎯', desc: '第一张打出的精准牌费用 -1', rarity: 'uncommon' },
-    trap_box: { name: '陷阱箱', icon: '💣', desc: '起始时布置 1 个陷阱,精英战斗额外 1 个', rarity: 'uncommon' },
+    // === 🏹 精准 ===
+    eagle_bow: { name: '鹰眼之弓', icon: '🏹', desc: '攻击牌精准计数额外 +1', rarity: 'common', tag: 'precision' },
+    hound_collar: { name: '猎犬项圈', icon: '🐺', desc: '每回合开始时,如果精准 ≥ 2,敌人获得 1 层虚弱', rarity: 'uncommon', tag: 'precision' },
+    sniper_scope: { name: '狙击镜', icon: '🎯', desc: '第一张打出的精准牌费用 -1', rarity: 'uncommon', tag: 'precision' },
+    trap_box: { name: '陷阱箱', icon: '💣', desc: '起始时布置 1 个陷阱,精英战斗额外 1 个', rarity: 'uncommon', tag: 'combat' },
 
-    // ===== 💀 死灵法师专属遗物 =====
-    bone_ring: { name: '白骨戒指', icon: '💀', desc: '每回合开始时,如果灵魂碎片 ≥ 5,恢复 3 点生命', rarity: 'common' },
-    blood_vial: { name: '血瓶', icon: '🦇', desc: '献血获得灵魂碎片 +2', rarity: 'uncommon' },
-    coffin: { name: '棺木', icon: '⚰️', desc: '每局限 1 次,生命值降至 0 时恢复至 15 HP', rarity: 'rare' },
-    obsidian: { name: '黑曜石', icon: '🌑', desc: '暗影牌对亡灵/恶魔敌人伤害 +5', rarity: 'rare' },
+    // === 🩸 鲜血盟约 ===
+    bone_ring: { name: '白骨戒指', icon: '💀', desc: '每回合开始时,如果灵魂碎片 ≥ 5,恢复 3 点生命', rarity: 'common', tag: 'blood' },
+    blood_vial: { name: '血瓶', icon: '🦇', desc: '献血获得灵魂碎片 +2', rarity: 'uncommon', tag: 'blood' },
+    coffin: { name: '棺木', icon: '⚰️', desc: '每局限 1 次,生命值降至 0 时恢复至 15 HP', rarity: 'rare', tag: 'blood' },
+    obsidian: { name: '黑曜石', icon: '🌑', desc: '暗影牌对亡灵/恶魔敌人伤害 +5', rarity: 'rare', tag: 'shadow' },
 
-    // ===== 📚 召唤师专属遗物 =====
-    summoner_manual: { name: '召唤师手册', icon: '📚', desc: '召唤物存活额外 +1 回合', rarity: 'common' },
-    stone_heart: { name: '石像之心', icon: '🗿', desc: '坦克类召唤物 HP +20', rarity: 'uncommon' },
-    phoenix_feather: { name: '凤凰羽', icon: '🦅', desc: '每局限 2 次,召唤物死亡时额外恢复 5 HP', rarity: 'uncommon' },
-    element_core: { name: '元素核心', icon: '⚡', desc: '输出类召唤物伤害 +5', rarity: 'uncommon' },
-    wolf_totem: { name: '狼王图腾', icon: '🐺', desc: '影狼类召唤物额外施加 1 层虚弱', rarity: 'uncommon' }
+    // === 📚 召唤之环 ===
+    summoner_manual: { name: '召唤师手册', icon: '📚', desc: '召唤物存活额外 +1 回合', rarity: 'common', tag: 'summon' },
+    stone_heart: { name: '石像之心', icon: '🗿', desc: '坦克类召唤物 HP +20', rarity: 'uncommon', tag: 'summon' },
+    phoenix_feather: { name: '凤凰羽', icon: '🦅', desc: '每局限 2 次,召唤物死亡时额外恢复 5 HP', rarity: 'uncommon', tag: 'summon' },
+    element_core: { name: '元素核心', icon: '⚡', desc: '输出类召唤物伤害 +5', rarity: 'uncommon', tag: 'summon' },
+    wolf_totem: { name: '狼王图腾', icon: '🐺', desc: '影狼类召唤物额外施加 1 层虚弱', rarity: 'uncommon', tag: 'summon' }
 };
+
+// ==================== P1: 遗物联动标签系统 ====================
+
+const RELIC_TAGS = {
+    inferno:  { name: '烈焰之心', icon: '🔥', color: '#e74c3c', synergy: '每持有 1 个同标签遗物，🔥 火焰牌伤害 +2' },
+    warden:   { name: '守护者',  icon: '🛡️', color: '#3498db', synergy: '每持有 1 个同标签遗物，防御牌格挡 +2' },
+    shadow:   { name: '暗影之手', icon: '☠️', color: '#8e44ad', synergy: '每持有 1 个同标签遗物，☠️ 毒层数 +1' },
+    greed:    { name: '贪婪',     icon: '💰', color: '#f1c40f', synergy: '每持有 1 个同标签遗物，战斗金币 +5' },
+    summon:   { name: '召唤之环', icon: '📚', color: '#2ecc71', synergy: '每持有 1 个同标签遗物，召唤物 HP +10' },
+    blood:    { name: '鲜血盟约', icon: '🩸', color: '#c0392b', synergy: '每持有 1 个同标签遗物，献血恢复 +1 HP' },
+    frost:    { name: '冰霜之心', icon: '❄️', color: '#85c1e9', synergy: '每持有 1 个同标签遗物，冰霜牌额外施加 1 层虚弱' },
+    holy:     { name: '圣光之环', icon: '✨', color: '#f9e79f', synergy: '每持有 1 个同标签遗物，神圣牌伤害 +2' },
+    combo:    { name: '连击大师', icon: '🔄', color: '#e67e22', synergy: '每持有 1 个同标签遗物，连击计数额外 +1' },
+    precision:{ name: '精准之眼', icon: '🎯', color: '#1abc9c', synergy: '每持有 1 个同标签遗物，精准计数额外 +1' },
+    recovery: { name: '生命之泉', icon: '💚', color: '#27ae60', synergy: '每持有 1 个同标签遗物，治疗效果 +2' },
+    combat:   { name: '战斗专家', icon: '⚔️', color: '#95a5a6', synergy: '每持有 1 个同标签遗物，攻击牌伤害 +1' }
+};
+
+function getRelicSynergy(tag) {
+    if (!tag) return 0;
+    return gameState.player.relics.filter(r => {
+        const relic = RELIC_DB[r];
+        return relic && relic.tag === tag;
+    }).length;
+}
+
+function getRelicSynergyBonus(tag) {
+    return Math.max(0, getRelicSynergy(tag) - 1);
+}
+
+function getPlayerTagCounts() {
+    const counts = {};
+    gameState.player.relics.forEach(r => {
+        const relic = RELIC_DB[r];
+        if (relic && relic.tag) {
+            counts[relic.tag] = (counts[relic.tag] || 0) + 1;
+        }
+    });
+    return counts;
+}
 
 // ==================== P2: Ascension 系统 ====================
 
@@ -985,6 +1255,190 @@ const FLOOR_TRANSITIONS = [
     '深渊之下,最终的黑暗在等待...'
 ];
 
+// ==================== P1: Boss 背景叙事 ====================
+
+const BOSS_LORE = {
+    boss_goblin_king: {
+        name: '哥布林王',
+        intro: '你踏入废弃矿坑的深处。王座上的哥布林挥舞着锈剑,周围的小兵发出刺耳的尖笑。"又一个来送死的?"',
+        quotes: [
+            { hpThreshold: 0.7, text: '什么?！我的剑可是...' },
+            { hpThreshold: 0.4, text: '小杂碎们,上！给我撕碎他！' },
+            { hpThreshold: 0.1, text: '不...不可能...我只是个小王啊...' }
+        ],
+        victory: {
+            easy: '哥布林王瘫坐在王座上,举起了双手。"别杀我！宝藏都是你的！"',
+            hard: '你一脚踩碎了哥布林的皇冠。矿坑重归寂静。',
+            perfect: '哥布林甚至没碰到你。也许它该退位让贤了。'
+        }
+    },
+    boss_lich: {
+        name: '巫妖',
+        intro: '阴冷的灵魂之风迎面吹来。一位枯骨法师悬浮在半空,眼窝中闪烁着幽蓝的魂火。"又一个挑战者...你的灵魂会是我的养分。"',
+        quotes: [
+            { hpThreshold: 0.7, text: '有趣...你的灵魂比预想的坚韧。' },
+            { hpThreshold: 0.4, text: '亡灵大军,听从我的召唤！' },
+            { hpThreshold: 0.1, text: '千年的灵魂...就这样消散了...' }
+        ],
+        victory: {
+            easy: '巫妖的魂火渐渐熄灭。"终于...可以安息了..."',
+            hard: '随着巫妖的倒下,周围的亡灵也失去了力量。',
+            perfect: '巫妖还没来得及念完咒语就倒下了。'
+        }
+    },
+    boss_dragon: {
+        name: '龙',
+        intro: '灼热的空气扭曲了视线。一头巨龙盘踞在废墟之上,金色的鳞片反射着危险的光芒。"数千年了,你是第一个来到这里的。"',
+        quotes: [
+            { hpThreshold: 0.7, text: '数千年来...你是第一个...' },
+            { hpThreshold: 0.4, text: '龙焰,吞噬一切！' },
+            { hpThreshold: 0.1, text: '龙的血脉不会断绝...但我的时代结束了...' }
+        ],
+        victory: {
+            easy: '巨龙低下了高傲的头颅。"我认输。"',
+            hard: '龙的鳞片散落一地,每片都闪烁着金色的光芒。',
+            perfect: '巨龙甚至没有完全展开翅膀就倒下了。'
+        }
+    },
+    boss_lich_king: {
+        name: '亡灵之王',
+        intro: '深渊的入口,万千冤魂的哀嚎回荡在耳边。一位头戴黑冠的亡灵君王端坐在白骨王座上。"欢迎来到永恒的国度。"',
+        quotes: [
+            { hpThreshold: 0.7, text: '亡灵的王权,不可挑战！' },
+            { hpThreshold: 0.4, text: '我的亡者大军将淹没你！' },
+            { hpThreshold: 0.1, text: '万千冤魂...终于可以安息了...' }
+        ],
+        victory: {
+            easy: '亡灵之王放下了权杖。"你们赢了...让亡者安息吧。"',
+            hard: '王冠碎裂的瞬间,万千冤魂归于平静。',
+            perfect: '亡灵之王甚至没有起身就倒下了。'
+        }
+    },
+    boss_ancient_dragon_evil: {
+        name: '上古邪龙',
+        intro: '黑暗本身在跳动。一头体型远超常理的黑龙盘踞在深渊底部,双瞳如血红的火炬。"你是光明的使者？那就让我看看,你能燃烧多久。"',
+        quotes: [
+            { hpThreshold: 0.7, text: '黑暗不会消失...但你的光芒确实刺眼...' },
+            { hpThreshold: 0.4, text: '感受上古的怒火吧！' },
+            { hpThreshold: 0.1, text: '心脏...停止了...但低语会找到下一个...' }
+        ],
+        victory: {
+            easy: '邪龙低下了头。"光明终将战胜黑暗...这次我认了。"',
+            hard: '黑龙化为灰烬,深渊终于迎来了第一缕阳光。',
+            perfect: '邪龙甚至没有完全苏醒就倒下了。'
+        }
+    }
+};
+
+// 追踪已触发的 Boss 台词
+let bossQuotesTriggered = {};
+
+// 触发 Boss 台词
+function checkBossQuotes(bossId) {
+    const boss = gameState.battle.enemy;
+    if (!boss.isBoss) return;
+    const lore = BOSS_LORE[bossId];
+    if (!lore || !lore.quotes) return;
+
+    const hpPercent = (boss.currentHp / boss.maxHp) * 100;
+    const key = bossId;
+    if (!bossQuotesTriggered[key]) bossQuotesTriggered[key] = [];
+
+    lore.quotes.forEach((q, i) => {
+        if (hpPercent <= q.hpThreshold * 100 && !bossQuotesTriggered[key].includes(i)) {
+            bossQuotesTriggered[key].push(i);
+            addCombatLog('info', '💬 ' + boss.name + ': "' + q.text + '"');
+        }
+    });
+}
+
+// ==================== P2: 战斗 Buff/诅咒系统 ====================
+
+// Buff 池
+const BATTLE_BUFFS = [
+    { id: 'battle_cry', name: '战吼', icon: '📣', desc: '首次出牌费用 -1', effect: 'firstCardDiscount', weight: 20 },
+    { id: 'adrenaline', name: '肾上腺素', icon: '⚡', desc: '能量 +1', effect: 'extraEnergy', weight: 15 },
+    { id: 'iron_wall', name: '铁壁', icon: '🧱', desc: '首次格挡 +5', effect: 'firstBlockBonus', weight: 15 },
+    { id: 'first_strike', name: '先手优势', icon: '🎯', desc: '抽牌 +2', effect: 'extraDrawStart', weight: 15 },
+    { id: 'sharp_blade', name: '利刃', icon: '🗡️', desc: '首次攻击伤害 +5', effect: 'firstAttackBonus', weight: 10 },
+    { id: 'ward', name: '守护', icon: '🛡️', desc: '获得 10 格挡', effect: 'initialBlock', weight: 15 }
+];
+
+// 诅咒池
+const BATTLE_CURSES = [
+    { id: 'wound_infection', name: '伤口感染', icon: '🤢', desc: '每回合开始 -1 HP', effect: 'hpLossPerTurn', weight: 15 },
+    { id: 'energy_leak', name: '能量泄漏', icon: '💧', desc: '每回合能量 -1', effect: 'energyLossPerTurn', weight: 10 },
+    { id: 'soul_bind', name: '灵魂束缚', icon: '⛓️', desc: '每回合抽牌 -1', effect: 'drawPenalty', weight: 15 },
+    { id: 'weakness', name: '虚弱', icon: '🟡', desc: '获得 2 层虚弱', effect: 'initialWeakness', weight: 20 }
+];
+
+// 获取加权随机的 Buff/诅咒
+function getWeightedRandomItem(pool) {
+    const totalWeight = pool.reduce((sum, item) => sum + item.weight, 0);
+    let r = randomInt(0, totalWeight - 1);
+    for (const item of pool) {
+        r -= item.weight;
+        if (r < 0) return item;
+    }
+    return pool[pool.length - 1];
+}
+
+// 在战斗开始时随机 Buff
+function rollBattleBuff() {
+    if (Math.random() < 0.55) { // 55% 概率有 Buff
+        const buff = getWeightedRandomItem(BATTLE_BUFFS);
+        gameState.battle.activeBuff = buff;
+
+        // 应用即时效果
+        switch (buff.effect) {
+            case 'extraEnergy':
+                gameState.player.energy += 1;
+                break;
+            case 'extraDrawStart':
+                drawCards(2);
+                break;
+            case 'initialBlock':
+                gameState.player.block += 10;
+                showFloatingText('🛡️ +10', document.querySelector('.player-area'), '#3498db');
+                break;
+            case 'initialWeakness':
+                gameState.player.stats.weak = 2;
+                break;
+        }
+
+        addCombatLog('buff', '✨ 战斗 Buff: ' + buff.icon + ' ' + buff.name + ' — ' + buff.desc);
+    }
+}
+
+// 应用回合开始时 Buff/诅咒效果
+function applyBuffCurseTurnStart() {
+    const battle = gameState.battle;
+    if (!battle.activeBuff) return;
+
+    const buff = battle.activeBuff;
+
+    if (buff.effect === 'firstCardDiscount') {
+        // 首次出牌时应用,在 playCard 中处理
+    }
+    if (buff.effect === 'firstBlockBonus') {
+        // 首次格挡时应用,在 effect.block 中处理
+    }
+    if (buff.effect === 'firstAttackBonus') {
+        // 首次攻击时应用,在 damage 计算中处理
+    }
+    if (buff.effect === 'hpLossPerTurn') {
+        gameState.player.hp = Math.max(1, gameState.player.hp - 1);
+        showFloatingText('-1 HP', document.querySelector('.player-area'), '#e74c3c');
+    }
+    if (buff.effect === 'energyLossPerTurn') {
+        gameState.player.energy = Math.max(1, gameState.player.energy - 1);
+        showFloatingText('-1 ⚡', document.querySelector('.player-area'), '#e74c3c');
+    }
+    if (buff.effect === 'drawPenalty') {
+        battle.drawPenalty = (battle.drawPenalty || 0) + 1;
+    }
+}
+
 // 辅助:随机稀有卡牌
 function getRandomRareCard() {
     const v = Object.keys(CARD_DB).filter(id => { const c = CARD_DB[id]; return c && (c.type === 'attack' || c.type === 'skill' || c.type === 'defense'); });
@@ -1045,6 +1499,37 @@ const EVENT_DB = [
 ];
 
 // 加权随机事件选择
+// ==================== P2: 无尽地牢模式 ====================
+
+// 无尽模式敌人数值缩放
+function getEndlessMultiplier() {
+    if (gameState.mode !== 'endless') return 1.0;
+    // 每层递增 8%，第 N 层 (从 5 开始) 的倍率
+    const excess = gameState.endlessFloor - 4;
+    return 1 + excess * 0.08;
+}
+
+function applyEndlessScaling(enemy) {
+    const mult = getEndlessMultiplier();
+    enemy.hp = Math.round(enemy.maxHp * mult);
+    enemy.maxHp = Math.round(enemy.maxHp * mult);
+    enemy.damage = Math.round((enemy.damage || 6) * mult);
+    return enemy;
+}
+
+// 获取最高层数
+function getEndlessBestFloor() {
+    try {
+        return parseInt(localStorage.getItem('dungeonEndlessBestFloor') || '0');
+    } catch(e) { return 0; }
+}
+
+function setEndlessBestFloor(floor) {
+    if (floor > getEndlessBestFloor()) {
+        localStorage.setItem('dungeonEndlessBestFloor', String(floor));
+    }
+}
+
 function selectEventByWeight() {
     const floor = gameState.map.floor;
     const eligible = EVENT_DB.filter(e => e.minFloor <= floor && e.maxFloor >= floor);
@@ -1059,6 +1544,8 @@ function selectEventByWeight() {
 
 let gameState = {
     difficulty: 'normal',
+    mode: 'normal',       // 'normal' | 'endless'
+    endlessFloor: 0,      // 无尽模式实际层数
     player: {
         class: null,  // 默认 null,防止 beforeunload 误存默认模板
         hp: 80,
@@ -1112,7 +1599,11 @@ let gameState = {
         empowerTurns: 0,         // 召唤师:强化召唤剩余回合
         coffinUsed: false,       // 死灵法师:棺木是否已用
         phoenixFeatherUses: 0,   // 召唤师:凤凰羽使用次数
-        firstPrecisionCard: true // 游侠:狙击镜-第一张精准牌
+        firstPrecisionCard: true, // 游侠:狙击镜-第一张精准牌
+        // 关键词协同追踪
+        comboDamageThisTurn: 0,    // 连环打击:本回合总伤害
+        shadowRitualActive: false, // 暗影仪式:本回合是否激活
+        poisonDiscount: 0          // 剧毒领域:毒牌费用折扣
     },
     map: {
         floor: 1,
@@ -1278,6 +1769,15 @@ function initGame() {
 
     // 绑定主菜单按钮
     document.getElementById('start-game').addEventListener('click', () => {
+        exitDailyMode();
+        showScreen('class-select');
+    });
+
+    // 无尽地牢模式
+    document.getElementById('start-endless').addEventListener('click', () => {
+        gameState.mode = 'endless';
+        gameState.endlessFloor = 0;
+        exitDailyMode();
         showScreen('class-select');
     });
 
@@ -1416,29 +1916,12 @@ function initGame() {
     if (viewRelicsBattleBtn) viewRelicsBattleBtn.addEventListener('click', () => {
         if (typeof showRelicsList === 'function') showRelicsList();
     });
-    // close-relics 按钮
-    const closeRelicsBtn = document.getElementById('close-relics');
+    // close-relics 按钮（新弹窗）
+    const closeRelicsBtn = document.getElementById('close-relics-modal');
     if (closeRelicsBtn) {
-        console.log('[initGame] close-relics 按钮找到, 绑定事件监听器');
-        closeRelicsBtn.addEventListener('click', (e) => {
-            console.log('[close-relics] 按钮点击事件触发!');
-            e.preventDefault();
-            e.stopPropagation();
-            try {
-                if (typeof closeRelicsList === 'function') {
-                    console.log('[close-relics] 调用 closeRelicsList');
-                    closeRelicsList();
-                } else {
-                    console.error('[close-relics] closeRelicsList 不是函数!');
-                    alert('错误: closeRelicsList 函数未定义');
-                }
-            } catch (err) {
-                console.error('[close-relics] 执行出错:', err);
-                alert('返回失败: ' + err.message);
-            }
+        closeRelicsBtn.addEventListener('click', () => {
+            if (typeof closeRelicsList === 'function') closeRelicsList();
         });
-    } else {
-        console.error('[initGame] 找不到 #close-relics 按钮!');
     }
 
     // 战斗日志
@@ -1525,7 +2008,26 @@ function initGame() {
     });
 }
 
+// 退出/清理每日挑战状态:普通新游戏进入职业选择前调用,
+// 避免上一局每日挑战残留的 sessionStorage 标记强制锁定职业,
+// 以及被设为不可交互的卡片样式仍未还原。
+function exitDailyMode() {
+    sessionStorage.removeItem('dungeonDailyMode');
+    document.querySelectorAll('.class-card').forEach(c => {
+        c.style.pointerEvents = '';
+        c.style.opacity = '';
+        c.classList.remove('selected');
+    });
+    const def = document.querySelector('.class-card[data-class="warrior"]');
+    if (def) def.classList.add('selected');
+}
+
 function startNewGame() {
+    // 防御性清理:若非每日模式,确保残留的每日标记被清除,
+    // 防止普通游戏被错误地强制锁定到每日职业(状态未同步导致战斗页职业显示不一致)
+    if (!isDailyMode()) {
+        sessionStorage.removeItem('dungeonDailyMode');
+    }
     // P2: 每日挑战模式
     if (isDailyMode()) {
         const seed = getDailySeed();
@@ -1693,35 +2195,6 @@ function renderMap() {
     document.getElementById('map-player-gold').textContent = `💰 ${gameState.player.gold}`;
     document.getElementById('map-floor').textContent = `第 ${floor} 层`;
 
-    // 添加地图说明
-    const mapInfo = document.createElement('div');
-    mapInfo.className = 'map-info';
-
-    let floorHint = '';
-    if (floor === 1) {
-        floorHint = '🌱 第一层:熟悉机制,谨慎探索';
-    } else if (floor === 2) {
-        floorHint = '⚔️ 第二层:策略规划,资源管理';
-    } else {
-        floorHint = '🔥 第三层:极限考验,全力以赴!';
-    }
-
-    mapInfo.innerHTML = `
-        <div class="legend">
-            <span>⚔️ 战斗</span>
-            <span>🏪 商店</span>
-            <span>🔥 休息</span>
-            <span>❓ 事件</span>
-            <span>👑 BOSS</span>
-            <span>⚡ 精英</span>
-        </div>
-        <div class="path-legend">
-            <span>● 可选路径</span>
-        </div>
-        <p class="hint">${floorHint}</p>
-    `;
-    nodesContainer.appendChild(mapInfo);
-
     const rows = 4;
     const nodesPerRow = 4;
 
@@ -1770,10 +2243,7 @@ function renderMap() {
                 elite: '⚡'
             };
 
-            nodeEl.innerHTML = `
-                <span>${icons[type]}</span>
-                <span class="node-label">${getNodeLabel(type)}</span>
-            `;
+            nodeEl.innerHTML = `<span>${icons[type]}</span>`;
 
             // 检查节点状态
             let isOnAnyPath = false;
@@ -1860,37 +2330,13 @@ function generateMap() {
     // 更新地图头部信息
     document.getElementById('map-player-hp').textContent = `❤️ ${gameState.player.hp}/${gameState.player.maxHp}`;
     document.getElementById('map-player-gold').textContent = `💰 ${gameState.player.gold}`;
-    document.getElementById('map-floor').textContent = `第 ${floor} 层`;
-
-    // 添加地图说明(优化版)
-    const mapInfo = document.createElement('div');
-    mapInfo.className = 'map-info';
-
-    // 根据楼层显示不同的提示
-    let floorHint = '';
-    if (floor === 1) {
-        floorHint = '🌱 第一层:熟悉机制,谨慎探索';
-    } else if (floor === 2) {
-        floorHint = '⚔️ 第二层:策略规划,资源管理';
+    
+    // 楼层显示（无尽模式显示实际层数）
+    if (gameState.mode === 'endless') {
+        document.getElementById('map-floor').textContent = `🌀 无尽地牢 · 第 ${gameState.endlessFloor} 层 (地图 ${floor})`;
     } else {
-        floorHint = '🔥 第三层:极限考验,全力以赴!';
+        document.getElementById('map-floor').textContent = `第 ${floor} 层`;
     }
-
-    mapInfo.innerHTML = `
-        <div class="legend">
-            <span>⚔️ 战斗</span>
-            <span>🏪 商店</span>
-            <span>🔥 休息</span>
-            <span>❓ 事件</span>
-            <span>👑 BOSS</span>
-            <span>⚡ 精英</span>
-        </div>
-        <div class="path-legend">
-            <span>● 可选路径</span>
-        </div>
-        <p class="hint">${floorHint}</p>
-    `;
-    nodesContainer.appendChild(mapInfo);
 
     // 生成节点类型(使用分层配置)
     const nodeTypes = getFloorNodeTypes(floor);
@@ -1960,10 +2406,7 @@ function generateMap() {
                 elite: '⚡'
             };
 
-            nodeEl.innerHTML = `
-                <span>${icons[type]}</span>
-                <span class="node-label">${getNodeLabel(type)}</span>
-            `;
+            nodeEl.innerHTML = `<span>${icons[type]}</span>`;
 
             // 根据 completedNodes 和路径设置节点状态
             const paths = gameState.map.paths;
@@ -2424,11 +2867,11 @@ function startBattle(isBoss) {
         gameState.battle.enemy = {
             type: enemyType,
             name: baseEnemy.name,
-            currentHp: Math.floor(baseEnemy.hp * bossHpMultiplier),
-            maxHp: Math.floor(baseEnemy.hp * bossHpMultiplier),
+            currentHp: Math.floor(baseEnemy.hp * bossHpMultiplier * getEndlessMultiplier()),
+            maxHp: Math.floor(baseEnemy.hp * bossHpMultiplier * getEndlessMultiplier()),
             icon: baseEnemy.icon,
             pattern: baseEnemy.pattern,
-            damage: Math.floor(baseEnemy.damage * bossDamageMultiplier),
+            damage: Math.floor(baseEnemy.damage * bossDamageMultiplier * getEndlessMultiplier()),
             difficulty: floor,
             phase2: false,
             isBoss: true,
@@ -2452,11 +2895,11 @@ function startBattle(isBoss) {
         gameState.battle.enemy = {
             type: enemyType,
             name: baseEnemy.name,
-            currentHp: Math.floor(baseEnemy.hp * difficultyMultiplier),
-            maxHp: Math.floor(baseEnemy.hp * difficultyMultiplier),
+            currentHp: Math.floor(baseEnemy.hp * difficultyMultiplier * getEndlessMultiplier()),
+            maxHp: Math.floor(baseEnemy.hp * difficultyMultiplier * getEndlessMultiplier()),
             icon: baseEnemy.icon,
             pattern: baseEnemy.pattern,
-            damage: Math.floor(baseEnemy.damage * difficultyMultiplier),
+            damage: Math.floor(baseEnemy.damage * difficultyMultiplier * getEndlessMultiplier()),
             difficulty: floor,
             phase2: false,
             block: 0,
@@ -2523,6 +2966,14 @@ function startBattle(isBoss) {
     gameState.battle.extraDrawNext = 0;
     gameState.battle.extraEnergyNext = 0;
 
+    // 关键词协同战斗重置
+    gameState.battle.comboCardsPlayedThisTurn = 0;
+    gameState.battle.comboDamageBonus = 0;
+    gameState.battle.shadowRitualActive = false;
+    gameState.battle.poisonDiscount = 0;
+    gameState.battle.totalSacrificeThisTurn = 0;
+    gameState.battle.summonSynergyBuff = 0;
+
     // 陷阱箱遗物:精英战斗额外陷阱
     if (gameState.player.relics.includes('trap_box') && isBoss) {
         gameState.battle.traps.push({ damage: 8, triggerNext: true });
@@ -2536,6 +2987,21 @@ function startBattle(isBoss) {
     // 重置敌人精灵动画标记,确保每场战斗重新登场
     const spriteEl = document.querySelector('.enemy-sprite');
     if (spriteEl) spriteEl.dataset.entered = '';
+
+    // P2: 战斗 Buff 随机事件
+    rollBattleBuff();
+
+    // P1: Boss 背景叙事
+    if (isBoss) {
+        const lore = BOSS_LORE[gameState.battle.enemy.type];
+        if (lore && lore.intro) {
+            addCombatLog('info', '📖 ' + lore.intro);
+        }
+    }
+
+    // 重置 Boss 台词追踪
+    bossQuotesTriggered = {};
+
     updateBattleUI();
     updatePotionBar();
     startTurn();
@@ -2573,11 +3039,11 @@ function startEliteBattle() {
     gameState.battle.enemy = {
         type: enemyType,
         name: baseEnemy.name,
-        currentHp: Math.floor(baseEnemy.hp * hpMult),
-        maxHp: Math.floor(baseEnemy.hp * hpMult),
+        currentHp: Math.floor(baseEnemy.hp * hpMult * getEndlessMultiplier()),
+        maxHp: Math.floor(baseEnemy.hp * hpMult * getEndlessMultiplier()),
         icon: baseEnemy.icon,
         pattern: baseEnemy.pattern,
-        damage: Math.floor(baseEnemy.damage * eliteMultiplier),
+        damage: Math.floor(baseEnemy.damage * eliteMultiplier * getEndlessMultiplier()),
         difficulty: floor,
         isElite: true,
         block: 0,
@@ -2625,6 +3091,14 @@ function startEliteBattle() {
     gameState.battle.nextAttackDouble = false;
     gameState.battle.extraDrawNext = 0;
     gameState.battle.extraEnergyNext = 0;
+
+    // 关键词协同战斗重置
+    gameState.battle.comboCardsPlayedThisTurn = 0;
+    gameState.battle.comboDamageBonus = 0;
+    gameState.battle.shadowRitualActive = false;
+    gameState.battle.poisonDiscount = 0;
+    gameState.battle.totalSacrificeThisTurn = 0;
+    gameState.battle.summonSynergyBuff = 0;
 
     // P2: Ascension - a7 诅咒起手(只加到当战抽牌堆,不污染永久牌库)
     if (ascensionActive('a7')) {
@@ -2681,7 +3155,7 @@ function startEliteBattle() {
     const cssClass = ENEMY_CSS_CLASSES[enemyType] || enemyType;
 
     // 设置 SVG 图像
-    enemySpriteEl.innerHTML = ENEMY_SPRITES[enemyType] || enemy.icon;
+    enemySpriteEl.innerHTML = enemySpriteHTML(enemyType, enemy);
     enemySpriteEl.className = `enemy-sprite ${cssClass}`;
     enemySpriteEl.classList.remove('dead');
 
@@ -2701,15 +3175,15 @@ function startEliteBattle() {
     const intentEl = document.getElementById('enemy-intent');
     if (intentEl && enemy.nextAction) {
         const act = enemy.nextAction;
-        let itext = '', icolor = '#888';
-        if (act.type === 'attack') { let dmg = act.value; if (enemy.weak > 0) dmg = Math.floor(dmg * 0.75); itext = '\u2694\ufe0f ' + dmg; icolor = '#e74c3c'; }
-        else if (act.type === 'heavy_attack') { itext = '\ud83d\udca5 ' + act.value; icolor = '#c0392b'; }
-        else if (act.type === 'defend') { itext = '\ud83d\udee1\ufe0f +' + act.value; icolor = '#3498db'; }
-        else if (act.type === 'buff') { itext = '\ud83d\udcaa +' + act.value + ' ATK'; icolor = '#f39c12'; }
-        else if (act.type === 'summon') { itext = '\ud83d\udce2 ' + (act.label || '召唤 x' + act.value); icolor = '#9b59b6'; }
-        else if (act.type === 'special') { itext = '\ud83c\udf00 ' + (act.label || '特殊技能'); icolor = '#1abc9c'; }
-        else { itext = '\u2753 未知'; }
-        intentEl.textContent = itext;
+        let iicon = '', ivalue = '', icolor = '#888';
+        if (act.type === 'attack') { let dmg = act.value; if (enemy.weak > 0) dmg = Math.floor(dmg * 0.75); iicon = '\u2694\ufe0f'; ivalue = dmg; icolor = '#e74c3c'; }
+        else if (act.type === 'heavy_attack') { iicon = '\ud83d\udca5'; ivalue = act.value; icolor = '#c0392b'; }
+        else if (act.type === 'defend') { iicon = '\ud83d\udee1\ufe0f'; ivalue = '+' + act.value; icolor = '#3498db'; }
+        else if (act.type === 'buff') { iicon = '\ud83d\udcaa'; ivalue = '+' + act.value + ' ATK'; icolor = '#f39c12'; }
+        else if (act.type === 'summon') { iicon = '\ud83d\udce2'; ivalue = (act.label || '召唤 x' + act.value); icolor = '#9b59b6'; }
+        else if (act.type === 'special') { iicon = '\ud83c\udf00'; ivalue = (act.label || '特殊技能'); icolor = '#1abc9c'; }
+        else { iicon = '\u2753'; ivalue = '未知'; }
+        intentEl.innerHTML = '<span class="intent-icon">' + iicon + '</span><span class="intent-value">' + ivalue + '</span>';
         intentEl.style.color = icolor;
     }
 
@@ -2717,15 +3191,20 @@ function startEliteBattle() {
     document.getElementById('player-hp').textContent = `${player.hp}/${player.maxHp}`;
     document.getElementById('player-block').textContent = player.block;
     document.getElementById('player-energy').textContent = `${player.energy}/${player.maxEnergy}`;
+    // 显示职业名（对齐原型 .battle-top .name）
+    const battleClassEl = document.getElementById('battle-class');
+    if (battleClassEl) {
+        const classData = CLASSES[player.class];
+        battleClassEl.textContent = classData ? classData.name : '';
+    }
     document.getElementById('battle-floor').textContent = `第 ${gameState.map.floor} 层`;
 
     // P3: 回合计数器实时更新
     const turnEl = document.getElementById('battle-turn');
     if (turnEl) turnEl.textContent = `回合: ${gameState.battle.turn}`;
 
-    // 更新职业图标
-    const classIcons = { warrior: '⚔️', mage: '🔮', rogue: '🗡️', monk: '🧘', paladin: '🛡️', hunter: '🏹', necromancer: '💀', summoner: '✨' };
-    document.getElementById('player-avatar').textContent = classIcons[player.class];
+    // 更新职业图标(始终以玩家当前所选职业为准)
+    document.getElementById('player-avatar').innerHTML = playerAvatarHTML(player.class);
 
     // 更新牌堆信息
     document.getElementById('deck-count').textContent = `牌库: ${gameState.battle.drawPile.length}`;
@@ -2860,6 +3339,9 @@ function startTurn() {
         gameState.battle.enemy.block = 0;
     }
 
+    // P2: 战斗 Buff/诅咒回合开始时效果
+    applyBuffCurseTurnStart();
+
     // 减少状态回合数
     // P2: A1 减益持久 - debuffExtraTurns 表示额外持续回合,每 (1+extra) 回合才减少一次
     gameState.battle.debuffTick = (gameState.battle.debuffTick || 0) + 1;
@@ -2888,6 +3370,37 @@ function startTurn() {
 
     // 重置减费效果(每回合清零)
     gameState.battle.costDiscount = 0;
+
+    // ===== 关键词协同:回合开始重置 =====
+    gameState.battle.comboCardsPlayedThisTurn = 0;
+    gameState.battle.comboDamageBonus = 0;
+    gameState.battle.shadowRitualActive = false;
+    gameState.battle.poisonDiscount = 0;
+
+    // ☠️ 剧毒领域:敌人3+层毒时，本回合毒牌费用-1
+    if (gameState.battle.enemyPoison >= 3) {
+        gameState.battle.poisonDiscount = 1;
+        addCombatLog('synergy', '☠️ 剧毒领域激活！本回合毒牌费用 -1');
+    }
+    gameState.battle.totalSacrificeThisTurn = 0;
+
+    // ✨ 圣光护佑:手牌中神圣牌≥2张，回合开始恢复3HP
+    const handHolyCount = gameState.battle.hand.filter(cid => {
+        const cd = CARD_DB[cid];
+        return cd && cd.keywords && cd.keywords.includes('holy');
+    }).length;
+    if (handHolyCount >= 2) {
+        gameState.player.hp = Math.min(gameState.player.hp + 3, gameState.player.maxHp);
+        showFloatingText('✨ 圣光护佑 +3', document.querySelector('.player-area'), '#f1c40f');
+        addCombatLog('synergy', '✨ 圣光护佑！手牌神圣密度触发，恢复 3 HP');
+    }
+
+    // 📚 亡灵共鸣:场上2+召唤物时，召唤物伤害+2
+    if (gameState.battle.summons.length >= 2) {
+        gameState.battle.summonSynergyBuff = 2;
+    } else {
+        gameState.battle.summonSynergyBuff = 0;
+    }
 
     // ===== P2: 关键词回合开始处理 =====
 
@@ -2959,7 +3472,7 @@ function startTurn() {
         const summonsCopy = [...gameState.battle.summons];
         summonsCopy.forEach(summon => {
             if (summon.turnsLeft > 0) {
-                let dmg = summon.damage + gameState.battle.empowerBuff;
+                let dmg = summon.damage + gameState.battle.empowerBuff + (gameState.battle.summonSynergyBuff || 0);
                 // 元素核心:输出类 +5
                 if (player.relics.includes('element_core') && (summon.type === 'output' || summon.type === 'aoe')) {
                     dmg += 5;
@@ -3157,7 +3670,7 @@ function renderHand() {
         const effectiveCost = Math.max(0, cardData.cost - (gameState.battle.costDiscount || 0));
         if (effectiveCost > gameState.player.energy) {
             cardEl.classList.add('unplayable');
-            cardEl.style.opacity = '0.5';
+            cardEl.style.opacity = '0.38';
             cardEl.style.borderColor = '#555';
         } else {
             cardEl.classList.add('energy-sufficient');
@@ -3167,26 +3680,18 @@ function renderHand() {
         // 添加 data-desc 属性用于悬停提示
         cardEl.setAttribute('data-desc', cardData.desc);
 
-        // P2: 显示关键词标签
-        let keywordBadge = '';
-        if (cardData.keywords && cardData.keywords.length > 0) {
-            const kwEmojis = { fire: '🔥', frost: '❄️', lightning: '⚡', poison: '☠️', holy: '✨', combo: '🔄', backstab: '🗡️' };
-            const badges = cardData.keywords.filter(k => kwEmojis[k]).map(k => kwEmojis[k]).join('');
-            if (badges) keywordBadge = `<div class="card-keywords">${badges}</div>`;
-        }
-
-        // P2: 显示稀有度标识
-        let rarityBadge = '';
-        if (cardData.rarity === 'uncommon') rarityBadge = `<div class="card-rarity uncommon">↑</div>`;
-        if (cardData.rarity === 'rare') rarityBadge = `<div class="card-rarity rare">↑↑</div>`;
+        // 稀有度指示（纯色点，对齐原型 .card-rarity：每张卡均显示，
+        // 基础卡无 rarity 字段时兜底为 common 显示灰白点，与原型逐卡表现一致）
+        const rarityClass = cardData.rarity || 'common';
+        const rarityBadge = `<div class="card-rarity ${rarityClass}"></div>`;
 
         cardEl.innerHTML = `
-            ${keywordBadge}
             ${rarityBadge}
-            <div class="card-cost">${cardData.cost}</div>
-            <div class="card-icon">${cardData.icon}</div>
+            <div class="card-cost"><span>${cardData.cost}</span></div>
+            <div class="card-icon">${cardIconHTML(cardId, cardData)}</div>
             <div class="card-name">${cardData.name}</div>
             <div class="card-desc">${cardData.desc}</div>
+            <div class="card-type">${CARD_TYPE_LABEL[cardData.type] || ''}</div>
         `;
 
         cardEl.addEventListener('click', () => playCard(index));
@@ -3218,10 +3723,48 @@ function playCard(handIndex) {
         finalCost = Math.max(0, finalCost - 1);
         gameState.battle.firstPrecisionCard = false;
     }
+    // 关键词协同:剧毒领域 - 敌人3+层毒时毒牌费用-1
+    if (cardData.keywords && cardData.keywords.includes('poison') && gameState.battle.poisonDiscount > 0) {
+        finalCost = Math.max(0, finalCost - gameState.battle.poisonDiscount);
+    }
     gameState.player.energy -= finalCost;
 
     // 从手牌移除
     gameState.battle.hand.splice(handIndex, 1);
+
+    // 关键词协同检查（在移除后、效果执行前，统计剩余手牌关键词密度）
+    const handAfter = gameState.battle.hand;
+    const keywordCounts = {};
+    handAfter.forEach(cid => {
+        const cd = CARD_DB[cid];
+        if (cd && cd.keywords) {
+            cd.keywords.forEach(kw => {
+                keywordCounts[kw] = (keywordCounts[kw] || 0) + 1;
+            });
+        }
+    });
+
+    // 🔥 烈焰风暴:打出火焰牌时手牌另有2+张火焰牌
+    if (cardData.keywords && cardData.keywords.includes('fire') && keywordCounts.fire >= 2) {
+        const synergyDmg = 8;
+        damageEnemy(synergyDmg);
+        showFloatingText('🔥 烈焰风暴 +8', document.querySelector('.enemy'), '#e74c3c');
+        addCombatLog('synergy', '🔥 烈焰风暴！手牌火焰密度触发，额外 8 点伤害');
+    }
+
+    // 📚 亡灵共鸣:场上2+召唤物时，本回合召唤物伤害+2
+    // （在 summonAutoAttack 中动态应用，这里只记录状态）
+    // 已在 battle.summonSynergyBuff 中追踪
+
+    // 🔄 连环打击:单回合打出3+连击牌，本回合所有伤害+5
+    if (cardData.keywords && cardData.keywords.includes('combo')) {
+        gameState.battle.comboCardsPlayedThisTurn++;
+        if (gameState.battle.comboCardsPlayedThisTurn >= 3) {
+            gameState.battle.comboDamageBonus = 5;
+            showFloatingText('🔄 连环打击激活!', document.querySelector('.player-area'), '#f39c12');
+            addCombatLog('synergy', '🔄 连环打击！本回合所有伤害 +5');
+        }
+    }
 
     // 👻 幽灵护甲等 ethereal 卡牌:不进入弃牌堆,直接进入消耗堆
     if (cardData.effect && cardData.effect.ethereal) {
@@ -3340,6 +3883,27 @@ function executeCardEffect(cardData, cardId) {
             damage += 5;
         }
 
+        // P1: 遗物联动 - 烈焰之心
+        const infernoBonus = getRelicSynergyBonus('inferno');
+        if (infernoBonus > 0 && cardData.keywords && cardData.keywords.includes('fire')) {
+            damage += infernoBonus * 2;
+            addCombatLog('synergy', '🔥 烈焰之心联动：火焰牌伤害 +' + (infernoBonus * 2));
+        }
+
+        // P1: 遗物联动 - 圣光之环
+        const holyBonus = getRelicSynergyBonus('holy');
+        if (holyBonus > 0 && cardData.keywords && cardData.keywords.includes('holy')) {
+            damage += holyBonus * 2;
+            addCombatLog('synergy', '✨ 圣光之环联动：神圣牌伤害 +' + (holyBonus * 2));
+        }
+
+        // P1: 遗物联动 - 战斗专家
+        const combatBonus = getRelicSynergyBonus('combat');
+        if (combatBonus > 0 && cardData.type === 'attack') {
+            damage += combatBonus;
+            addCombatLog('synergy', '⚔️ 战斗专家联动：攻击伤害 +' + combatBonus);
+        }
+
         // P2: 🪨 黑曜石 - 暗影牌对亡灵/恶魔敌人伤害 +5
         if (cardData.keywords && cardData.keywords.includes('shadow') && player.relics.includes('obsidian')) {
             const enemyTags = battle.enemy.tags || [];
@@ -3354,6 +3918,17 @@ function executeCardEffect(cardData, cardId) {
             const bonus = (battle.comboCount - 1) * 2;
             damage += bonus;
             showFloatingText('+' + bonus + ' 连击', document.querySelector('.player-area'), '#f39c12');
+        }
+
+        // ===== 关键词协同: 连环打击 - 3+连击牌伤害+5 =====
+        if (battle.comboDamageBonus > 0) {
+            damage += battle.comboDamageBonus;
+        }
+
+        // ===== 关键词协同: 暗影仪式 - 单回合献血≥10，暗影牌伤害×1.5 =====
+        if (battle.shadowRitualActive && cardData.keywords && cardData.keywords.includes('shadow')) {
+            damage = Math.floor(damage * 1.5);
+            showFloatingText('🩸 暗影仪式 ×1.5', document.querySelector('.enemy'), '#8e44ad');
         }
 
         // P2: 🗡️ 背击 - 未受伤时伤害翻倍
@@ -3391,6 +3966,13 @@ function executeCardEffect(cardData, cardId) {
                 block += 6;
                 addCombatLog('info', '🔥 熔岩护甲:上张牌是火焰牌,格挡 +6!');
             }
+        }
+
+        // P1: 遗物联动 - 守护者
+        const wardenBonus = getRelicSynergyBonus('warden');
+        if (wardenBonus > 0 && cardData.type === 'defense') {
+            block += wardenBonus * 2;
+            addCombatLog('synergy', '🛡️ 守护者联动：防御牌格挡 +' + (wardenBonus * 2));
         }
 
         // 敏捷加成
@@ -3444,6 +4026,15 @@ function executeCardEffect(cardData, cardId) {
     if (effect.hpCost) {
         player.hp -= effect.hpCost;
         showFloatingText(`-${effect.hpCost}`, document.querySelector('.player-area'), '#e74c3c');
+        // ===== 关键词协同: 暗影仪式 - 单回合献血≥10，激活伤害×1.5 =====
+        if (cardData.keywords && cardData.keywords.includes('sacrifice')) {
+            battle.totalSacrificeThisTurn = (battle.totalSacrificeThisTurn || 0) + effect.hpCost;
+            if (battle.totalSacrificeThisTurn >= 10 && !battle.shadowRitualActive) {
+                battle.shadowRitualActive = true;
+                showFloatingText('🩸 暗影仪式激活!', document.querySelector('.player-area'), '#8e44ad');
+                addCombatLog('synergy', '🩸 暗影仪式！本回合献血 ≥10，暗影牌伤害 ×1.5');
+            }
+        }
     }
 
     // 添加卡牌到弃牌堆
@@ -3473,6 +4064,12 @@ function executeCardEffect(cardData, cardId) {
     // ☠️ 施加毒/燃烧层数
     if (effect.poison) {
         let poisonAmount = effect.poison;
+        // P1: 遗物联动 - 暗影之手：每多 1 个同标签遗物，毒层数 +1
+        const shadowBonus = getRelicSynergyBonus('shadow');
+        if (shadowBonus > 0) {
+            poisonAmount += shadowBonus;
+            addCombatLog('synergy', '☠️ 暗影之手联动：毒层数 +' + shadowBonus);
+        }
         // 毒蛇之牙:毒层数上限 +3
         const maxPoison = player.relics.includes('viper_fang') ? 6 : 3;
         const label = effect.poisonLabel || '毒';
@@ -3529,6 +4126,8 @@ function executeCardEffect(cardData, cardId) {
         if (effect.precision2) precisionGain = 2;
         // 致命专注:精准 +3
         if (effect.precision3) precisionGain = 3;
+        // P1: 遗物联动 - 精准之眼
+        precisionGain += getRelicSynergyBonus('precision');
 
         gameState.battle.precisionCount += precisionGain;
         addCombatLog('info', '🎯 精准 + ' + precisionGain + ' (当前: ' + gameState.battle.precisionCount + ')');
@@ -3575,14 +4174,22 @@ function executeCardEffect(cardData, cardId) {
         addCombatLog('info', '💀 猎杀时刻:精准 ' + gameState.battle.precisionCount + ' × ' + effect.precisionFinish + ' = ' + finishDmg);
     }
 
-    // 陷阱:布置陷阱
+    // 陷阱:布置陷阱（最多 2 个，新的替换旧的）
     if (effect.trap) {
+        const maxTraps = 2;
         const count = effect.trapCount || 1;
+        let added = 0;
         for (let i = 0; i < count; i++) {
-            gameState.battle.traps.push({ damage: effect.trap, triggerNext: true });
+            if (gameState.battle.traps.length >= maxTraps) {
+                gameState.battle.traps[gameState.battle.traps.length - 1] = { damage: effect.trap, triggerNext: true };
+                addCombatLog('info', '⚠️ 陷阱已达上限，替换旧陷阱');
+            } else {
+                gameState.battle.traps.push({ damage: effect.trap, triggerNext: true });
+            }
+            added++;
         }
-        showFloatingText('⚠️ 陷阱 ×' + count, document.querySelector('.player-area'), '#e67e22');
-        addCombatLog('info', '⚠️ 布置 ' + count + ' 个陷阱(下回合触发 ' + effect.trap + ' 伤害)');
+        showFloatingText('⚠️ 陷阱 ×' + added, document.querySelector('.player-area'), '#e67e22');
+        addCombatLog('info', '⚠️ 布置 ' + added + ' 个陷阱(下回合触发 ' + effect.trap + ' 伤害)');
     }
 
     // 标记目标:敌人易伤
@@ -3766,6 +4373,9 @@ function executeCardEffect(cardData, cardId) {
         // 石像之心:坦克类 +20 HP
         let hp = s.hp;
         if (player.relics.includes('stone_heart') && s.type === 'tank') hp += 20;
+        // P1: 遗物联动 - 召唤之环
+        const summonBonus = getRelicSynergyBonus('summon');
+        if (summonBonus > 0) hp += summonBonus * 10;
 
         gameState.battle.summons.push({
             ...s, hp: hp, maxHp: hp, turnsLeft: turns, maxTurns: turns
@@ -3780,7 +4390,8 @@ function executeCardEffect(cardData, cardId) {
             { id: 'golem', name: '石像兵', hp: 30, maxHp: 30, damage: 6, turns: 3, maxTurns: 3, type: 'tank', icon: '🗿' },
             { id: 'spirit', name: '元素精灵', hp: 20, maxHp: 20, damage: 10, turns: 2, maxTurns: 2, type: 'output', icon: '🧚' },
             { id: 'wolf', name: '影狼', hp: 25, maxHp: 25, damage: 8, turns: 2, maxTurns: 2, type: 'balanced', icon: '🐺' },
-            { id: 'flower', name: '治疗花', hp: 15, maxHp: 15, damage: 0, turns: 2, maxTurns: 2, type: 'heal', icon: '🌸', healPerTurn: 4 }
+            { id: 'flower', name: '治疗花', hp: 15, maxHp: 15, damage: 0, turns: 2, maxTurns: 2, type: 'heal', icon: '🌸', healPerTurn: 4 },
+            { id: 'ghost', name: '幽灵', hp: 10, maxHp: 10, damage: 12, turns: 2, maxTurns: 2, type: 'output', icon: '👻' }
         ];
         for (let i = 0; i < effect.summonRandom; i++) {
             if (gameState.battle.summons.length >= gameState.battle.summonSlots) break;
@@ -3789,6 +4400,9 @@ function executeCardEffect(cardData, cardId) {
             if (player.relics.includes('summoner_manual')) turns++;
             let hp = template.hp;
             if (player.relics.includes('stone_heart') && template.type === 'tank') hp += 20;
+            // P1: 遗物联动 - 召唤之环：每多 1 个同标签遗物，召唤物 HP +10
+            const summonBonus = getRelicSynergyBonus('summon');
+            if (summonBonus > 0) hp += summonBonus * 10;
 
             gameState.battle.summons.push({ ...template, hp, maxHp: hp, turnsLeft: turns });
             addCombatLog('info', template.icon + ' 随机召唤了 ' + template.name);
@@ -3850,13 +4464,17 @@ function executeCardEffect(cardData, cardId) {
             const randomPool = [
                 { id: 'golem', name: '石像兵', hp: 30, maxHp: 30, damage: 6, turns: 3, maxTurns: 3, type: 'tank', icon: '🗿' },
                 { id: 'spirit', name: '元素精灵', hp: 20, maxHp: 20, damage: 10, turns: 2, maxTurns: 2, type: 'output', icon: '🧚' },
-                { id: 'wolf', name: '影狼', hp: 25, maxHp: 25, damage: 8, turns: 2, maxTurns: 2, type: 'balanced', icon: '🐺' }
+                { id: 'wolf', name: '影狼', hp: 25, maxHp: 25, damage: 8, turns: 2, maxTurns: 2, type: 'balanced', icon: '🐺' },
+                { id: 'ghost', name: '幽灵', hp: 10, maxHp: 10, damage: 12, turns: 2, maxTurns: 2, type: 'output', icon: '👻' }
             ];
             const template = randomPool[randomInt(0, randomPool.length - 1)];
             let turns = template.turns;
             if (player.relics.includes('summoner_manual')) turns++;
             let hp = template.hp;
             if (player.relics.includes('stone_heart') && template.type === 'tank') hp += 20;
+            // P1: 遗物联动 - 召唤之环
+            const summonBonus2 = getRelicSynergyBonus('summon');
+            if (summonBonus2 > 0) hp += summonBonus2 * 10;
 
             gameState.battle.summons.push({ ...template, hp, maxHp: hp, turnsLeft: turns });
             addCombatLog('info', '🔄 新召唤了 ' + template.name);
@@ -4383,7 +5001,15 @@ function winBattle() {
     }
     gameState.player.gold += goldReward;
 
-    document.getElementById('reward-gold').textContent = goldReward;
+    // P1: 遗物联动 - 贪婪
+    const greedBonus = getRelicSynergyBonus('greed');
+    if (greedBonus > 0) {
+        const bonusGold = greedBonus * 5;
+        gameState.player.gold += bonusGold;
+        addCombatLog('synergy', '💰 贪婪联动：额外金币 +' + bonusGold);
+    }
+
+    document.getElementById('reward-gold').textContent = `🪙 获得 ${goldReward} 金币`;
 
     // 生成卡牌奖励
     const rewardCardsContainer = document.getElementById('reward-cards');
@@ -4423,23 +5049,15 @@ function winBattle() {
         cardEl.className = `card ${cardData.type}`;
         cardEl.setAttribute('data-desc', cardData.desc);
 
-        // P2: 关键词徽章 + 稀有度
-        let kwBadge = '';
-        if (cardData.keywords && cardData.keywords.length > 0) {
-            const kwEmojis = { fire: '🔥', frost: '❄️', lightning: '⚡', poison: '☠️', holy: '✨', combo: '🔄', backstab: '🗡️' };
-            const badges = cardData.keywords.filter(k => kwEmojis[k]).map(k => kwEmojis[k]).join('');
-            if (badges) kwBadge = `<div class="card-keywords">${badges}</div>`;
-        }
-        let rarBadge = '';
-        if (cardData.rarity === 'uncommon') rarBadge = `<div class="card-rarity uncommon">↑</div>`;
-        if (cardData.rarity === 'rare') rarBadge = `<div class="card-rarity rare">↑↑</div>`;
-
+        // 奖励卡牌 DOM 结构与 UI 原型 cardHTML 完全一致：
+        // 费用(span 反向旋转校正菱形内可读性) / 稀有度纯色点 / 原画黑框 / 名称 / 描述 / 类型标签
         cardEl.innerHTML = `
-            ${kwBadge}${rarBadge}
-            <div class="card-cost">${cardData.cost}</div>
-            <div class="card-icon">${cardData.icon}</div>
+            <div class="card-cost"><span>${cardData.cost}</span></div>
+            <div class="card-rarity ${cardData.rarity || 'common'}"></div>
+            <div class="card-icon">${cardIconHTML(cardId, cardData)}</div>
             <div class="card-name">${cardData.name}</div>
             <div class="card-desc">${cardData.desc}</div>
+            <div class="card-type">${CARD_TYPE_LABEL[cardData.type] || ''}</div>
         `;
         cardEl.addEventListener('click', function() {
             // 如果已经选择过卡牌,显示提示并返回
@@ -4477,7 +5095,7 @@ function winBattle() {
         rewardCardsContainer.appendChild(cardEl);
     });
 
-    // Boss战额外奖励遗物
+    // Boss战额外奖励遗物（对齐 UI 原型 .relic-banner 样式）
     const relicRewardSection = document.getElementById('relic-reward');
     if (isBoss) {
         relicRewardSection.style.display = 'block';
@@ -4487,20 +5105,25 @@ function winBattle() {
         const randomRelic = Object.keys(RELIC_DB)[randomInt(0, Object.keys(RELIC_DB).length - 1)];
         const relicData = RELIC_DB[randomRelic];
 
-        const relicEl = document.createElement('div');
-        relicEl.className = 'relic-item';
-        relicEl.innerHTML = `
-            <div>${relicData.icon}</div>
-            <div style="font-size: 0.4em; margin-top: 5px;">${relicData.name}</div>
-            <div style="font-size: 0.3em; margin-top: 5px; color: #ffd700; text-align: center;">${relicData.desc}</div>
+        relicContainer.innerHTML = `
+            <div class="relic-banner" role="button" tabindex="0" title="${relicData.desc}">
+                <div class="gem"></div>
+                <div>
+                    <div class="rt">${relicData.name}</div>
+                    <div class="rd">遗物 · ${relicData.desc}</div>
+                </div>
+            </div>
         `;
-        relicEl.title = relicData.desc;
-        relicEl.addEventListener('click', () => {
+        const bannerEl = relicContainer.querySelector('.relic-banner');
+        bannerEl.addEventListener('click', () => {
             addRelic(randomRelic);
             alert('获得遗物:' + relicData.name + '!\n\n' + relicData.desc);
 
             // 进入下一层
             gameState.map.floor++;
+            if (gameState.mode === 'endless') {
+                gameState.endlessFloor++;
+            }
 
             // P3: 层间过渡文本
             const floor = gameState.map.floor;
@@ -4508,8 +5131,12 @@ function winBattle() {
                 setTimeout(() => alert(FLOOR_TRANSITIONS[floor]), 300);
             }
 
-            // 恢复血量(满血)
-            gameState.player.hp = gameState.player.maxHp;
+            // 恢复血量(无尽模式只恢复 50%，正常模式满血)
+            if (gameState.mode === 'endless') {
+                gameState.player.hp = Math.min(gameState.player.maxHp, gameState.player.hp + Math.floor(gameState.player.maxHp * 0.5));
+            } else {
+                gameState.player.hp = gameState.player.maxHp;
+            }
             document.getElementById('player-hp').textContent = `${gameState.player.hp}/${gameState.player.maxHp}`;
 
             // 清空路径、节点类型和已完成节点数据,让下一层生成新数据
@@ -4518,14 +5145,21 @@ function winBattle() {
             gameState.map.completedNodes.clear();  // 清空已完成节点,否则新层的第一行会被锁定
             gameState.map.currentNode = null;
 
-            if (gameState.map.floor > 3) {
+            // 无尽模式逻辑：每 4 层一个 Boss 循环
+            if (gameState.mode === 'endless') {
+                // 无尽模式不结束，继续循环
+                gameState.map.floor = ((gameState.map.floor - 1) % 4) + 1;
+                setEndlessBestFloor(gameState.endlessFloor);
+                saveGame();
+                showScreen('map-screen');
+                generateMap();
+            } else if (gameState.map.floor > 3) {
                 gameOver(true);
             } else {
                 showScreen('map-screen');
                 generateMap();
             }
         });
-        relicContainer.appendChild(relicEl);
     } else if (isElite) {
         // 精英战额外奖励:50% 概率获得药水
         relicRewardSection.style.display = 'block';
@@ -4561,6 +5195,10 @@ function winBattle() {
 }
 
 function healPlayer(amount) {
+    // P1: 遗物联动 - 生命之泉
+    const recoveryBonus = getRelicSynergyBonus('recovery');
+    amount += recoveryBonus * 2;
+
     const oldHp = gameState.player.hp;
     gameState.player.hp = Math.min(gameState.player.maxHp, gameState.player.hp + amount);
     const actualHeal = gameState.player.hp - oldHp;
@@ -4658,7 +5296,7 @@ function openShop() {
         cardDiv.setAttribute('data-desc', cardData.desc);
         cardDiv.innerHTML = `
             <div class="card-cost">${cardData.cost}</div>
-            <div class="card-icon">${cardData.icon}</div>
+            <div class="card-icon">${cardIconHTML(cardId, cardData)}</div>
             <div class="card-name">${cardData.name}</div>
             <div class="card-desc">${cardData.desc}</div>
         `;
@@ -4691,7 +5329,7 @@ function openShop() {
         itemEl.className = 'shop-item';
         itemEl.innerHTML = `
             <div class="relic-item" title="${relicData.desc}">
-                <div>${relicData.icon}</div>
+                <div>${relicIconHTML(relicId, relicData)}</div>
             </div>
             <div class="price">💰 ${price}</div>
         `;
@@ -4819,7 +5457,7 @@ function showRemoveCardModal() {
             cardEl.style.pointerEvents = canRemove ? 'auto' : 'none';
             cardEl.style.cursor = canRemove ? 'pointer' : 'default';
             cardEl.innerHTML = '<div class="card-cost">' + card.data.cost + '</div>' +
-                '<div class="card-icon">' + card.data.icon + '</div>' +
+                '<div class="card-icon">' + cardIconHTML(card.baseId, card.data) + '</div>' +
                 '<div class="card-name">' + card.data.name + (card.upgraded ? ' \u2605' : '') + '</div>' +
                 '<div class="card-desc">' + card.data.desc + '</div>' +
                 '<div style="position:absolute;top:4px;right:6px;font-size:0.7em;color:#f0c040;">x' + card.count + '</div>' +
@@ -4921,7 +5559,7 @@ function restUpgrade() {
         cardEl.setAttribute('data-desc', cardData.desc);
         cardEl.innerHTML = `
             <div class="card-cost">${cardData.cost}</div>
-            <div class="card-icon">${cardData.icon}</div>
+            <div class="card-icon">${cardIconHTML(cardId, cardData)}</div>
             <div class="card-name">${cardData.name}</div>
             <div class="card-desc">${cardData.desc}</div>
             <div style="position: absolute; top: 5px; right: 5px; background: #e94560; padding: 2px 6px; border-radius: 10px; font-size: 0.7em;">x${count}</div>
@@ -5200,27 +5838,15 @@ function showDeckModal() {
         cardEl.className = `card ${cardData.type}`;
         cardEl.setAttribute('data-desc', cardData.desc);
         cardEl.innerHTML = `
-            <div class="card-cost">${cardData.cost}</div>
-            <div class="card-icon">${cardData.icon}</div>
+            <div class="card-cost"><span>${cardData.cost}</span></div>
+            <div class="card-rarity ${cardData.rarity || 'common'}"></div>
+            <div class="card-icon">${cardIconHTML(cardId, cardData)}</div>
             <div class="card-name">${cardData.name}</div>
             <div class="card-desc">${cardData.desc}</div>
-            ${count > 1 ? `<div style="position: absolute; top: 5px; right: 5px; background: #e94560; padding: 2px 6px; border-radius: 10px; font-size: 0.7em;">x${count}</div>` : ''}
+            ${count > 1 ? `<div class="deck-card-count">x${count}</div>` : ''}
         `;
         deckList.appendChild(cardEl);
     });
-
-    // 显示遗物
-    const relicsList = document.getElementById('relics-list');
-    if (relicsList) {
-        relicsList.innerHTML = '';
-        gameState.player.relics.forEach(relicId => {
-            const relicData = RELIC_DB[relicId];
-            const relicEl = document.createElement('div');
-            relicEl.className = 'relic-item-small';
-            relicEl.innerHTML = `<div title="${relicData.name}: ${relicData.desc}">${relicData.icon}</div>`;
-            relicsList.appendChild(relicEl);
-        });
-    }
 
     document.getElementById('deck-modal').classList.add('active');
 }
@@ -5300,7 +5926,7 @@ function showCollectionPanel() {
         const el = document.createElement('div');
         el.className = `collection-item ${unlocked ? 'unlocked' : 'locked'}`;
         el.innerHTML = `
-            <div class="collection-item-icon">${unlocked ? relic.icon : '❓'}</div>
+            <div class="collection-item-icon">${unlocked ? relicIconHTML(id, relic) : '❓'}</div>
             <div class="collection-item-info">
                 <div class="collection-item-name">${unlocked ? relic.name : '未解锁'}</div>
                 <div class="collection-item-desc">${unlocked ? relic.desc : '继续冒险来解锁'}</div>
@@ -5694,6 +6320,11 @@ function updateGlobalStats(victory) {
 // ==================== 游戏结束 ====================
 
 function gameOver(victory) {
+    // 无尽模式：保存最高层数
+    if (gameState.mode === 'endless') {
+        setEndlessBestFloor(gameState.endlessFloor);
+    }
+
     // 游戏结束(胜利或失败)时清除存档
     clearSave();
 
@@ -5795,82 +6426,45 @@ function gameOver(victory) {
 // ==================== 遗物列表 ====================
 
 function showRelicsList() {
-    // 保存当前屏幕,关闭时返回
-    // 关键:确保 previousScreen 不是 relics-screen 自身
-    if (gameState.screen !== 'relics-screen') {
-        gameState.previousScreen = gameState.screen;
-    } else {
-        gameState.previousScreen = gameState.previousScreen || 'map-screen';
-    }
+    const list = document.getElementById('relics-modal-list');
+    list.innerHTML = '';
 
-    const relicsList = document.getElementById('relics-list');
-
-    relicsList.innerHTML = '';
-
-    if (gameState.player.relics.length === 0) {
-        relicsList.innerHTML = '<p style="color: #888; width: 100%; text-align: center;">还没有获得任何遗物</p>';
+    if (!gameState.player.relics.length) {
+        list.innerHTML = '<p style="color: #888; width: 100%; text-align: center; padding: 20px;">还没有获得任何遗物</p>';
     } else {
         gameState.player.relics.forEach(relicId => {
             const relicData = RELIC_DB[relicId];
             if (!relicData) return;
 
-            const relicEl = document.createElement('div');
-            relicEl.className = 'relic-item-small';
-            relicEl.innerHTML = `
-                <div>${relicData.icon}</div>
+            const el = document.createElement('div');
+            el.className = 'relic-item-modal';
+
+            // 标签/协同信息（仅当有同标签协同时才显示，避免单件遗物下方出现多余的标签名称）
+            let tagHtml = '';
+            if (relicData.tag && RELIC_TAGS[relicData.tag]) {
+                const tagInfo = RELIC_TAGS[relicData.tag];
+                const synergyCount = getRelicSynergy(relicData.tag);
+                if (synergyCount > 1) {
+                    tagHtml = `<div class="relic-tag-badge" style="background:${tagInfo.color}22;border:1px solid ${tagInfo.color};color:${tagInfo.color};font-size:0.7em;padding:1px 5px;border-radius:4px;">${tagInfo.icon} ${tagInfo.name} ×${synergyCount}</div>`;
+                }
+            }
+
+            el.innerHTML = `
+                ${relicIconHTML(relicId, relicData)}
                 <div class="relic-name">${relicData.name}</div>
                 <div class="relic-desc">${relicData.desc}</div>
+                ${tagHtml}
             `;
-            relicEl.title = relicData.desc;
-            relicsList.appendChild(relicEl);
+            el.title = relicData.desc;
+            list.appendChild(el);
         });
     }
 
-    showScreen('relics-screen');
+    document.getElementById('relics-modal').classList.add('active');
 }
 
 function closeRelicsList() {
-    try {
-        console.log('[closeRelicsList] 关闭遗物列表, 当前 screen:', gameState.screen, 'previousScreen:', gameState.previousScreen);
-        const prev = gameState.previousScreen || 'map-screen';
-        console.log('[closeRelicsList] 返回目标:', prev);
-
-        // 防御性检查:确保目标屏幕存在
-        const target = document.getElementById(prev);
-        if (!target) {
-            console.error('[closeRelicsList] 目标屏幕不存在:', prev, ',回退到 main-menu');
-        }
-
-        // 仅清除当前屏幕的 class，保留其他屏幕的 floor 类
-        document.querySelectorAll('.screen').forEach(s => {
-            s.classList.remove('active');
-        });
-        // 从目标屏幕移除 floor 类后再重新添加，确保干净
-        const screenToShow = target || document.getElementById('main-menu');
-        screenToShow.classList.remove('floor-1', 'floor-2', 'floor-3');
-        // 恢复楼层主题
-        if (gameState.map && gameState.map.floor > 0 && gameState.map.floor <= 5) {
-            screenToShow.classList.add('floor-' + gameState.map.floor);
-        }
-        screenToShow.classList.add('active');
-        gameState.screen = screenToShow.id;
-
-        console.log('[closeRelicsList] 屏幕切换完成, 当前 screen:', gameState.screen);
-
-        if (prev === 'map-screen') {
-            console.log('[closeRelicsList] 调用 updateMapUI');
-            updateMapUI();
-            console.log('[closeRelicsList] updateMapUI 完成');
-        }
-    } catch (e) {
-        console.error('[closeRelicsList] 错误:', e);
-        // 最后兜底:回 main-menu
-        document.querySelectorAll('.screen').forEach(s => {
-            s.classList.remove('active');
-        });
-        document.getElementById('main-menu').classList.add('active');
-        gameState.screen = 'main-menu';
-    }
+    document.getElementById('relics-modal').classList.remove('active');
 }
 
 // 显式暴露到全局
