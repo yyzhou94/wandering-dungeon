@@ -813,7 +813,7 @@ button, .btn-small {
 .map-row {
     display: flex;
     justify-content: center;
-    gap: clamp(20px, 3.5vw, 36px);
+    gap: clamp(28px, 5vw, 56px);
     position: relative;
 }
 
@@ -1634,15 +1634,49 @@ button, .btn-small {
 /* ===== 商店界面美化 ===== */
 
 .shop-gold {
-    font-family: var(--font-body);
+    font-family: 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
     color: var(--clr-gold);
-    font-size: 1.1em;
+    font-size: 1em;
+    font-weight: 600;
 }
 
+/* 离开商店按钮：严格对齐战斗页 #end-turn（.btn-primary 配色 + #end-turn 尺寸） */
+#leave-shop {
+    display: block;
+    width: max-content;
+    max-width: 100%;
+    margin: var(--space-md) auto 0;
+    padding: var(--space-md) var(--space-xl);
+    font-size: 1rem;
+    font-weight: 600;
+    font-family: inherit;
+    letter-spacing: 0.5px;
+    color: #fff;
+    background: var(--clr-accent);
+    border: 2px solid var(--clr-accent-lt);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#leave-shop:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+    background: var(--clr-accent-lt);
+    border-color: var(--clr-gold);
+}
+
+#leave-shop:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-sm);
+}
+
+/* 每种商品类型独占一行；类型内商品横向排列 */
 .shop-items {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
     margin: var(--space-lg) 0;
 }
 
@@ -1671,14 +1705,16 @@ button, .btn-small {
 .shop-item .price {
     position: absolute;
     bottom: var(--space-xs);
-    right: var(--space-xs);
+    left: 50%;
+    transform: translateX(-50%);
     background: var(--clr-accent);
     color: #fff;
-    font-size: 0.7em;
+    font-size: 1em;
     font-family: var(--font-body);
     padding: 2px 6px;
     border-radius: 10px;
     font-weight: 600;
+    white-space: nowrap;
 }
 
 .shop-section {
@@ -1708,6 +1744,13 @@ button, .btn-small {
     margin-bottom: 10px;
 }
 
+/* 商店卡牌：悬停只垂直上移，不旋转、不放大弹出 */
+.shop-item .card:hover {
+    transform: translateY(-12px);
+    box-shadow: var(--shadow-md);
+    z-index: 10;
+}
+
 .relic-item {
     width: 80px;
     height: 80px;
@@ -1729,22 +1772,42 @@ button, .btn-small {
     box-shadow: var(--shadow-sm);
 }
 
+/* 药水图标 —— 参考 ui-prototype 战斗页的圆形药水瓶风格 */
 .potion-item {
-    width: 60px;
-    height: 80px;
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
-    border-radius: 0 0 30px 30px;
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 26px;
+    border-radius: 50%;
+    border: 2px dashed var(--clr-heal);
+    background: radial-gradient(circle at 50% 32%, rgba(106,158,90,.28), rgba(106,158,90,.06) 72%);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 1.5em;
+    font-size: 2rem;
     position: relative;
+    box-shadow: 0 0 14px -4px rgba(106,158,90,.55);
+}
+
+/* 玻璃高光，强化“药水瓶”质感 */
+.potion-item::before {
+    content: '';
+    position: absolute;
+    top: 14%;
+    left: 22%;
+    width: 26%;
+    height: 16%;
+    border-radius: 50%;
+    background: rgba(255,255,255,.30);
+    filter: blur(2px);
+    pointer-events: none;
 }
 
 .potion-item:hover {
     transform: translateY(-5px);
+    box-shadow: 0 0 22px -2px rgba(106,158,90,.85);
+    border-color: var(--clr-gold);
 }
 
 /* 休息处 */
@@ -5597,3 +5660,182 @@ button, .card, .class-card, .map-node, .shop-item, .potion-slot {
 .card {
     animation-duration: 0.35s;
 }
+
+/* ============================================================
+   地图界面全面重做 v2 —— 暗黑地牢石墙风
+   纯 CSS 覆盖；仅对死规则做清理（原 #map-screen::before 的方格网格已移除）
+   ============================================================ */
+
+/* ---- 楼层主题色钩子：showScreen 已为地图加 floor-${floor} 类 ---- */
+#map-screen { --map-accent: var(--clr-accent); position: relative; }
+#map-screen.floor-1 { --map-accent: var(--floor-1); }
+#map-screen.floor-2 { --map-accent: var(--floor-2); }
+#map-screen.floor-3 { --map-accent: var(--floor-3); }
+#map-screen.floor-4 { --map-accent: var(--floor-4); }
+#map-screen.floor-5 { --map-accent: var(--floor-5); }
+
+/* 让内容始终浮在氛围层之上 */
+#map-screen.active > * { position: relative; z-index: 1; }
+
+/* ---- 背景：与首页一致（--clr-bg 底色 + 顶部微弱烛光） ---- */
+#map-screen::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: var(--clr-bg);
+    background-image: radial-gradient(ellipse at 50% 30%, rgba(212, 149, 60, 0.05) 0%, transparent 60%);
+}
+
+/* ---- 顶部信息条：融入楼层主题强调色，楼层/血量/金币同行，留白加大 ---- */
+#map-screen .map-header {
+    border-color: var(--clr-gold);
+    padding: var(--space-lg) var(--space-lg);
+    background: linear-gradient(90deg, rgba(212, 160, 60, 0.12), rgba(212, 160, 60, 0.02));
+    background: linear-gradient(90deg,
+        color-mix(in srgb, var(--map-accent) 18%, rgba(212, 160, 60, 0.10)),
+        rgba(212, 160, 60, 0.02));
+    gap: var(--space-xl);
+}
+/* 楼层与血量/金币/按钮同处一行（取消独占第一行），按钮间距加大 */
+#map-screen .header-buttons { gap: var(--space-lg); }
+#map-screen .map-legend {
+    border-color: var(--clr-gold);
+    padding: var(--space-lg) var(--space-lg);
+    row-gap: var(--space-md);
+    background: linear-gradient(90deg, rgba(212, 160, 60, 0.12), rgba(212, 160, 60, 0.02));
+    background: linear-gradient(90deg,
+        color-mix(in srgb, var(--map-accent) 14%, rgba(212, 160, 60, 0.10)),
+        rgba(212, 160, 60, 0.02));
+}
+
+/* ---- 节点：符文石风格（彩色石缘 + 石面 + 类型核心辉光） ---- */
+#map-screen .map-node {
+    width: clamp(60px, 9vw, 84px);
+    height: clamp(60px, 9vw, 84px);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(1.6em, 3vw, 2.4em);
+    line-height: 1;
+    cursor: pointer;
+    color: var(--clr-text);
+    background: var(--node-edge, #4a4038);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.25s ease;
+    position: relative;
+    z-index: 2;
+}
+
+#map-screen .map-node.battle { --node-edge: #8a4530; --node-core: rgba(196, 90, 60, 0.32); }
+#map-screen .map-node.elite  { --node-edge: #9a7230; --node-core: rgba(212, 160, 60, 0.32); }
+#map-screen .map-node.boss   { --node-edge: #6a4f8a; --node-core: rgba(139, 111, 170, 0.38); }
+#map-screen .map-node.rest   { --node-edge: #4f7a45; --node-core: rgba(106, 158, 90, 0.32); }
+#map-screen .map-node.shop   { --node-edge: #3f6f88; --node-core: rgba(90, 143, 168, 0.32); }
+#map-screen .map-node.event  { --node-edge: #3f6f9c; --node-core: rgba(90, 158, 196, 0.32); }
+
+#map-screen .map-node::before {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    z-index: 0;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    background:
+        radial-gradient(circle at 50% 38%, var(--node-core), transparent 70%),
+        linear-gradient(160deg, rgba(62, 54, 46, 0.97), rgba(22, 19, 16, 0.98));
+}
+/* 节点图标浮于石面之上 */
+#map-screen .map-node span { position: relative; z-index: 2; }
+
+#map-screen .map-node:hover {
+    transform: scale(1.1);
+    filter: brightness(1.25) drop-shadow(0 0 10px rgba(212, 160, 60, 0.45));
+    z-index: 10;
+}
+
+/* 已访问：暗淡 + 绿勾 */
+#map-screen .map-node.completed { opacity: 0.62; filter: saturate(0.7); }
+#map-screen .map-node.completed::after {
+    content: '✓';
+    position: absolute;
+    top: 4px;
+    right: 6px;
+    color: var(--clr-heal);
+    font-size: 1.1em;
+    font-weight: 700;
+    z-index: 10;
+    text-shadow: 0 0 6px rgba(106, 158, 90, 0.7);
+}
+
+/* 锁定：更暗 + 锁标 */
+#map-screen .map-node.locked { opacity: 0.32; cursor: not-allowed; }
+#map-screen .map-node.locked::after {
+    content: '🔒';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.2em;
+    z-index: 20;
+}
+
+/* 可选：金色呼吸光晕（保留原 availablePulse 关键帧意图） */
+#map-screen .map-node.available {
+    animation: availablePulse 2s ease-in-out infinite;
+    z-index: 5;
+}
+#map-screen .map-node.available:hover {
+    animation: none;
+    transform: scale(1.12);
+    z-index: 10;
+}
+
+/* Boss 节点：紫色特有脉冲 */
+#map-screen .map-node.boss.available { animation: bossPulse 1.5s ease-in-out infinite; }
+
+/* 当前位置：楼层主题色光环 + 专属脉冲（"你在这里"） */
+#map-screen .map-node.current {
+    animation: currentNodePulse 2.2s ease-in-out infinite;
+    z-index: 8;
+}
+@keyframes currentNodePulse {
+    0%, 100% {
+        filter: brightness(1.15) drop-shadow(0 0 6px var(--map-accent, var(--clr-accent)));
+        transform: scale(1.04);
+    }
+    50% {
+        filter: brightness(1.35) drop-shadow(0 0 14px var(--map-accent, var(--clr-accent)));
+        transform: scale(1.1);
+    }
+}
+
+/* 当前节点若同时为已完成节点，保持点亮（不叠加暗淡） */
+#map-screen .map-node.completed.current { opacity: 1; }
+
+/* ---- 路径连线：按状态着色（JS 为每条 line 打 .locked/.available/.completed） ---- */
+.map-line line {
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    transition: stroke 0.45s ease, opacity 0.45s ease;
+}
+.map-line line.locked {
+    stroke: rgba(150, 138, 122, 0.16);
+    stroke-dasharray: 4 7;
+    opacity: 0.5;
+}
+.map-line line.available {
+    stroke: var(--map-accent, var(--clr-accent));
+    stroke-dasharray: 6 6;
+    opacity: 0.9;
+    filter: drop-shadow(0 0 4px var(--map-accent, var(--clr-accent)));
+    animation: pathFlow 1.1s linear infinite;
+}
+.map-line line.completed {
+    stroke: var(--clr-gold);
+    stroke-dasharray: none;
+    opacity: 0.85;
+    filter: drop-shadow(0 0 4px rgba(212, 160, 60, 0.5));
+}
+@keyframes pathFlow { to { stroke-dashoffset: -24; } }
