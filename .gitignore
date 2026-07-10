@@ -18,7 +18,5 @@ CHANGELOG.md
 游戏BUG修复与平衡性调整完成报告.md
 
 # 原画 / 生成素材（体积过大，不进 git）
-generated-images/
 
 # 代理工作目录（内部运行记忆，非仓库内容）
-.workbuddy/
