@@ -5838,4 +5838,72 @@ button, .card, .class-card, .map-node, .shop-item, .potion-slot {
     opacity: 0.85;
     filter: drop-shadow(0 0 4px rgba(212, 160, 60, 0.5));
 }
+
+/* ============================================================
+   移动端自适应安全网（纯 CSS 覆盖，不动 game.js 逻辑）
+   目标：手机（≤640px，重点 320–520px）不破图、不裁切、不横向溢出
+   策略：全局图片封顶 + 地图/战斗顶栏/弹窗/手牌的窄屏兜底
+   ============================================================ */
+
+/* —— 全局图片兜底：任何图片都不许超出容器宽度（防破图第一道闸） —— */
+img { max-width: 100%; }
+
+@media (max-width: 640px) {
+
+    /* 根容器：手机上铺满屏宽并收紧内边距，给内容留足横向空间 */
+    #game-container {
+        width: 100%;
+        padding: var(--space-sm) var(--space-md);
+        font-size: clamp(12px, 4vw, 15px);
+    }
+
+    /* —— 地图：缩小节点与间距，保证整行落在屏宽内，不再被左右裁切 —— */
+    #map-screen { padding: var(--space-sm); }
+    .map-container { padding: var(--space-md) var(--space-sm); min-height: 320px; }
+    .map-row { gap: clamp(14px, 4vw, 24px); }
+    .map-node {
+        width: clamp(46px, 13vw, 64px);
+        height: clamp(46px, 13vw, 64px);
+        font-size: clamp(1.4em, 4vw, 2em);
+    }
+    .map-legend { flex-wrap: wrap; gap: var(--space-xs) var(--space-sm); }
+
+    /* —— 战斗顶栏：允许换行，避免 nowrap 文本把整行顶破 —— */
+    .battle-header { flex-wrap: wrap; gap: var(--space-xs); row-gap: 4px; }
+    .battle-header #battle-class,
+    .battle-header #battle-floor,
+    .battle-header #battle-turn { white-space: normal; }
+
+    /* —— 手牌：极窄屏适度缩小卡牌（换行已天然安全） —— */
+    #battle-screen .hand-cards .card,
+    .hand-cards .card { width: clamp(96px, 28vw, 128px); }
+
+    /* —— 职业选择：窄屏已是 2/1 列，这里再兜底间距 —— */
+    .class-list { gap: var(--space-md); margin: var(--space-md) auto; }
+    .class-card { padding: var(--space-md); }
+
+    /* —— 弹窗：贴边铺满，杜绝 700px 上限在小屏溢出 —— */
+    .modal { padding: 0; }
+    .modal-content {
+        max-width: 100%;
+        width: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+        padding: var(--space-lg);
+    }
+
+    /* —— 商店：小屏分区纵向堆叠兜底 —— */
+    .shop-items { gap: var(--space-lg); }
+}
+
+@media (max-width: 380px) {
+    /* 超小屏（iPhone SE / 320px）：进一步压缩战斗顶栏与卡牌、地图节点 */
+    .battle-header { font-size: 0.85rem; }
+    #battle-screen .hand-cards .card,
+    .hand-cards .card { width: clamp(84px, 26vw, 104px); }
+    .map-node {
+        width: clamp(42px, 12vw, 56px);
+        height: clamp(42px, 12vw, 56px);
+    }
+}
 @keyframes pathFlow { to { stroke-dashoffset: -24; } }
