@@ -1,14 +1,15 @@
-# ⚔️ 流浪地牢 - 卡牌构筑 Roguelike
+# ⚔️ 流浪地牢 · Wandering Dungeon
 
 <div align="center">
 
-![流浪地牢](https://img.shields.io/badge/流浪地牢-卡牌构筑 Roguelike-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Status](https://img.shields.io/badge/status-开发中-orange)
+![类型](https://img.shields.io/badge/类型-卡牌构筑%20Roguelike-blue)
+![版本](https://img.shields.io/badge/版本-v4.0.0-green)
+![协议](https://img.shields.io/badge/license-MIT-green)
+![技术](https://img.shields.io/badge/技术-纯前端%20零依赖-orange)
 
 **一个精美的纯前端卡牌构筑 Roguelike 网页游戏**
 
-[在线试玩](https://your-name.pages.dev) | [设计文档](GAME_DESIGN.md) | [报告 Bug](https://github.com/your-username/dungeon-crawler/issues)
+[🎮 在线试玩 (GitHub Pages)](https://yyzhou94.github.io/wandering-dungeon/) ｜ [📋 更新日志](CHANGELOG.md) ｜ [🎨 UI 设计规范](design/UI设计规范.md) ｜ [🐞 报告 Bug](https://github.com/yyzhou94/wandering-dungeon/issues)
 
 </div>
 
@@ -16,27 +17,24 @@
 
 ## 🎮 游戏特色
 
-- **✨ 3 个职业**：战士、法师、盗贼，每个职业有独特的初始卡牌和属性
-- **🃏 30+ 张卡牌**：攻击卡、技能卡、防御卡，支持锻造升级
-- **🏺 遗物系统**：获得各种被动增益道具，改变游戏玩法
-- **🗺️ 动态地图**：4 列布局，每层随机生成 8-12 条路径
-- **⚔️ 难度递增**：敌人属性、商店价格随楼层动态提升
-- **🎯 完整系统**：战斗、商店、休息、事件、Boss 战、新手引导
-- **💾 本地存档**：保存最高分和游戏统计
-- **📱 响应式设计**：完美适配桌面和移动端
+- **🦸 8 大职业**：战士 / 法师 / 盗贼 / 武僧 / 圣骑士 / 游侠 / 死灵法师 / 召唤师，各有专属初始牌组、属性与玩法流派
+- **🃏 94 张卡牌**：攻击 / 防御 / 技能 / 能力 / 诅咒，支持锻造升级与三级稀有度（普通 · 稀有 · 史诗）
+- **🏺 29 种遗物**：普通 / 稀有 / 史诗 / 传说品级加权掉落，含同标签「联动」增益系统
+- **🗺️ 5 层地牢**：每层多行节点、随机路径生成，保证所有节点可达
+- **⚔️ 难度递增**：敌人属性、商店价格随楼层与难度动态提升
+- **🔥 7 大关键词**：火焰 / 冰霜 / 闪电 / 剧毒 / 圣光 / 连击 / 背刺，卡牌与遗物形成路线联动
+- **🧩 12 项进阶挑战**：减益持久、敌人强化、硬核模式等自由开关，支持一键全选
+- **📅 每日挑战**：固定种子 + 固定职业（seeded PRNG），可分享验证、比拼社区排行榜
+- **🏆 30 个成就 + 元进度**：跨周目永久加成（生命 / 力量 / 金币）
+- **👑 Boss 二阶段**：上古邪龙、巫妖王在残血时进入强化形态
+- **💾 本地存档**：最高分、统计、设置与元进度均通过 `localStorage` 持久化
+- **📱 响应式设计**：完美适配桌面与移动端
 
 ---
 
-## 🎨 游戏截图
+## 🎨 关于美术素材
 
-> TODO: 添加游戏截图
-
-- 主菜单界面
-- 职业选择
-- 地图探索
-- 战斗场景
-- 卡牌奖励
-- 遗物系统
+游戏内所有立绘（职业头像、敌人精灵、卡牌插画、遗物图标）均为 AI 生成的概念原画，存放于仓库根目录的 **`generated-images/`**（共 155 张 PNG，约 210 MB）。克隆仓库后即可正常显示；若本地缺失该目录，对应图片位置会显示为空白占位。
 
 ---
 
@@ -44,83 +42,37 @@
 
 ### 方式一：在线试玩（推荐）
 
-直接访问部署好的版本：
-- **Cloudflare Pages**: [https://your-name.pages.dev](https://your-name.pages.dev)
-- **GitHub Pages**: [https://your-username.github.io/dungeon-crawler](https://your-username.github.io/dungeon-crawler)
+直接访问部署在 GitHub Pages 的版本：
+
+👉 **https://yyzhou94.github.io/wandering-dungeon/**
 
 ### 方式二：本地运行
 
 1. **克隆仓库**
    ```bash
-   git clone https://github.com/your-username/dungeon-crawler.git
-   cd dungeon-crawler
+   git clone https://github.com/yyzhou94/wandering-dungeon.git
+   cd wandering-dungeon
    ```
 
-2. **直接在浏览器中打开**
+2. **用浏览器打开**
    ```bash
-   # 方法 A：直接双击 index.html
-   # 方法 B：使用 Python 本地服务器
+   # 方式 A：直接双击 index.html
+   # 方式 B：启动本地静态服务器（推荐，避免个别浏览器对本地文件的限制）
    python -m http.server 8080
-   # 访问 http://localhost:8080
+   # 然后访问 http://localhost:8080
    ```
+
+> 💡 游戏为纯前端、零依赖、无需构建，打开即玩。
 
 ---
 
-## 📦 部署指南
+## 📦 部署到 GitHub Pages
 
-### 部署到 Cloudflare Pages
+1. 进入仓库 **Settings → Pages**
+2. **Source** 选择 **`main`** 分支、目录选根目录（`/`）后保存
+3. 等待数分钟，访问 `https://yyzhou94.github.io/wandering-dungeon/`
 
-#### 方法 A：通过 GitHub 自动部署（推荐）
-
-1. **推送到 GitHub**
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit: 流浪地牢游戏"
-   git branch -M main
-   git remote add origin https://github.com/你的用户名/dungeon-crawler.git
-   git push -u origin main
-   ```
-
-2. **在 Cloudflare 中设置**
-   - 登录 [Cloudflare Dashboard](https://dash.cloudflare.com/)
-   - 进入 **Pages** → **Create a project**
-   - 选择 **Connect to Git**
-   - 选择 `dungeon-crawler` 仓库
-   - 配置：
-     - **Framework preset**: None
-     - **Build command**: 留空（纯静态，无需构建）
-     - **Build output directory**: 留空（默认为根目录）
-   - 点击 **Save and Deploy**
-
-#### 方法 B：直接上传
-
-1. 在 Cloudflare Pages 中选择 **Upload Assets**
-2. 上传以下文件：
-   - `index.html`
-   - `game.js`
-   - `styles.css`
-   - `README.md`（可选）
-3. 部署完成
-
-### 部署到 GitHub Pages
-
-1. **推送到 GitHub**
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git branch -M main
-   git remote add origin https://github.com/你的用户名/dungeon-crawler.git
-   git push -u origin main
-   ```
-
-2. **开启 GitHub Pages**
-   - 进入仓库页面
-   - 点击 **Settings** → **Pages**
-   - 在 **Source** 下选择 **main branch**
-   - 点击 **Save**
-   - 等待几分钟，访问 `https://你的用户名.github.io/dungeon-crawler/`
+（如需 Cloudflare Pages，连接同一仓库、Framework preset 选 `None`、Build command 与输出目录均留空即可。）
 
 ---
 
@@ -128,203 +80,132 @@
 
 | 技术 | 说明 |
 |------|------|
-| **HTML5** | 页面结构和游戏容器 |
-| **CSS3** | 样式、动画、响应式设计 |
-| **JavaScript (ES6+)** | 游戏逻辑、状态管理 |
-| **LocalStorage** | 保存游戏进度和统计 |
-| **SVG** | 动态地图路径连线 |
+| **HTML5** | 页面结构与游戏容器 |
+| **CSS3** | 样式、动画、石墙地牢主题与响应式布局 |
+| **JavaScript (ES6+)** | 游戏逻辑、状态管理与战斗计算 |
+| **LocalStorage** | 存档、统计与设置持久化 |
+| **SVG** | 地图节点路径动态连线 |
 
-**特点**：
-- ✅ 纯前端，零依赖
-- ✅ 无需构建，直接运行
-- ✅ 模块化代码结构
-- ✅ 响应式布局
+**特点**：✅ 纯前端零依赖 ｜ ✅ 无需构建直接运行 ｜ ✅ 模块化代码结构 ｜ ✅ 响应式布局
 
 ---
 
 ## 📁 项目结构
 
 ```
-dungeon-crawler/
-├── index.html          # 主页面入口
-├── game.js             # 游戏核心逻辑
-├── styles.css          # 全局样式
-├── GAME_DESIGN.md      # 详细游戏设计文档
-├── README.md           # 项目说明（本文件）
-├── .gitignore          # Git 忽略配置
-└── LICENSE             # 开源许可证
+wandering-dungeon/
+├── index.html              # 主页面入口（含职业选择等界面结构）
+├── game.js                 # 游戏核心逻辑（约 6000 行 / 336 KB）
+├── styles.css              # 全局样式与地牢主题
+├── README.md               # 本文件
+├── CHANGELOG.md            # 版本更新日志
+├── design/
+│   └── UI设计规范.md        # UI 设计规范参考
+├── generated-images/       # AI 生成的概念原画（155 张 PNG，约 210 MB）
+└── .gitignore              # Git 忽略配置
 ```
-
-### 核心文件说明
-
-- **`index.html`**: 游戏 UI 结构，包含所有界面容器
-- **`game.js`**: 完整游戏逻辑（约 2000 行代码）
-  - 游戏状态管理
-  - 地图生成系统
-  - 战斗计算系统
-  - 卡牌/遗物/事件系统
-- **`styles.css`**: 游戏视觉样式
-  - 响应式布局
-  - 动画效果
-  - 主题配色
 
 ---
 
 ## 🎯 游戏目标
 
-1. **探索地牢**：通过 3 层地牢，每层 4 行节点
-2. **构筑卡组**：收集卡牌，升级强化
-3. **获取遗物**：获得稀有被动道具
-4. **击败 Boss**：挑战每层的最终 Boss
-5. **冲击高分**：解锁成就，挑战自我
+1. **探索地牢**：通关 5 层地牢，逐层解锁节点
+2. **构筑卡组**：收集卡牌、锻造升级、调整流派
+3. **获取遗物**：积累被动增益与联动组合
+4. **击败 Boss**：挑战每层最终 Boss，并挺进第 5 层
+5. **冲击高分**：解锁成就、累积元进度、挑战进阶模式
 
 ### 胜利条件
-- 击败第 3 层的最终 Boss（远古巨龙）
-- 获得最高分并保存
+击败 **第 5 层的最终 Boss** 即通关，成绩与最高分将被保存。
 
 ---
 
-## 🎮 职业介绍
+## 🦸 职业介绍
 
-### ⚔️ 战士
-- **生命值**: 80 HP
-- **初始能量**: 3
-- **初始遗物**: 燃烧之血（战斗结束恢复 6 HP）
-- **特点**: 高生存能力，擅长近战
-- **初始卡牌**: 重击、巨剑、铁波等
-
-### 🔮 法师
-- **生命值**: 60 HP
-- **初始能量**: 3
-- **初始遗物**: 蛇之戒指（战斗开始额外抽 2 牌）
-- **特点**: 高爆发伤害，抽牌能力强
-- **初始卡牌**: 魔法飞弹、火球、护盾等
-
-### 🗡️ 盗贼
-- **生命值**: 65 HP
-- **初始能量**: 3
-- **初始遗物**: 船锚（战斗开始获得 10 格挡）
-- **特点**: 快速攻击，资源丰富
-- **初始卡牌**: 快速攻击、飞刀、背刺等
+| 职业 | 图标 | 生命值 | 初始能量 | 玩法定位 |
+|------|------|-------:|--------:|----------|
+| 战士 | ⚔️ | 80 | 3 | 高生存、近战压制 |
+| 法师 | 🔮 | 60 | 4 | 高爆发、法术连发 |
+| 盗贼 | 🗡️ | 65 | 3 | 快速攻击、资源运营 |
+| 武僧 | 👊 | 75 | 3 | 连击叠层、攻防一体 |
+| 圣骑士 | 🛡️ | 90 | 3 | 坦克肉盾、治疗辅助 |
+| 游侠 | 🏹 | 68 | 3 | 精准叠加、状态控制 |
+| 死灵法师 | 💀 | 75 | 3 | 献血换伤、灵魂碎片 |
+| 召唤师 | 📚 | 62 | 3 | 召唤作战、槽位管理 |
 
 ---
 
-## 🎨 核心系统
+## 🧩 核心系统
 
 ### 1. 卡牌系统
-- **攻击牌**: 造成伤害
-- **防御牌**: 获得格挡
-- **技能牌**: 特殊效果
-- **锻造升级**: 减少费用，增强效果
+- **类型**：攻击 / 防御 / 技能 / 能力 / 诅咒
+- **稀有度**：普通 · 稀有 · 史诗（奖励按稀有度加权生成）
+- **锻造升级**：降低费用、增强效果
 
 ### 2. 遗物系统
-- **普通遗物**: 燃烧之血、蛇之戒指等
-- **稀有遗物**: 青铜鳞、水银沙漏等
-- **史诗遗物**: 诅咒钥匙、永恒羽毛等
+- **品级**：普通(白) · 稀有(蓝) · 史诗(紫) · 传说(金)，加权掉落
+- **联动标签**：同标签遗物叠加产生协同增益
+- **遗物锁定**：单局最多锁定 2 个，避免被替换或重复掉落
 
 ### 3. 地图系统
-- **节点类型**: 战斗、商店、休息、事件、Boss
-- **路径生成**: 可达性算法，保证所有节点可到达
-- **动态解锁**: 完成节点后解锁下一行
+- **节点类型**：战斗 / 精英 / 商店 / 休息 / 事件 / Boss
+- **路径生成**：可达性算法保证全部节点可到达
+- **动态解锁**：完成当前行节点后解锁下一行
 
 ### 4. 战斗系统
-- **回合制**: 玩家回合 → 敌人回合
-- **能量管理**: 每回合 3-4 点能量
-- **状态效果**: 力量、敏捷、虚弱、易伤
-- **遗物联动**: 各种遗物影响战斗
+- **回合制**：玩家回合 → 敌人回合
+- **能量管理**：每回合 3–4 点能量
+- **状态效果**：力量、敏捷、虚弱、易伤、中毒等
+- **Boss 二阶段**：残血触发形态切换与强化特效
+
+### 5. 关键词系统
+7 种关键词（火焰 / 冰霜 / 闪电 / 剧毒 / 圣光 / 连击 / 背刺）可与对应路线及「之心」类遗物形成联动，例如火焰牌 + 燃烧路线额外伤害、闪电链 + 连锁路线伤害翻倍。
+
+### 6. 进阶与挑战
+- **进阶挑战**：12 项自由开关（减益持久、敌人强化、无休息、硬核模式等），可一键全选
+- **每日挑战**：固定种子 + 固定职业，支持社区排行榜竞争
+- **元进度**：每通关累积永久加成，跨周目生效
 
 ---
 
-## 📝 开发日志
+## 📝 更新日志（摘要）
 
-### 最新版本: v0.3.0 (2026-04-27)
+完整记录见 [CHANGELOG.md](CHANGELOG.md)。
 
-#### BUG 修复（共 8 个）
-- 🐛 修复第 3/4 层 Boss 类型引用不存在的问题（`boss_poison_spider`→`boss_lich_king`，`boss_vampire`→`boss_ancient_dragon`）
-- 🐛 修复 Boss 战小兵池中引用不存在的 `phantom` 敌人类型
-- 🐛 修复普通战斗敌人池中引用不存在的 `stone_golem`、`phantom`、`necromancer` 敌人类型
-- 🐛 修复精英战斗引用不存在的 `elite_ancient_dragon` 敌人类型
-- 🐛 修复 `startEliteBattle()` 使用旧的单对象 `gameState.enemy`，改为多敌人数组结构
-- 🐛 修复 `usePotion()` 使用旧的 `gameState.battle.enemy.currentHp` 判断
-- 🐛 修复 `shakeOnHeavyAttack()` 使用旧的单敌人对象引用
-- 🐛 修复 `startBossShake()` 使用旧的单敌人对象引用
-
-#### 平衡性调整
-
-**敌人数值调整：**
-- ⚖️ 第一层普通敌人伤害降低：哥布林 8→6，史莱姆 6→5，骷髅 7→6
-- ⚖️ Boss 伤害降低 15–30%：哥布林王 15→12，巫妖 18→15，远古巨龙 22→18，巫妖王 25→20，上古邪龙 28→22
-- ⚖️ 多敌人同时行动的伤害分摊系数：25%→40%（遭遇多敌人时承伤更低）
-- ⚖️ Boss 战第 1 层援兵数量：1 只→0 只
-
-**奖励调整：**
-- 💰 普通战斗金币奖励：10–20→20–35
-- 💰 精英战斗金币奖励：25–40→40–60
-
-**卡牌数值调整：**
-- 🃏 魔法飞弹：8 伤害→10 伤害（提高，单体）
-- 🃏 火球术：20 伤害→15 伤害（降低，费用不变）
-- 🃏 快速攻击：4 伤害→5 伤害（提高，1 费）
-- 🃏 背刺：16 伤害→14 伤害（降低，高额触发伤害）
-- 🃏 切割：7 伤害→9 伤害（提高，多段）
-- 🃏 陨石雨：10 伤害→8 伤害（降低，AOE 全体）
-- 🃏 处决：25 伤害→20 伤害（降低，即时终结条件）
-
-> 详细修复报告见 [游戏BUG修复与平衡性调整完成报告.md](游戏BUG修复与平衡性调整完成报告.md)
-
----
-
-### v0.2.0 (2026-04-17)
-
-#### 新增功能
-- ✅ 新手引导系统（5 步教程）
-- ✅ 动态难度调整（每层 +20%）
-- ✅ 多路径地图生成（8-12 条路径）
-- ✅ 遗物列表查看界面
-- ✅ 商店价格随楼层递增
-
-#### 修复问题
-- 🐛 修复进入新楼层时节点锁定问题
-- 🐛 修复卡牌选择无反馈问题
-- 🐛 修复 Boss 战卡牌重复选择问题
-- 🐛 统一提示系统为 alert 弹窗
-
-#### 优化改进
-- ⚡ 优化路径生成算法
-- ⚡ 改进 UI 视觉反馈
-- ⚡ 增强移动端适配
-
-> 详细开发记录见 [.workbuddy/memory/](.workbuddy/memory/)
+- **v4.0.0** (2026-07-10)：地图与商店全面美化 —— 石墙地牢风、符石节点、路径流动着色、商店按类型横排重排
+- **v3.0** (2026-07-07)：进阶挑战系统、每日挑战、7 关键词系统、卡牌稀有度系统
+- **v2.0** (2026-07-02)：遗物品级加权掉落、30 成就 + 元进度、Boss 二阶段、遗物锁定
+- **v1.0** (2026-05-01)：初始版本，3 职业 / 5 层地牢 / 卡牌战斗 / 遗物 / 商店锻造事件
 
 ---
 
 ## 🤝 贡献指南
 
-欢迎贡献代码！提交 PR 前请确保：
-1. 代码符合现有风格
-2. 测试过主要功能
-3. 更新相关文档
+欢迎贡献！提交 PR 前请确保：
+1. 代码风格与现有结构一致
+2. 主要功能已自测
+3. 相关文档（README / CHANGELOG）同步更新
 
 ---
 
 ## 📄 许可证
 
-MIT License - 自由使用、修改和分发
+[MIT License](https://opensource.org/licenses/MIT) —— 可自由使用、修改与分发。
 
 ---
 
 ## 📮 联系方式
 
-- **问题反馈**: [GitHub Issues](https://github.com/your-username/dungeon-crawler/issues)
-- **功能建议**: 直接提 PR 或开 Issue
-- **作者**: [你的用户名](https://github.com/your-username)
+- **问题反馈**：[GitHub Issues](https://github.com/yyzhou94/wandering-dungeon/issues)
+- **功能建议**：直接提 PR 或开 Issue
+- **作者**：[@yyzhou94](https://github.com/yyzhou94)
 
 ---
 
 <div align="center">
 
-**Made with ❤️ by 你的用户名**
+**Made with ❤️ by yyzhou94**
 
-⭐ 如果这个项目对你有帮助，请给一个 Star！
+⭐ 如果这个项目对你有帮助，欢迎点个 Star！
 
 </div>
