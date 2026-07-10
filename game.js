@@ -2320,6 +2320,7 @@ function renderMap() {
     }, 100);
 
     updateMapUI();
+    refreshMapDecorations();
 }
 
 function generateMap() {
@@ -2493,6 +2494,7 @@ function generateMap() {
     // 生成随机路径的连线(延迟执行,确保元素已渲染)
     setTimeout(() => {
         generatePathLines(nodesContainer, paths);
+        refreshMapDecorations();
     }, 100);
 }
 
@@ -2708,9 +2710,6 @@ function generatePathLines(nodesContainer, paths) {
 
     const rows = nodesContainer.querySelectorAll('.map-row');
 
-    // 统一使用灰色,不区分路径颜色
-    const strokeColor = '#888';
-
     // 遍历所有路径,为每条路径画线
     paths.forEach((path) => {
         // 遍历路径,为每两个相邻节点画线
@@ -2747,24 +2746,58 @@ function generatePathLines(nodesContainer, paths) {
             const endX = nextRect.left + nextRect.width / 2 - containerRect.left;
             const endY = nextRect.top - containerRect.top;
 
-            // 创建线条
+            // 创建线条（颜色/状态交由 CSS + recolorMapLines 控制）
             const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
             line.setAttribute('x1', startX);
             line.setAttribute('y1', startY);
             line.setAttribute('x2', endX);
             line.setAttribute('y2', endY);
-            line.setAttribute('stroke', strokeColor);
-            line.setAttribute('stroke-width', '2');
-            line.setAttribute('stroke-dasharray', '5,5');
-            line.setAttribute('opacity', '0.6');
+            line.setAttribute('class', 'map-path-line');
+            line.dataset.from = `${current.row}-${current.col}`;
+            line.dataset.to = `${next.row}-${next.col}`;
 
             svg.appendChild(line);
             nodesContainer.appendChild(svg);
         }
     });
+
+    recolorMapLines(nodesContainer);
 }
 
 
+/* 按节点状态为每条路径连线着色：已完成=金实线，可走=楼层主题色流动虚线，未解锁=暗淡 */
+function recolorMapLines(container) {
+    const lines = container.querySelectorAll('.map-line line');
+    lines.forEach(line => {
+        const from = line.dataset.from;
+        const to = line.dataset.to;
+        if (!from || !to) return;
+        const fromDone = gameState.map.completedNodes.has(from);
+        const toDone = gameState.map.completedNodes.has(to);
+        const toEl = document.querySelector(`[data-node-id="${to}"]`);
+        let status = 'locked';
+        if (fromDone && toDone) status = 'completed';
+        else if (fromDone && toEl && toEl.classList.contains('available')) status = 'available';
+        line.setAttribute('class', 'map-path-line ' + status);
+    });
+}
+
+/* 统一刷新地图装饰：连线着色 + 当前位置标记 */
+function refreshMapDecorations() {
+    const container = document.getElementById('map-nodes');
+    if (!container) return;
+    recolorMapLines(container);
+
+    // 当前位置标记（清除旧的，避免残留）
+    container.querySelectorAll('.map-node.current').forEach(n => n.classList.remove('current'));
+    if (gameState.map.currentNode) {
+        const el = container.querySelector(`[data-node-id="${gameState.map.currentNode.id}"]`);
+        if (el) {
+            el.classList.add('current');
+            el.setAttribute('aria-label', '当前位置');
+        }
+    }
+}
 
 function enterNode(node) {
     console.log(`[enterNode] Clicked node: ${node.id}, type: ${node.type}`);
@@ -2810,6 +2843,8 @@ function enterNode(node) {
             unlockNextRow(nextRow);
         }
     }
+
+    refreshMapDecorations();
 
     // 进入对应场景
     switch (node.type) {
@@ -4981,6 +5016,8 @@ function winBattle() {
         }
     }
 
+    refreshMapDecorations();
+
     // 战斗胜利后保存进度
     saveGame();
 
@@ -5295,13 +5332,14 @@ function openShop() {
         cardDiv.className = `card ${cardData.type}`;
         cardDiv.setAttribute('data-desc', cardData.desc);
         cardDiv.innerHTML = `
-            <div class="card-cost">${cardData.cost}</div>
+            <div class="card-rarity ${cardData.rarity || 'common'}"></div>
+            <div class="card-cost"><span>${cardData.cost}</span></div>
             <div class="card-icon">${cardIconHTML(cardId, cardData)}</div>
             <div class="card-name">${cardData.name}</div>
             <div class="card-desc">${cardData.desc}</div>
         `;
         itemEl.appendChild(cardDiv);
-        itemEl.innerHTML += `<div class="price">💰 ${price}</div>`;
+        itemEl.innerHTML += `<div class="price">${price}</div>`;
         itemEl.addEventListener('click', () => {
             if (gameState.player.gold >= price) {
                 gameState.player.gold -= price;
@@ -5331,7 +5369,7 @@ function openShop() {
             <div class="relic-item" title="${relicData.desc}">
                 <div>${relicIconHTML(relicId, relicData)}</div>
             </div>
-            <div class="price">💰 ${price}</div>
+            <div class="price">${price}</div>
         `;
         itemEl.addEventListener('click', () => {
             if (gameState.player.gold >= price && !gameState.player.relics.includes(relicId)) {
@@ -5360,7 +5398,7 @@ function openShop() {
         itemEl.className = 'shop-item';
         itemEl.innerHTML = `
             <div class="potion-item" title="${potionData.desc}">${potionData.icon}</div>
-            <div class="price">💰 ${price}</div>
+            <div class="price">${price}</div>
         `;
         itemEl.addEventListener('click', () => {
             if (gameState.player.gold >= price && gameState.player.potions.length < getPotionCap()) {
@@ -6017,6 +6055,26 @@ function showChangelogPanel() {
         const panel = document.getElementById('changelog-panel');
 
 const entries = [
+    {
+        version: 'v4.0.0',
+        date: '2026-07-10',
+        type: 'major',
+        title: '🎨 地图与商店全面美化',
+        changes: [
+            { type: 'add', text: '<span class="changelog-highlight">地图界面重构</span>：石墙地牢风，节点改为符石样式（完成✓/锁定🔒/可选/当前四态），路径按进度着色并流动' },
+            { type: 'add', text: '<span class="changelog-highlight">地图背景统一</span>：去除网格，改用首页底色 + 暖光' },
+            { type: 'add', text: '<span class="changelog-highlight">地图顶部信息条</span>：楼层/血量/金币/按钮同行，方框加高、图例行距加大' },
+            { type: 'add', text: '<span class="changelog-highlight">地图节点间距放宽</span>：横向间距调大，排布更透气' },
+            { type: 'add', text: '<span class="changelog-highlight">商店布局重排</span>：卡牌/遗物/药水各占一行，行内横向并排' },
+            { type: 'add', text: '<span class="changelog-highlight">商店卡牌修正</span>：费用数字摆正，新增稀有度圆点' },
+            { type: 'add', text: '<span class="changelog-highlight">商店卡牌悬停</span>：去掉旋转弹出，改纯垂直上移' },
+            { type: 'add', text: '<span class="changelog-highlight">商店药水重设计</span>：改圆形玻璃瓶（虚线治疗绿描边），参考战斗页' },
+            { type: 'add', text: '<span class="changelog-highlight">商店金币统一</span>：金额去 emoji 居中，字号对齐地图金币（雅黑/600）' },
+            { type: 'add', text: '<span class="changelog-highlight">商店标题</span>：去 emoji，精简为「神秘商店」' },
+            { type: 'remove', text: '移除未接线的「编辑牌组」占位方框' },
+            { type: 'add', text: '<span class="changelog-highlight">离开商店按钮</span>：风格对齐战斗「结束回合」' }
+        ]
+    },
     {
         version: 'v3.2.0',
         date: '2026-07-08',
