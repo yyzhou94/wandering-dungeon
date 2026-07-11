@@ -14,6 +14,578 @@ function addCombatLog(type, message) {
     list.scrollTop = list.scrollHeight;
 }
 
+// ==================== 音频引擎（程序化 Web Audio） ====================
+// 设计依据 design/AUDIO_DESIGN.md：烛光手稿风地牢的互动音频。
+// 运行时为 Web Audio API，但沿用中间件纪律：命名事件路径 + 参数 API + 语音预算。
+// 所有音效均为程序化合成，不依赖任何素材文件。
+
+// 权威事件类型枚举（值 = FMOD 风格事件路径，与 AUDIO_DESIGN.md §4.1 对齐）
+const SFX_TYPES = {
+    // UI
+    button_click: 'ui_button_click',
+    panel_open: 'ui_panel_open',
+    panel_close: 'ui_panel_close',
+    toggle_on: 'ui_toggle_on',
+    denied: 'ui_denied',
+    // Map
+    node_select: 'map_node_select',
+    node_locked: 'map_node_locked',
+    path_reveal: 'map_path_reveal',
+    floor_ascend: 'map_floor_ascend',
+    // Cards
+    cards_draw: 'cards_draw',
+    cards_hover: 'cards_hover',
+    play_attack: 'cards_play_attack',
+    play_defense: 'cards_play_defense',
+    play_skill: 'cards_play_skill',
+    play_curse: 'cards_play_curse',
+    power: 'cards_upgrade',        // 旧 stub 别名（升级）
+    cards_upgrade: 'cards_upgrade',
+    card_remove: 'cards_remove',   // 旧 stub 别名（移除）
+    cards_remove: 'cards_remove',
+    cards_shuffle: 'cards_shuffle',
+    // Combat
+    hit_enemy: 'combat_hit_enemy',
+    hit_player: 'combat_hit_player',
+    block_gain: 'combat_block_gain',
+    heal: 'combat_heal',
+    debuff: 'combat_debuff',
+    buff: 'combat_buff',
+    status_tick: 'combat_status_tick',
+    energy_gain: 'combat_energy_gain',
+    enemy_death: 'combat_enemy_death',
+    player_hurt: 'combat_player_hurt',
+    // Enemy
+    attack_windup: 'enemy_attack_windup',
+    spawn: 'enemy_spawn',
+    boss_intro: 'enemy_boss_intro',
+    boss_roar: 'enemy_boss_roar',
+    boss_phase_shift: 'enemy_boss_phase_shift',
+    // Economy
+    gold_gain: 'economy_gold_gain',
+    gold_spend: 'economy_gold_spend',
+    relic_acquire: 'economy_relic_acquire',
+    potion_use: 'economy_potion_use',
+    shop_open: 'economy_shop_open',
+    shop_buy: 'economy_shop_buy',
+    shop_deny: 'economy_shop_deny',
+    // Rest
+    campfire_light: 'rest_campfire_light',
+    rest_heal: 'rest_heal',
+    forge: 'rest_forge',
+    remove_card: 'rest_remove_card',
+    // Event
+    event_choice: 'event_choice',
+    event_good: 'event_good',
+    event_bad: 'event_bad',
+    // Meta
+    victory: 'meta_victory',
+    defeat: 'meta_defeat',
+    level_up: 'meta_level_up',
+    achievement: 'meta_achievement',
+    // Misc
+    screen_transition: 'screen_transition'
+};
+
+// ==================== 自适应程序化音乐系统（P2） ====================
+// 5 楼层调式：根音取低八度保温暖，对齐「暗调手稿 + 琥珀金微光」视觉语义
+const MUSIC_SCALES = {
+    1: { root: 110.00, mode: [0, 2, 3, 5, 7, 9, 10], tempo: 76 }, // 矿坑 Dorian
+    2: { root: 73.42,  mode: [0, 1, 3, 5, 7, 8, 10], tempo: 80 }, // 森林 Phrygian
+    3: { root: 98.00,  mode: [0, 2, 4, 5, 7, 9, 10], tempo: 84 }, // 遗迹 Mixolydian
+    4: { root: 82.41,  mode: [0, 1, 3, 5, 6, 8, 10], tempo: 88 }, // 深渊 Locrian
+    5: { root: 65.41,  mode: [0, 2, 3, 5, 6, 8, 9],  tempo: 92 }  // 巢穴 Diminished
+};
+
+const MusicEngine = {
+    ctx: null, bus: null, reverbSend: null,
+    running: false, timer: null, nextStepTime: 0, step: 0,
+    floor: 1, intensity: 0, targetIntensity: 0, boss: 0, health: 1,
+
+    init(ctx, buses) {
+        this.ctx = ctx; this.bus = buses.music; this.reverbSend = buses.reverbSend;
+    },
+
+    start() {
+        if (this.running || !this.ctx) return;
+        this.running = true; this.step = 0;
+        this.nextStepTime = this.ctx.currentTime + 0.12;
+        this.timer = setInterval(() => this._scheduler(), 25);
+    },
+    stop() { this.running = false; if (this.timer) { clearInterval(this.timer); this.timer = null; } },
+    pause() { if (this.timer) { clearInterval(this.timer); this.timer = null; } },
+    resume() {
+        if (!this.running || !this.ctx || this.ctx.state !== 'running') return;
+        if (!this.timer) { this.nextStepTime = this.ctx.currentTime + 0.06; this.timer = setInterval(() => this._scheduler(), 25); }
+    },
+
+    setParam(name, value) {
+        if (name === 'floorTheme') this.floor = Math.max(1, Math.min(5, Math.round(value)));
+        else if (name === 'combatIntensity') this.targetIntensity = Math.max(0, Math.min(1, value));
+        else if (name === 'bossPhase') this.boss = value ? 1 : 0;
+        else if (name === 'playerHealth') this.health = Math.max(0, Math.min(1, value));
+    },
+
+    _scaleFreq(deg, oct) {
+        const s = MUSIC_SCALES[this.floor] || MUSIC_SCALES[1];
+        const m = s.mode, len = m.length;
+        const octShift = Math.floor(deg / len);
+        const idx = ((deg % len) + len) % len;
+        return s.root * Math.pow(2, (m[idx] + 12 * (oct + octShift)) / 12);
+    },
+
+    _ramp(x, start, width) { if (x <= start) return 0; return Math.max(0, Math.min(1, (x - start) / width)); },
+
+    _voice(dur, buildFn) {
+        if (!this.ctx) return;
+        const nodes = [];
+        try { buildFn(this.bus, nodes); } catch (e) {}
+        setTimeout(() => { nodes.forEach(n => { try { n.disconnect(); } catch (e) {} }); }, dur * 1000 + 80);
+    },
+
+    _scheduler() {
+        try {
+            if (!this.ctx || this.ctx.state !== 'running') return;
+            const s = MUSIC_SCALES[this.floor] || MUSIC_SCALES[1];
+            const stepDur = (60 / s.tempo) / 4; // 16 分音符
+            while (this.nextStepTime < this.ctx.currentTime + 0.12) {
+                this.intensity += (this.targetIntensity - this.intensity) * 0.06; // 平滑爬升/回落（≈3s 时间常数）
+                this._scheduleStep(this.step, this.nextStepTime);
+                this.nextStepTime += stepDur;
+                this.step = (this.step + 1) % 16;
+            }
+        } catch (e) {}
+    },
+
+    _scheduleStep(step, t) {
+        const I = this.intensity;
+        const gPad = 0.14;                                       // 探索垫底常驻
+        const gBass = this._ramp(I, 0.30, 0.40) * 0.5;         // 战斗低音脉冲
+        const gArp = this._ramp(I, 0.45, 0.45) * 0.45;        // 旋律琶音
+        const gTens = (this.boss ? 0.4 : this._ramp(I, 0.80, 0.20) * 0.4); // 张力层
+        if (step === 0) this._pad(t, gPad);
+        if (I >= 0.3 && step % 4 === 0) this._bass(t, gBass);
+        if (I >= 0.5 && step % 2 === 0) this._arp(t, step, gArp);
+        if (this.boss || I >= 0.82) this._tension(t, step, gTens);
+        if (I >= 0.3) {
+            if (step % 4 === 0) this._perc(t, this._ramp(I, 0.30, 0.30) * 0.4);
+            else if (step % 2 === 0) this._perc(t, this._ramp(I, 0.55, 0.25) * 0.22);
+        }
+    },
+
+    _pad(t, g) {
+        if (g <= 0.001) return;
+        [0, 2, 4].forEach((d, i) => {
+            const f = this._scaleFreq(d, 1);
+            this._voice(2.6, (bus, nodes) => {
+                const ctx = this.ctx;
+                const o1 = ctx.createOscillator(); o1.type = 'triangle'; o1.frequency.value = f; o1.detune.value = -4;
+                const o2 = ctx.createOscillator(); o2.type = 'triangle'; o2.frequency.value = f; o2.detune.value = 5;
+                const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1100;
+                const gain = ctx.createGain();
+                const a = 0.5, peak = g * (i === 0 ? 0.9 : 0.5);
+                gain.gain.setValueAtTime(0.0001, t);
+                gain.gain.exponentialRampToValueAtTime(peak, t + a);
+                gain.gain.exponentialRampToValueAtTime(0.0001, t + a + 2.0 + 1.2);
+                o1.connect(lp); o2.connect(lp); lp.connect(gain);
+                if (this.reverbSend) { const sg = ctx.createGain(); sg.gain.value = 0.5; gain.connect(sg); sg.connect(this.reverbSend); }
+                gain.connect(bus);
+                o1.start(t); o2.start(t); o1.stop(t + a + 2.0 + 1.2 + 0.05); o2.stop(t + a + 2.0 + 1.2 + 0.05);
+                nodes.push(o1, o2);
+            });
+        });
+    },
+
+    _bass(t, g) {
+        if (g <= 0.001) return;
+        const f = this._scaleFreq(0, 0);
+        this._voice(0.5, (bus, nodes) => {
+            const ctx = this.ctx;
+            const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = f;
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0.0001, t);
+            gain.gain.exponentialRampToValueAtTime(g, t + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.42);
+            o.connect(gain); gain.connect(bus);
+            o.start(t); o.stop(t + 0.5);
+            nodes.push(o);
+        });
+    },
+
+    _arp(t, step, g) {
+        if (g <= 0.001) return;
+        const degs = [0, 2, 4, 6, 4, 2];
+        const d = degs[((step / 2) | 0) % degs.length];
+        const f = this._scaleFreq(d, 2);
+        this._voice(0.35, (bus, nodes) => {
+            const ctx = this.ctx;
+            const o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = f;
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0.0001, t);
+            gain.gain.exponentialRampToValueAtTime(g, t + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
+            o.connect(gain);
+            if (this.reverbSend) { const sg = ctx.createGain(); sg.gain.value = 0.4; gain.connect(sg); sg.connect(this.reverbSend); }
+            gain.connect(bus);
+            o.start(t); o.stop(t + 0.35);
+            nodes.push(o);
+        });
+    },
+
+    _tension(t, step, g) {
+        if (g <= 0.001) return;
+        const f = this._scaleFreq(4, 2), ft = this._scaleFreq(6, 2);
+        this._voice(0.4, (bus, nodes) => {
+            const ctx = this.ctx;
+            const o1 = ctx.createOscillator(); o1.type = 'sine'; o1.frequency.value = f; o1.detune.value = 6;
+            const o2 = ctx.createOscillator(); o2.type = 'sine'; o2.frequency.value = ft; o2.detune.value = -6;
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0.0001, t);
+            gain.gain.exponentialRampToValueAtTime(g * 0.5, t + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.34);
+            o1.connect(gain); o2.connect(gain);
+            if (this.reverbSend) { const sg = ctx.createGain(); sg.gain.value = 0.5; gain.connect(sg); sg.connect(this.reverbSend); }
+            gain.connect(bus);
+            o1.start(t); o2.start(t); o1.stop(t + 0.4); o2.stop(t + 0.4);
+            nodes.push(o1, o2);
+        });
+    },
+
+    _perc(t, g) {
+        if (g <= 0.001) return;
+        this._voice(0.16, (bus, nodes) => {
+            const ctx = this.ctx;
+            const src = ctx.createBufferSource(); src.buffer = AudioEngine._noiseBuf();
+            const f = ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 1800;
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0.0001, t);
+            gain.gain.exponentialRampToValueAtTime(g, t + 0.005);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+            src.connect(f); f.connect(gain); gain.connect(bus);
+            src.start(t); src.stop(t + 0.16);
+            nodes.push(src);
+        });
+    }
+};
+
+// 音频引擎对象（单例）
+const AudioEngine = {
+    ctx: null,
+    buses: {},
+    params: { CombatIntensity: 0, FloorTheme: 1, PlayerHealth: 1, BossPhase: 0 },
+    maxVoices: 24,
+    voices: [],
+    muted: false,
+    volumes: { master: 0.9, sfx: 0.8, ui: 0.9, music: 0.7, ambience: 0.6 },
+    _nbuf: null,
+    _throttles: {},
+
+    init() {
+        try {
+            const saved = JSON.parse(localStorage.getItem('wd_audio') || '{}');
+            if (saved.volumes) Object.assign(this.volumes, saved.volumes);
+            if (typeof saved.muted === 'boolean') this.muted = saved.muted;
+        } catch (e) {}
+        this.bindGesture();
+    },
+
+    ensureContext() {
+        if (this.ctx) return true;
+        try {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return false;
+            const ctx = new AC();
+            this.ctx = ctx;
+            // master -> limiter(限幅) -> destination
+            const master = ctx.createGain();
+            master.gain.value = this.volumes.master;
+            const limiter = ctx.createDynamicsCompressor();
+            limiter.threshold.value = -3; limiter.knee.value = 0; limiter.ratio.value = 20;
+            limiter.attack.value = 0.003; limiter.release.value = 0.25;
+            master.connect(limiter); limiter.connect(ctx.destination);
+            // 各总线
+            const sfxBus = ctx.createGain(); sfxBus.gain.value = this.volumes.sfx; sfxBus.connect(master);
+            const uiBus = ctx.createGain(); uiBus.gain.value = this.volumes.ui; uiBus.connect(master);
+            const musicBus = ctx.createGain(); musicBus.gain.value = this.volumes.music;
+            const musicLP = ctx.createBiquadFilter(); musicLP.type = 'lowpass'; musicLP.frequency.value = 20000;
+            musicBus.connect(musicLP); musicLP.connect(master);
+            const ambienceBus = ctx.createGain(); ambienceBus.gain.value = this.volumes.ambience; ambienceBus.connect(master);
+            // 共享混响（程序化脉冲响应）
+            const reverbReturn = ctx.createGain(); reverbReturn.gain.value = 0.5; reverbReturn.connect(master);
+            const reverbSend = ctx.createGain(); reverbSend.gain.value = 1.0;
+            const conv = ctx.createConvolver();
+            const len = Math.floor(ctx.sampleRate * 1.6);
+            const ir = ctx.createBuffer(2, len, ctx.sampleRate);
+            for (let ch = 0; ch < 2; ch++) {
+                const d = ir.getChannelData(ch);
+                for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.5);
+            }
+            conv.buffer = ir;
+            reverbSend.connect(conv); conv.connect(reverbReturn);
+            this.buses = { master, limiter, sfx: sfxBus, ui: uiBus, music: musicBus, ambience: ambienceBus, musicLP, reverbSend, reverbReturn, conv };
+            try { MusicEngine.init(this.ctx, this.buses); } catch (e) {}
+            return true;
+        } catch (e) {
+            console.warn('[AudioEngine] 上下文初始化失败', e);
+            this.ctx = null;
+            return false;
+        }
+    },
+
+    resume() {
+        try {
+            if (!this.ensureContext()) return;
+            if (this.ctx.state === 'suspended') this.ctx.resume();
+        } catch (e) {}
+    },
+
+    bus(name) { return this.buses[name] || this.buses.sfx; },
+    now() { return this.ctx ? this.ctx.currentTime : 0; },
+
+    _noiseBuf() {
+        if (this._nbuf) return this._nbuf;
+        const len = this.ctx.sampleRate * 2;
+        const b = this.ctx.createBuffer(1, len, this.ctx.sampleRate);
+        const d = b.getChannelData(0);
+        for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+        this._nbuf = b;
+        return b;
+    },
+
+    _panner(pan) {
+        const p = this.ctx.createStereoPanner();
+        p.pan.value = Math.max(-1, Math.min(1, pan));
+        return p;
+    },
+
+    // 基础音色：振荡器 + ADSR 包络
+    _tone(bus, nodes, o) {
+        const ctx = this.ctx;
+        const t = (o.t0 != null) ? o.t0 : ctx.currentTime;
+        const a = o.a != null ? o.a : 0.005;
+        const d = o.d != null ? o.d : 0.1;
+        const r = o.r != null ? o.r : 0.06;
+        const peak = o.peak != null ? o.peak : 0.4;
+        const s = o.s != null ? o.s : 0;
+        const osc = ctx.createOscillator();
+        osc.type = o.type || 'sine';
+        osc.frequency.setValueAtTime(o.freq, t);
+        if (o.freqEnd && o.freqEnd !== o.freq) {
+            osc.frequency.exponentialRampToValueAtTime(Math.max(1, o.freqEnd), t + a + d + r);
+        }
+        if (o.detune) osc.detune.setValueAtTime(o.detune, t);
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(peak, t + a);
+        g.gain.exponentialRampToValueAtTime(Math.max(0.0001, peak * (1 - s)), t + a + d);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + a + d + r);
+        if (o.pan) { const p = this._panner(o.pan); g.connect(p); p.connect(bus); } else { g.connect(bus); }
+        if (o.send && this.buses.reverbSend) { const sg = ctx.createGain(); sg.gain.value = o.send; g.connect(sg); sg.connect(this.buses.reverbSend); }
+        osc.connect(g);
+        osc.start(t);
+        osc.stop(t + a + d + r + 0.05);
+        nodes.push(osc);
+        return { osc, g };
+    },
+
+    // 噪声爆破（带滤波）
+    _noise(bus, nodes, o) {
+        const ctx = this.ctx;
+        const t = (o.t0 != null) ? o.t0 : ctx.currentTime;
+        const a = o.a != null ? o.a : 0.002;
+        const d = o.d != null ? o.d : 0.08;
+        const peak = o.peak != null ? o.peak : 0.4;
+        const dur = o.dur || (a + d + 0.05);
+        const src = ctx.createBufferSource();
+        src.buffer = this._noiseBuf();
+        const f = ctx.createBiquadFilter();
+        f.type = o.filterType || 'bandpass';
+        f.frequency.value = o.filterFreq || 1200;
+        f.Q.value = o.filterQ || 1;
+        const g = ctx.createGain();
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(peak, t + a);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + a + d);
+        src.connect(f); f.connect(g);
+        if (o.pan) { const p = this._panner(o.pan); g.connect(p); p.connect(bus); } else { g.connect(bus); }
+        if (o.send && this.buses.reverbSend) { const sg = ctx.createGain(); sg.gain.value = o.send; g.connect(sg); sg.connect(this.buses.reverbSend); }
+        src.start(t);
+        src.stop(t + dur + 0.02);
+        nodes.push(src);
+        return { src, g, f };
+    },
+
+    _throttle(key, ms) {
+        const now = performance.now();
+        if (this._throttles[key] && now - this._throttles[key] < ms) return false;
+        this._throttles[key] = now;
+        return true;
+    },
+
+    // 语音预算：超出则 steal 最旧的非 UI 语音
+    _spawn(busName, dur, buildFn, priority) {
+        const ctx = this.ctx;
+        if (priority !== 0) {
+            while (this.voices.length >= this.maxVoices) {
+                const old = this.voices.shift();
+                old.nodes.forEach(n => { try { n.stop && n.stop(); } catch (e) {} try { n.disconnect(); } catch (e) {} });
+            }
+        }
+        const bus = this.bus(busName);
+        const nodes = [];
+        try { buildFn(bus, nodes); } catch (e) { console.warn('[AudioEngine] 合成失败', e); return; }
+        const v = { nodes, t: performance.now() };
+        if (priority !== 0) this.voices.push(v);
+        setTimeout(() => {
+            nodes.forEach(n => { try { n.disconnect(); } catch (e) {} });
+            const i = this.voices.indexOf(v); if (i >= 0) this.voices.splice(i, 1);
+        }, dur * 1000 + 120);
+    },
+
+    play(type, opts) {
+        try {
+            if (!type) return;
+            if (type === 'screen_transition' && !this._throttle('screen_transition', 160)) return;
+            if (this.muted) return;
+            // 仅当用户手势已创建上下文后才发声（resume 为异步，悬挂态也允许调度，待运行即响）
+            if (!this.ctx) return;
+            const r = RECIPES[type];
+            if (!r) { console.warn('[AudioEngine] 无配方:', type); return; }
+            const busName = r.bus || 'sfx';
+            const pri = (r.priority != null) ? r.priority : 1;
+            this._spawn(busName, r.dur, (bus, nodes) => r.build(this, bus, nodes, opts || {}), pri);
+        } catch (e) { /* 音频绝不影响玩法 */ }
+    },
+
+    setParam(name, value) {
+        try {
+            this.params[name] = value;
+            if (name === 'PlayerHealth' && this.buses.musicLP && this.ctx) {
+                const v = Math.max(0, Math.min(1, value));
+                const cutoff = v >= 0.2 ? 20000 : 300 + (v / 0.2) * 19700;
+                this.buses.musicLP.frequency.setTargetAtTime(cutoff, this.ctx.currentTime, 0.1);
+            }
+        } catch (e) {}
+    },
+
+    setVolume(which, v) {
+        try {
+            v = Math.max(0, Math.min(1, v));
+            this.volumes[which] = v;
+            if (this.buses[which]) this.buses[which].gain.value = v;
+            this._save();
+        } catch (e) {}
+    },
+
+    setMuted(m) { this.muted = !!m; this._save(); },
+
+    _save() {
+        try { localStorage.setItem('wd_audio', JSON.stringify({ volumes: this.volumes, muted: this.muted })); } catch (e) {}
+    },
+
+    bindGesture() {
+        const kick = () => { this.resume(); };
+        window.addEventListener('pointerdown', kick);
+        window.addEventListener('keydown', kick);
+        // 委托式 UI 点击音：覆盖按钮/面板/职业卡等，无需逐个接线
+        document.addEventListener('click', (e) => {
+            try {
+                this.resume();
+                const el = e.target.closest('button, .btn, .class-card, [id^="close-"], [id^="view-"], #confirm-class, #end-turn, #skip-card, #leave-shop, #leave-rest, #back-to-menu, #return-menu, #start-game, #start-endless, #continue-game');
+                if (!el) return;
+                if (el.closest('#hand-cards')) return;       // 手牌由 playCard 处理
+                if (el.classList.contains('map-node')) return; // 节点由 enterNode 处理
+                if (el.id && el.id.indexOf('close-') === 0) { playSFX(SFX_TYPES.panel_close); return; }
+                if (el.id && el.id.indexOf('view-') === 0) { playSFX(SFX_TYPES.panel_open); return; }
+                playSFX(SFX_TYPES.button_click);
+            } catch (err) {}
+        }, true);
+        document.addEventListener('visibilitychange', () => {
+            try {
+                if (document.hidden) { if (this.ctx && this.ctx.state === 'running') this.ctx.suspend(); if (typeof MusicEngine !== 'undefined') MusicEngine.pause(); }
+                else { if (this.ctx) this.ctx.resume(); if (typeof MusicEngine !== 'undefined') MusicEngine.resume(); }
+            } catch (e) {}
+        });
+    },
+
+    // ---- 自适应音乐委托 ----
+    startMusic() { try { if (this.ctx) MusicEngine.start(); } catch (e) {} },
+    stopMusic() { try { MusicEngine.stop(); } catch (e) {} },
+    setMusicParam(name, value) { try { MusicEngine.setParam(name, value); } catch (e) {} }
+};
+
+// 程序化合成配方（每个事件路径对应一段 Web Audio 图）
+const RECIPES = {
+    ui_button_click: { dur: 0.09, bus: 'ui', priority: 0, build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 620, freqEnd: 880, a: 0.004, d: 0.05, r: 0.03, peak: 0.22 }); } },
+    ui_panel_open: { dur: 0.2, bus: 'ui', priority: 0, build: (e, b, n) => { e._tone(b, n, { type: 'triangle', freq: 280, freqEnd: 520, a: 0.02, d: 0.12, r: 0.05, peak: 0.22, send: 0.2 }); } },
+    ui_panel_close: { dur: 0.18, bus: 'ui', priority: 0, build: (e, b, n) => { e._tone(b, n, { type: 'triangle', freq: 520, freqEnd: 280, a: 0.02, d: 0.1, r: 0.05, peak: 0.2, send: 0.15 }); } },
+    ui_toggle_on: { dur: 0.14, bus: 'ui', priority: 0, build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 760, a: 0.003, d: 0.04, r: 0.03, peak: 0.2 }); e._tone(b, n, { type: 'sine', freq: 1040, a: 0.003, d: 0.04, r: 0.03, peak: 0.18, t0: e.now() + 0.06 }); } },
+    ui_denied: { dur: 0.2, bus: 'ui', priority: 0, build: (e, b, n) => { e._tone(b, n, { type: 'square', freq: 180, freqEnd: 120, a: 0.004, d: 0.14, r: 0.04, peak: 0.26 }); } },
+
+    map_node_select: { dur: 0.14, bus: 'sfx', build: (e, b, n) => { e._noise(b, n, { filterType: 'highpass', filterFreq: 1800, a: 0.002, d: 0.06, peak: 0.3 }); e._tone(b, n, { type: 'triangle', freq: 200, a: 0.003, d: 0.08, r: 0.03, peak: 0.25 }); } },
+    map_node_locked: { dur: 0.16, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 130, a: 0.004, d: 0.1, r: 0.05, peak: 0.22 }); } },
+    map_path_reveal: { dur: 0.32, bus: 'sfx', build: (e, b, n) => { e._noise(b, n, { filterType: 'bandpass', filterFreq: 400, filterQ: 0.7, a: 0.05, d: 0.25, r: 0.05, peak: 0.16, send: 0.3 }); } },
+    map_floor_ascend: { dur: 0.55, bus: 'sfx', build: (e, b, n) => { [300, 450, 600].forEach((f, i) => e._tone(b, n, { type: 'triangle', freq: f, a: 0.01, d: 0.1, r: 0.08, peak: 0.26, t0: e.now() + i * 0.12, send: 0.3 })); } },
+
+    cards_draw: { dur: 0.2, bus: 'sfx', build: (e, b, n) => { e._noise(b, n, { filterType: 'highpass', filterFreq: 2600, a: 0.01, d: 0.14, peak: 0.2 }); } },
+    cards_hover: { dur: 0.05, bus: 'ui', priority: 0, build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 1200, a: 0.002, d: 0.02, r: 0.02, peak: 0.06 }); } },
+    cards_play_attack: { dur: 0.24, bus: 'sfx', build: (e, b, n, o) => { const ds = Math.max(0.6, Math.min(2.2, (o.damage || 6) / 6)); const f = 170 * ds; e._tone(b, n, { type: 'sawtooth', freq: f, a: 0.003, d: 0.16, r: 0.04, peak: 0.32, send: 0.05 }); e._noise(b, n, { filterType: 'bandpass', filterFreq: 2200, filterQ: 1.2, a: 0.002, d: 0.07, peak: 0.3 }); } },
+    cards_play_defense: { dur: 0.55, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 140, a: 0.04, d: 0.3, r: 0.18, peak: 0.3, send: 0.1 }); e._tone(b, n, { type: 'sine', freq: 140 * 2.01, detune: 6, a: 0.04, d: 0.3, r: 0.18, peak: 0.12, send: 0.1 }); } },
+    cards_play_skill: { dur: 0.55, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 330, a: 0.05, d: 0.25, r: 0.2, peak: 0.24, send: 0.5 }); e._tone(b, n, { type: 'sine', freq: 330 * 1.5, detune: 8, a: 0.05, d: 0.25, r: 0.2, peak: 0.14, send: 0.5 }); e._tone(b, n, { type: 'sine', freq: 1320, a: 0.05, d: 0.2, r: 0.15, peak: 0.06, send: 0.5 }); } },
+    cards_play_curse: { dur: 0.5, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 90, a: 0.02, d: 0.3, r: 0.18, peak: 0.3, send: 0.2 }); e._tone(b, n, { type: 'sine', freq: 90 * 1.06, detune: 4, a: 0.02, d: 0.3, r: 0.18, peak: 0.2, send: 0.2 }); e._noise(b, n, { filterType: 'lowpass', filterFreq: 600, a: 0.02, d: 0.3, peak: 0.12 }); } },
+    cards_upgrade: { dur: 0.28, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 500, freqEnd: 760, a: 0.01, d: 0.12, r: 0.08, peak: 0.3, send: 0.3 }); e._tone(b, n, { type: 'sine', freq: 760, a: 0.01, d: 0.1, r: 0.08, peak: 0.18, t0: e.now() + 0.1, send: 0.3 }); } },
+    cards_remove: { dur: 0.22, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 520, freqEnd: 300, a: 0.01, d: 0.12, r: 0.08, peak: 0.22, send: 0.1 }); } },
+    cards_shuffle: { dur: 0.36, bus: 'sfx', build: (e, b, n) => { for (let i = 0; i < 4; i++) e._noise(b, n, { filterType: 'bandpass', filterFreq: 1500, filterQ: 0.8, a: 0.005, d: 0.05, peak: 0.14, t0: e.now() + i * 0.07 }); } },
+
+    combat_hit_enemy: { dur: 0.16, bus: 'sfx', build: (e, b, n, o) => { const ds = Math.max(0.7, Math.min(2, (o.amount || 8) / 8)); e._noise(b, n, { filterType: 'bandpass', filterFreq: 1500 * Math.min(1.6, ds), filterQ: 1, a: 0.001, d: 0.1, peak: 0.36 }); e._tone(b, n, { type: 'triangle', freq: 90 * Math.min(1.5, ds), a: 0.001, d: 0.08, r: 0.03, peak: 0.3 }); } },
+    combat_hit_player: { dur: 0.18, bus: 'sfx', build: (e, b, n, o) => { e._noise(b, n, { filterType: 'lowpass', filterFreq: 900, a: 0.001, d: 0.1, peak: 0.34, pan: -0.2 }); e._tone(b, n, { type: 'square', freq: 70, a: 0.001, d: 0.09, r: 0.03, peak: 0.28, pan: -0.2 }); } },
+    combat_block_gain: { dur: 0.28, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 190, a: 0.02, d: 0.1, r: 0.12, peak: 0.3 }); e._tone(b, n, { type: 'sine', freq: 190 * 2.76, a: 0.02, d: 0.12, r: 0.12, peak: 0.1, send: 0.15 }); } },
+    combat_heal: { dur: 0.42, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 440, freqEnd: 660, a: 0.03, d: 0.2, r: 0.15, peak: 0.28, send: 0.3 }); } },
+    combat_debuff: { dur: 0.32, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sawtooth', freq: 300, freqEnd: 190, a: 0.01, d: 0.2, r: 0.1, peak: 0.26 }); } },
+    combat_buff: { dur: 0.32, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'triangle', freq: 300, freqEnd: 500, a: 0.01, d: 0.2, r: 0.1, peak: 0.26, send: 0.2 }); } },
+    combat_status_tick: { dur: 0.06, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 1500, a: 0.001, d: 0.02, r: 0.02, peak: 0.1 }); } },
+    combat_energy_gain: { dur: 0.14, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'triangle', freq: 880, freqEnd: 1170, a: 0.003, d: 0.06, r: 0.04, peak: 0.24 }); } },
+    combat_enemy_death: { dur: 0.55, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sawtooth', freq: 400, freqEnd: 80, a: 0.01, d: 0.4, r: 0.12, peak: 0.34, send: 0.2 }); e._noise(b, n, { filterType: 'lowpass', filterFreq: 1200, a: 0.01, d: 0.3, peak: 0.2, send: 0.1 }); } },
+    combat_player_hurt: { dur: 0.32, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 140, freqEnd: 90, a: 0.01, d: 0.2, r: 0.1, peak: 0.32 }); e._noise(b, n, { filterType: 'lowpass', filterFreq: 500, a: 0.01, d: 0.2, peak: 0.16 }); } },
+
+    enemy_attack_windup: { dur: 0.32, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sawtooth', freq: 200, freqEnd: 420, a: 0.05, d: 0.2, r: 0.06, peak: 0.22, detune: 6 }); } },
+    enemy_spawn: { dur: 0.5, bus: 'sfx', build: (e, b, n) => { e._noise(b, n, { filterType: 'bandpass', filterFreq: 600, filterQ: 0.6, a: 0.05, d: 0.35, r: 0.05, peak: 0.22, send: 0.2 }); e._tone(b, n, { type: 'sine', freq: 80, a: 0.02, d: 0.3, r: 0.1, peak: 0.28 }); } },
+    enemy_boss_intro: { dur: 1.2, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sawtooth', freq: 60, freqEnd: 55, a: 0.1, d: 0.8, r: 0.3, peak: 0.42, send: 0.5 }); e._tone(b, n, { type: 'sine', freq: 90, detune: 10, a: 0.1, d: 0.8, r: 0.3, peak: 0.2, send: 0.4 }); } },
+    enemy_boss_roar: { dur: 1.0, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sawtooth', freq: 55, freqEnd: 40, a: 0.02, d: 0.7, r: 0.25, peak: 0.46, send: 0.4, detune: 5 }); e._noise(b, n, { filterType: 'lowpass', filterFreq: 800, a: 0.02, d: 0.6, peak: 0.3, send: 0.3 }); } },
+    enemy_boss_phase_shift: { dur: 0.85, bus: 'sfx', build: (e, b, n) => { [110, 110 * 1.41, 110 * 1.68].forEach(f => e._tone(b, n, { type: 'sawtooth', freq: f, a: 0.01, d: 0.5, r: 0.25, peak: 0.3, send: 0.5, detune: 8 })); e._noise(b, n, { filterType: 'bandpass', filterFreq: 2000, filterQ: 0.8, a: 0.005, d: 0.2, peak: 0.3 }); } },
+
+    economy_gold_gain: { dur: 0.2, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 880, a: 0.003, d: 0.05, r: 0.04, peak: 0.28 }); e._tone(b, n, { type: 'sine', freq: 1320, a: 0.003, d: 0.06, r: 0.04, peak: 0.24, t0: e.now() + 0.07 }); } },
+    economy_gold_spend: { dur: 0.14, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 680, freqEnd: 440, a: 0.003, d: 0.08, r: 0.04, peak: 0.24 }); } },
+    economy_relic_acquire: { dur: 0.5, bus: 'sfx', build: (e, b, n) => { [440, 660, 880].forEach((f, i) => e._tone(b, n, { type: 'sine', freq: f, a: 0.01, d: 0.15, r: 0.1, peak: 0.26, t0: e.now() + i * 0.09, send: 0.4 })); } },
+    economy_potion_use: { dur: 0.26, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 300, freqEnd: 900, a: 0.005, d: 0.12, r: 0.05, peak: 0.28 }); e._noise(b, n, { filterType: 'bandpass', filterFreq: 3000, filterQ: 1, a: 0.002, d: 0.06, peak: 0.14 }); } },
+    economy_shop_open: { dur: 0.6, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 1046, a: 0.005, d: 0.4, r: 0.2, peak: 0.24, send: 0.5 }); e._tone(b, n, { type: 'sine', freq: 1568, a: 0.005, d: 0.4, r: 0.2, peak: 0.16, t0: e.now() + 0.04, send: 0.5 }); } },
+    economy_shop_buy: { dur: 0.2, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 880, freqEnd: 1320, a: 0.003, d: 0.08, r: 0.05, peak: 0.26 }); } },
+    economy_shop_deny: { dur: 0.2, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'square', freq: 160, freqEnd: 110, a: 0.004, d: 0.14, r: 0.04, peak: 0.26 }); } },
+
+    rest_campfire_light: { dur: 0.5, bus: 'sfx', build: (e, b, n) => { e._noise(b, n, { filterType: 'highpass', filterFreq: 2000, a: 0.02, d: 0.3, peak: 0.14 }); e._tone(b, n, { type: 'sine', freq: 120, a: 0.02, d: 0.3, r: 0.1, peak: 0.2 }); } },
+    rest_heal: { dur: 0.5, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 440, freqEnd: 680, a: 0.03, d: 0.25, r: 0.18, peak: 0.26, send: 0.3 }); } },
+    rest_forge: { dur: 0.4, bus: 'sfx', build: (e, b, n) => { e._noise(b, n, { filterType: 'bandpass', filterFreq: 1600, filterQ: 1.2, a: 0.002, d: 0.12, peak: 0.3 }); e._tone(b, n, { type: 'sine', freq: 300, a: 0.005, d: 0.2, r: 0.1, peak: 0.16, send: 0.1 }); } },
+    rest_remove_card: { dur: 0.22, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 500, freqEnd: 300, a: 0.01, d: 0.12, r: 0.08, peak: 0.22, send: 0.1 }); } },
+
+    event_choice: { dur: 0.14, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'triangle', freq: 520, a: 0.005, d: 0.06, r: 0.04, peak: 0.22 }); } },
+    event_good: { dur: 0.34, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 660, freqEnd: 990, a: 0.01, d: 0.15, r: 0.12, peak: 0.26, send: 0.2 }); } },
+    event_bad: { dur: 0.36, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sawtooth', freq: 220, freqEnd: 120, a: 0.01, d: 0.22, r: 0.12, peak: 0.26 }); } },
+
+    meta_victory: { dur: 1.2, bus: 'sfx', build: (e, b, n) => { [523, 659, 784, 1046].forEach((f, i) => e._tone(b, n, { type: 'triangle', freq: f, a: 0.01, d: 0.2, r: 0.4, peak: 0.3, t0: e.now() + i * 0.12, send: 0.5 })); } },
+    meta_defeat: { dur: 1.2, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 300, freqEnd: 80, a: 0.02, d: 0.7, r: 0.3, peak: 0.34 }); e._noise(b, n, { filterType: 'lowpass', filterFreq: 600, a: 0.02, d: 0.6, peak: 0.18 }); } },
+    meta_level_up: { dur: 0.6, bus: 'sfx', build: (e, b, n) => { [660, 990, 1320].forEach((f, i) => e._tone(b, n, { type: 'sine', freq: f, a: 0.005, d: 0.12, r: 0.1, peak: 0.26, t0: e.now() + i * 0.08, send: 0.4 })); } },
+    meta_achievement: { dur: 0.7, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 880, a: 0.005, d: 0.3, r: 0.2, peak: 0.26, send: 0.4 }); e._tone(b, n, { type: 'sine', freq: 1320, a: 0.005, d: 0.3, r: 0.2, peak: 0.16, t0: e.now() + 0.06, send: 0.4 }); } },
+
+    screen_transition: { dur: 0.26, bus: 'sfx', build: (e, b, n) => { e._noise(b, n, { filterType: 'bandpass', filterFreq: 300, filterQ: 0.6, a: 0.04, d: 0.18, r: 0.04, peak: 0.1, send: 0.2 }); } }
+};
+
+// 全局安全分发器：任何地方都能直接调用，音频错误绝不影响玩法
+function playSFX(type) { try { AudioEngine.play(type); } catch (e) {} }
+function setAudioParam(name, value) { try { AudioEngine.setParam(name, value); } catch (e) {} }
+
+// 启动引擎（绑定首次手势与委托式 UI 监听）
+AudioEngine.init();
+
 // ==================== 敌人 SVG 精灵系统 ====================
 
 // SVG 精灵图像库(扁平化矢量风格)
@@ -1657,13 +2229,24 @@ function showScreen(screenId) {
     if (screenId === 'map-screen') {
         const floor = gameState.map.floor;
         screen.classList.add(`floor-${floor}`);
+        // 进入地图：启动自适应音乐 + 同步楼层调式（探索态，强度 0）
+        AudioEngine.startMusic();
+        AudioEngine.setMusicParam('floorTheme', floor);
     }
 
     // 为战斗屏幕添加楼层类名
     if (screenId === 'battle-screen') {
         const floor = gameState.map.floor;
         screen.classList.add(`floor-${floor}`);
+        // 进入战斗：按敌人类型设定音乐强度（Boss=1.0 / 精英=0.8 / 普通=0.6），tempo 同步无硬切
+        AudioEngine.setMusicParam('floorTheme', floor);
+        const en = gameState.battle && gameState.battle.enemy;
+        AudioEngine.setMusicParam('combatIntensity', en && en.isBoss ? 1.0 : (en && en.isElite ? 0.8 : 0.6));
+        AudioEngine.setMusicParam('bossPhase', 0);
     }
+
+    // 屏幕切换极轻 whoosh（已在 play() 内做节流，避免快速切换刷屏）
+    playSFX(SFX_TYPES.screen_transition);
 }
 
 function showDamage(target, amount, type = 'damage') {
@@ -2823,6 +3406,8 @@ function enterNode(node) {
     }
 
     console.log('[enterNode] Proceeding with node entry...');
+    playSFX(SFX_TYPES.node_select);
+    if (node.type === 'boss') setTimeout(() => playSFX(SFX_TYPES.boss_intro), 400);
 
     // 只记录当前节点
     gameState.map.currentNode = node;
@@ -3671,6 +4256,7 @@ function decideEnemyAction() {
 
 function drawCards(count) {
     if (gameState.battle.noDraw) return;
+    if (count > 0) playSFX(SFX_TYPES.cards_draw);
 
     for (let i = 0; i < count; i++) {
         if (gameState.battle.drawPile.length === 0) {
@@ -3678,6 +4264,7 @@ function drawCards(count) {
             if (gameState.battle.discardPile.length === 0) break;
             gameState.battle.drawPile = shuffle([...gameState.battle.discardPile]);
             gameState.battle.discardPile = [];
+            playSFX(SFX_TYPES.cards_shuffle);
         }
 
         const card = gameState.battle.drawPile.pop();
@@ -3763,6 +4350,13 @@ function playCard(handIndex) {
         finalCost = Math.max(0, finalCost - gameState.battle.poisonDiscount);
     }
     gameState.player.energy -= finalCost;
+
+    // 卡牌音效（对齐视觉语义色：攻击=铁锈红/防御=青铜蓝/技能=紫罗兰/诅咒=灰）
+    if (cardData.type === 'attack') playSFX(SFX_TYPES.play_attack, { damage: (cardData.effect && cardData.effect.damage) ? cardData.effect.damage : 6 });
+    else if (cardData.type === 'defense') playSFX(SFX_TYPES.play_defense);
+    else if (cardData.type === 'skill') playSFX(SFX_TYPES.play_skill);
+    else if (cardData.type === 'curse') playSFX(SFX_TYPES.play_curse);
+    else playSFX(SFX_TYPES.play_attack, { damage: 6 });
 
     // 从手牌移除
     gameState.battle.hand.splice(handIndex, 1);
@@ -4541,6 +5135,7 @@ function damageEnemy(amount) {
     // 扣除生命
     if (amount > 0) {
         enemy.currentHp -= amount;
+        playSFX(SFX_TYPES.hit_enemy, { amount: amount });
 
         // 根据伤害大小决定震动强度和视觉效果
         const damagePercent = amount / enemy.maxHp;
@@ -4589,8 +5184,11 @@ function damageEnemy(amount) {
     const boss = gameState.battle.enemy;
     if (boss.isBoss && !boss.phase2 && boss.currentHp < boss.maxHp * 0.5) {
         boss.phase2 = true;
+        // 音乐：进入二阶段张力层
+        AudioEngine.setMusicParam('bossPhase', 1);
         addCombatLog('info', '⚠️ ' + boss.name + ' 进入了第二阶段!狂暴模式启动!');
-        try { playSFX(SFX_TYPES.power); } catch(e) {}
+        playSFX(SFX_TYPES.boss_phase_shift);
+        setTimeout(() => playSFX(SFX_TYPES.boss_roar), 120);
         // 视觉特效
         const spriteEl = document.querySelector('.enemy-sprite');
         if (spriteEl) {
@@ -4768,6 +5366,7 @@ function createHealNumber(target, heal) {
 
 // 创建格挡效果
 function createBlockEffect(target) {
+    playSFX(SFX_TYPES.block_gain);
     const targetRect = target.getBoundingClientRect();
     const container = document.querySelector('#game-container');
 
@@ -4820,6 +5419,8 @@ function executeEnemyDamage(enemy, damage, playerArea, enemyEl) {
     // 造成伤害
     if (damage > 0) {
         gameState.player.hp -= damage;
+        playSFX(SFX_TYPES.hit_player, { amount: damage });
+        setAudioParam('PlayerHealth', gameState.player.hp / Math.max(1, gameState.player.maxHp));
         showDamage(playerArea, damage, 'damage');
         shakeElement(playerArea);
         createDamageNumber(playerArea, damage, damage > gameState.player.maxHp * 0.3);
@@ -4980,6 +5581,10 @@ function endTurn() {
 }
 
 function winBattle() {
+    playSFX(SFX_TYPES.enemy_death);
+    // 战斗胜利：音乐回落到探索态（Boss 阶段标志复位）
+    AudioEngine.setMusicParam('combatIntensity', 0);
+    AudioEngine.setMusicParam('bossPhase', 0);
     // 停止 Boss 战震动
     stopBossShake();
 
@@ -5037,6 +5642,7 @@ function winBattle() {
         goldReward = randomInt(10, 20);
     }
     gameState.player.gold += goldReward;
+    playSFX(SFX_TYPES.gold_gain);
 
     // P1: 遗物联动 - 贪婪
     const greedBonus = getRelicSynergyBonus('greed');
@@ -5245,6 +5851,8 @@ function healPlayer(amount) {
         // 添加治疗粒子效果
         createHealNumber(playerArea, actualHeal);
         createMagicParticles(playerArea, '#2ecc71', 10);
+        playSFX(SFX_TYPES.heal);
+        setAudioParam('PlayerHealth', gameState.player.hp / Math.max(1, gameState.player.maxHp));
     }
 }
 
@@ -5279,6 +5887,7 @@ function showFloatingTextWithDelay(text, target, color, delay) {
 }
 
 function addRelic(relicId) {
+    playSFX(SFX_TYPES.relic_acquire);
     if (gameState.player.relics.includes(relicId)) return;
     gameState.player.relics.push(relicId);
     gameState.stats.relicsFound++;
@@ -5307,6 +5916,7 @@ function addRelic(relicId) {
 // ==================== 商店系统 ====================
 
 function openShop() {
+    playSFX(SFX_TYPES.shop_open);
     const floor = gameState.map.floor;
     // 商店价格随楼层递增(每层增加 20%)
     const floorMultiplier = 1 + (floor - 1) * 0.2;
@@ -5449,7 +6059,7 @@ function removeCardFromDeck(cardId) {
         if (document.getElementById('rest-screen') && document.getElementById('rest-screen').classList.contains('active')) {
             gameState.removeCount++;
         }
-        try { playSFX(SFX_TYPES.card_remove); } catch(e) {}
+        playSFX(SFX_TYPES.card_remove);
         return true;
     }
     return false;
@@ -5639,6 +6249,7 @@ function restUpgrade() {
 }
 
 function upgradeCard(cardId) {
+    playSFX(SFX_TYPES.cards_upgrade);
     const cardData = CARD_DB[cardId];
 
     // 从牌组中移除一张该卡牌
@@ -6056,6 +6667,29 @@ function showChangelogPanel() {
 
 const entries = [
     {
+        version: 'v4.0.2',
+        date: '2026-07-10',
+        type: 'add',
+        title: '🎵 自适应背景音乐',
+        changes: [
+            { type: 'add', text: '<span class="changelog-highlight">程序化音乐</span>：Web Audio 实时合成，5 楼层调式（Dorian/Phrygian/Mixolydian/Locrian/Diminished）' },
+            { type: 'add', text: '<span class="changelog-highlight">强度分层</span>：探索垫底常驻，战斗渐入低音/琶音/鼓点，Boss 二阶段加张力层' },
+            { type: 'add', text: '<span class="changelog-highlight">无缝过渡</span>：CombatIntensity 平滑爬升(≈3s)，tempo 同步无硬切；低血量复用音乐低通' }
+        ]
+    },
+    {
+        version: 'v4.0.1',
+        date: '2026-07-10',
+        type: 'add',
+        title: '🔊 程序化音频引擎落地',
+        changes: [
+            { type: 'add', text: '<span class="changelog-highlight">音频引擎</span>：基于 Web Audio API 实现程序化合成（无素材文件），含音频图、限幅总线、共享混响、语音预算(≤24)' },
+            { type: 'add', text: '<span class="changelog-highlight">音效覆盖</span>：UI 点击/面板、卡牌四型(攻击/防御/技能/诅咒)、战斗受击/格挡/治疗、金币/遗物/商店、胜利/失败、Boss 二阶段等 50+ 事件' },
+            { type: 'add', text: '<span class="changelog-highlight">自适应参数</span>：CombatIntensity/FloorTheme/PlayerHealth/BossPhase 驱动，低血量触发音乐低通' },
+            { type: 'add', text: '<span class="changelog-highlight">持久化与无障碍</span>：音量/静音存 localStorage，首次手势激活，标签页隐藏自动暂停' }
+        ]
+    },
+    {
         version: 'v4.0.0',
         date: '2026-07-10',
         type: 'major',
@@ -6183,7 +6817,7 @@ const entries = [
             { type: 'fix', text: '修复事件处理中 fountain_listen action 缩进错误' },
             { type: 'add', text: 'ENEMY_DB 新增 4 种精英敌人,覆盖全部 5 层精英战斗' },
             { type: 'optimization', text: '所有 Boss 二阶段切换时统一视觉特效(色调滤镜 + 震动 + 发光)' },
-            { type: 'optimization', text: 'playSFX 调用增加 try-catch 保护,防止音频加载失败阻断流程' }
+            { type: 'optimization', text: '占位音频调用 playSFX 以 try-catch 包裹,避免未实现时阻断流程（实际音效于 v4.0.1 落地）' }
         ]
     },
     {
@@ -6378,6 +7012,9 @@ function updateGlobalStats(victory) {
 // ==================== 游戏结束 ====================
 
 function gameOver(victory) {
+    playSFX(victory ? SFX_TYPES.victory : SFX_TYPES.defeat);
+    // 游戏结束：停止自适应音乐，让结局音效单独发声
+    AudioEngine.stopMusic();
     // 无尽模式：保存最高层数
     if (gameState.mode === 'endless') {
         setEndlessBestFloor(gameState.endlessFloor);
