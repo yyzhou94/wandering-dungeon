@@ -160,17 +160,14 @@ const MusicEngine = {
     _scheduleStep(step, t) {
         const I = this.intensity;
         const gPad = 0.14;                                       // 探索垫底常驻
-        const gBass = this._ramp(I, 0.30, 0.40) * 0.5;         // 战斗低音脉冲
-        const gArp = this._ramp(I, 0.45, 0.45) * 0.45;        // 旋律琶音
-        const gTens = (this.boss ? 0.4 : this._ramp(I, 0.80, 0.20) * 0.4); // 张力层
+        const gBass = this._ramp(I, 0.30, 0.40) * 0.38;        // 战斗低音脉冲
+        const gArp = this._ramp(I, 0.45, 0.45) * 0.3;         // 旋律琶音(稀释)
+        const gTens = (this.boss ? 0.34 : this._ramp(I, 0.82, 0.20) * 0.34); // 张力层
         if (step === 0) this._pad(t, gPad);
         if (I >= 0.3 && step % 4 === 0) this._bass(t, gBass);
-        if (I >= 0.5 && step % 2 === 0) this._arp(t, step, gArp);
+        if (I >= 0.5 && step % 4 === 0 && Math.random() > 0.22) this._arp(t, step, gArp); // 四分音符 + 留白
         if (this.boss || I >= 0.82) this._tension(t, step, gTens);
-        if (I >= 0.3) {
-            if (step % 4 === 0) this._perc(t, this._ramp(I, 0.30, 0.30) * 0.4);
-            else if (step % 2 === 0) this._perc(t, this._ramp(I, 0.55, 0.25) * 0.22);
-        }
+        if (I >= 0.45 && step % 4 === 0) this._perc(t, this._ramp(I, 0.45, 0.30) * 0.3); // 只留强拍
     },
 
     _pad(t, g) {
@@ -187,6 +184,13 @@ const MusicEngine = {
                 gain.gain.setValueAtTime(0.0001, t);
                 gain.gain.exponentialRampToValueAtTime(peak, t + a);
                 gain.gain.exponentialRampToValueAtTime(0.0001, t + a + 2.0 + 1.2);
+                // 共享慢颤音：让常驻垫底有呼吸感（去电子化）
+                if (i === 0) {
+                    const vib = ctx.createOscillator(); vib.type = 'sine'; vib.frequency.value = 4.5;
+                    const vibG = ctx.createGain(); vibG.gain.value = 3;
+                    vib.connect(vibG); vibG.connect(o1.detune); vibG.connect(o2.detune);
+                    vib.start(t); vib.stop(t + a + 2.0 + 1.2 + 0.05); nodes.push(vib);
+                }
                 o1.connect(lp); o2.connect(lp); lp.connect(gain);
                 if (this.reverbSend) { const sg = ctx.createGain(); sg.gain.value = 0.5; gain.connect(sg); sg.connect(this.reverbSend); }
                 gain.connect(bus);
@@ -276,7 +280,7 @@ const AudioEngine = {
     maxVoices: 24,
     voices: [],
     muted: false,
-    volumes: { master: 0.9, sfx: 0.8, ui: 0.9, music: 0.7, ambience: 0.6 },
+    volumes: { master: 0.9, sfx: 0.8, ui: 0.9, music: 0.6, ambience: 0.6 },
     _nbuf: null,
     _throttles: {},
 
@@ -296,13 +300,15 @@ const AudioEngine = {
             if (!AC) return false;
             const ctx = new AC();
             this.ctx = ctx;
-            // master -> limiter(限幅) -> destination
+            // master -> 柔和饱和(去数字锐边,粘合) -> limiter(限幅) -> destination
             const master = ctx.createGain();
             master.gain.value = this.volumes.master;
+            const shaper = ctx.createWaveShaper();
+            shaper.curve = this._softCurve(0.7); shaper.oversample = '2x';
             const limiter = ctx.createDynamicsCompressor();
             limiter.threshold.value = -3; limiter.knee.value = 0; limiter.ratio.value = 20;
             limiter.attack.value = 0.003; limiter.release.value = 0.25;
-            master.connect(limiter); limiter.connect(ctx.destination);
+            master.connect(shaper); shaper.connect(limiter); limiter.connect(ctx.destination);
             // 各总线
             const sfxBus = ctx.createGain(); sfxBus.gain.value = this.volumes.sfx; sfxBus.connect(master);
             const uiBus = ctx.createGain(); uiBus.gain.value = this.volumes.ui; uiBus.connect(master);
@@ -322,7 +328,7 @@ const AudioEngine = {
             }
             conv.buffer = ir;
             reverbSend.connect(conv); conv.connect(reverbReturn);
-            this.buses = { master, limiter, sfx: sfxBus, ui: uiBus, music: musicBus, ambience: ambienceBus, musicLP, reverbSend, reverbReturn, conv };
+            this.buses = { master, shaper, limiter, sfx: sfxBus, ui: uiBus, music: musicBus, ambience: ambienceBus, musicLP, reverbSend, reverbReturn, conv };
             try { MusicEngine.init(this.ctx, this.buses); } catch (e) {}
             return true;
         } catch (e) {
@@ -352,6 +358,16 @@ const AudioEngine = {
         return b;
     },
 
+    // 柔和饱和曲线：轻 tanh 软削波，给全曲一点暖与粘合，消除数字边缘
+    _softCurve(k) {
+        const n = 1024, c = new Float32Array(n);
+        for (let i = 0; i < n; i++) {
+            const x = (i / (n - 1)) * 2 - 1;
+            c[i] = Math.tanh(x * k) / Math.tanh(k);
+        }
+        return c;
+    },
+
     _panner(pan) {
         const p = this.ctx.createStereoPanner();
         p.pan.value = Math.max(-1, Math.min(1, pan));
@@ -374,14 +390,26 @@ const AudioEngine = {
             osc.frequency.exponentialRampToValueAtTime(Math.max(1, o.freqEnd), t + a + d + r);
         }
         if (o.detune) osc.detune.setValueAtTime(o.detune, t);
+        // 颤音：慢 LFO 微调 detune，让稳态音有生命感（去电子化）
+        if (o.vibrato) {
+            const lfo = ctx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = o.vibrato.rate || 5;
+            const lfoG = ctx.createGain(); lfoG.gain.value = o.vibrato.depth || 4;
+            lfo.connect(lfoG); lfoG.connect(osc.detune);
+            lfo.start(t); lfo.stop(t + a + d + r + 0.05); nodes.push(lfo);
+        }
         const g = ctx.createGain();
         g.gain.setValueAtTime(0.0001, t);
         g.gain.exponentialRampToValueAtTime(peak, t + a);
         g.gain.exponentialRampToValueAtTime(Math.max(0.0001, peak * (1 - s)), t + a + d);
         g.gain.exponentialRampToValueAtTime(0.0001, t + a + d + r);
+        // 暖低通：削掉振荡器的数字锐边（去电子化）
+        let head = osc;
+        if (o.lp) { const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = o.lp; lp.Q.value = o.lpQ || 0.7; head.connect(lp); head = lp; }
+        head.connect(g);
         if (o.pan) { const p = this._panner(o.pan); g.connect(p); p.connect(bus); } else { g.connect(bus); }
         if (o.send && this.buses.reverbSend) { const sg = ctx.createGain(); sg.gain.value = o.send; g.connect(sg); sg.connect(this.buses.reverbSend); }
-        osc.connect(g);
+        // 实体瞬态：极短带通噪声，制造拨/木的触感（去电子化）
+        if (o.click) { this._noise(bus, nodes, { filterType: 'bandpass', filterFreq: o.click.freq || 1800, filterQ: o.click.q || 1.2, a: 0.001, d: o.click.dur || 0.03, peak: o.click.peak || 0.18, t0: t }); }
         osc.start(t);
         osc.stop(t + a + d + r + 0.05);
         nodes.push(osc);
@@ -495,6 +523,10 @@ const AudioEngine = {
                 if (!el) return;
                 if (el.closest('#hand-cards')) return;       // 手牌由 playCard 处理
                 if (el.classList.contains('map-node')) return; // 节点由 enterNode 处理
+                // 节流：连点只响第一下，避免机关枪式堆叠
+                const _now = performance.now();
+                if (this._uiLast && _now - this._uiLast < 70) return;
+                this._uiLast = _now;
                 if (el.id && el.id.indexOf('close-') === 0) { playSFX(SFX_TYPES.panel_close); return; }
                 if (el.id && el.id.indexOf('view-') === 0) { playSFX(SFX_TYPES.panel_open); return; }
                 playSFX(SFX_TYPES.button_click);
@@ -516,9 +548,9 @@ const AudioEngine = {
 
 // 程序化合成配方（每个事件路径对应一段 Web Audio 图）
 const RECIPES = {
-    ui_button_click: { dur: 0.09, bus: 'ui', priority: 0, build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 620, freqEnd: 880, a: 0.004, d: 0.05, r: 0.03, peak: 0.22 }); } },
-    ui_panel_open: { dur: 0.2, bus: 'ui', priority: 0, build: (e, b, n) => { e._tone(b, n, { type: 'triangle', freq: 280, freqEnd: 520, a: 0.02, d: 0.12, r: 0.05, peak: 0.22, send: 0.2 }); } },
-    ui_panel_close: { dur: 0.18, bus: 'ui', priority: 0, build: (e, b, n) => { e._tone(b, n, { type: 'triangle', freq: 520, freqEnd: 280, a: 0.02, d: 0.1, r: 0.05, peak: 0.2, send: 0.15 }); } },
+    ui_button_click: { dur: 0.09, bus: 'ui', priority: 0, build: (e, b, n) => { e._noise(b, n, { filterType: 'bandpass', filterFreq: 1400, filterQ: 1.0, a: 0.001, d: 0.04, peak: 0.2 }); e._tone(b, n, { type: 'triangle', freq: 420, freqEnd: 300, a: 0.003, d: 0.05, r: 0.02, peak: 0.14, lp: 1600 }); } },
+    ui_panel_open: { dur: 0.2, bus: 'ui', priority: 0, build: (e, b, n) => { e._tone(b, n, { type: 'triangle', freq: 280, freqEnd: 520, a: 0.02, d: 0.12, r: 0.05, peak: 0.13, send: 0.2 }); } },
+    ui_panel_close: { dur: 0.18, bus: 'ui', priority: 0, build: (e, b, n) => { e._tone(b, n, { type: 'triangle', freq: 520, freqEnd: 280, a: 0.02, d: 0.1, r: 0.05, peak: 0.12, send: 0.15 }); } },
     ui_toggle_on: { dur: 0.14, bus: 'ui', priority: 0, build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 760, a: 0.003, d: 0.04, r: 0.03, peak: 0.2 }); e._tone(b, n, { type: 'sine', freq: 1040, a: 0.003, d: 0.04, r: 0.03, peak: 0.18, t0: e.now() + 0.06 }); } },
     ui_denied: { dur: 0.2, bus: 'ui', priority: 0, build: (e, b, n) => { e._tone(b, n, { type: 'square', freq: 180, freqEnd: 120, a: 0.004, d: 0.14, r: 0.04, peak: 0.26 }); } },
 
@@ -529,10 +561,10 @@ const RECIPES = {
 
     cards_draw: { dur: 0.2, bus: 'sfx', build: (e, b, n) => { e._noise(b, n, { filterType: 'highpass', filterFreq: 2600, a: 0.01, d: 0.14, peak: 0.2 }); } },
     cards_hover: { dur: 0.05, bus: 'ui', priority: 0, build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 1200, a: 0.002, d: 0.02, r: 0.02, peak: 0.06 }); } },
-    cards_play_attack: { dur: 0.24, bus: 'sfx', build: (e, b, n, o) => { const ds = Math.max(0.6, Math.min(2.2, (o.damage || 6) / 6)); const f = 170 * ds; e._tone(b, n, { type: 'sawtooth', freq: f, a: 0.003, d: 0.16, r: 0.04, peak: 0.32, send: 0.05 }); e._noise(b, n, { filterType: 'bandpass', filterFreq: 2200, filterQ: 1.2, a: 0.002, d: 0.07, peak: 0.3 }); } },
-    cards_play_defense: { dur: 0.55, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 140, a: 0.04, d: 0.3, r: 0.18, peak: 0.3, send: 0.1 }); e._tone(b, n, { type: 'sine', freq: 140 * 2.01, detune: 6, a: 0.04, d: 0.3, r: 0.18, peak: 0.12, send: 0.1 }); } },
-    cards_play_skill: { dur: 0.55, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 330, a: 0.05, d: 0.25, r: 0.2, peak: 0.24, send: 0.5 }); e._tone(b, n, { type: 'sine', freq: 330 * 1.5, detune: 8, a: 0.05, d: 0.25, r: 0.2, peak: 0.14, send: 0.5 }); e._tone(b, n, { type: 'sine', freq: 1320, a: 0.05, d: 0.2, r: 0.15, peak: 0.06, send: 0.5 }); } },
-    cards_play_curse: { dur: 0.5, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 90, a: 0.02, d: 0.3, r: 0.18, peak: 0.3, send: 0.2 }); e._tone(b, n, { type: 'sine', freq: 90 * 1.06, detune: 4, a: 0.02, d: 0.3, r: 0.18, peak: 0.2, send: 0.2 }); e._noise(b, n, { filterType: 'lowpass', filterFreq: 600, a: 0.02, d: 0.3, peak: 0.12 }); } },
+    cards_play_attack: { dur: 0.24, bus: 'sfx', build: (e, b, n, o) => { const ds = Math.max(0.6, Math.min(2.2, (o.damage || 6) / 6)); const f = 170 * ds; e._tone(b, n, { type: 'sawtooth', freq: f, a: 0.003, d: 0.16, r: 0.04, peak: 0.2, lp: 2600, click: { freq: 2200, peak: 0.15, dur: 0.05 } }); e._noise(b, n, { filterType: 'bandpass', filterFreq: 2200, filterQ: 1.2, a: 0.002, d: 0.07, peak: 0.13 }); } },
+    cards_play_defense: { dur: 0.55, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 140, a: 0.04, d: 0.3, r: 0.18, peak: 0.2, send: 0.1, vibrato: { rate: 5, depth: 3 } }); e._tone(b, n, { type: 'sine', freq: 140 * 2.01, detune: 6, a: 0.04, d: 0.3, r: 0.18, peak: 0.09, send: 0.1 }); } },
+    cards_play_skill: { dur: 0.55, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 330, a: 0.05, d: 0.25, r: 0.2, peak: 0.18, send: 0.5 }); e._tone(b, n, { type: 'sine', freq: 330 * 1.5, detune: 8, a: 0.05, d: 0.25, r: 0.2, peak: 0.1, send: 0.5 }); e._tone(b, n, { type: 'sine', freq: 1320, a: 0.05, d: 0.2, r: 0.15, peak: 0.05, send: 0.5 }); } },
+    cards_play_curse: { dur: 0.5, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 90, a: 0.02, d: 0.3, r: 0.18, peak: 0.2, send: 0.2 }); e._tone(b, n, { type: 'sine', freq: 90 * 1.06, detune: 4, a: 0.02, d: 0.3, r: 0.18, peak: 0.14, send: 0.2 }); e._noise(b, n, { filterType: 'lowpass', filterFreq: 600, a: 0.02, d: 0.3, peak: 0.08 }); } },
     cards_upgrade: { dur: 0.28, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 500, freqEnd: 760, a: 0.01, d: 0.12, r: 0.08, peak: 0.3, send: 0.3 }); e._tone(b, n, { type: 'sine', freq: 760, a: 0.01, d: 0.1, r: 0.08, peak: 0.18, t0: e.now() + 0.1, send: 0.3 }); } },
     cards_remove: { dur: 0.22, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 520, freqEnd: 300, a: 0.01, d: 0.12, r: 0.08, peak: 0.22, send: 0.1 }); } },
     cards_shuffle: { dur: 0.36, bus: 'sfx', build: (e, b, n) => { for (let i = 0; i < 4; i++) e._noise(b, n, { filterType: 'bandpass', filterFreq: 1500, filterQ: 0.8, a: 0.005, d: 0.05, peak: 0.14, t0: e.now() + i * 0.07 }); } },
@@ -540,19 +572,19 @@ const RECIPES = {
     combat_hit_enemy: { dur: 0.16, bus: 'sfx', build: (e, b, n, o) => { const ds = Math.max(0.7, Math.min(2, (o.amount || 8) / 8)); e._noise(b, n, { filterType: 'bandpass', filterFreq: 1500 * Math.min(1.6, ds), filterQ: 1, a: 0.001, d: 0.1, peak: 0.36 }); e._tone(b, n, { type: 'triangle', freq: 90 * Math.min(1.5, ds), a: 0.001, d: 0.08, r: 0.03, peak: 0.3 }); } },
     combat_hit_player: { dur: 0.18, bus: 'sfx', build: (e, b, n, o) => { e._noise(b, n, { filterType: 'lowpass', filterFreq: 900, a: 0.001, d: 0.1, peak: 0.34, pan: -0.2 }); e._tone(b, n, { type: 'square', freq: 70, a: 0.001, d: 0.09, r: 0.03, peak: 0.28, pan: -0.2 }); } },
     combat_block_gain: { dur: 0.28, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 190, a: 0.02, d: 0.1, r: 0.12, peak: 0.3 }); e._tone(b, n, { type: 'sine', freq: 190 * 2.76, a: 0.02, d: 0.12, r: 0.12, peak: 0.1, send: 0.15 }); } },
-    combat_heal: { dur: 0.42, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 440, freqEnd: 660, a: 0.03, d: 0.2, r: 0.15, peak: 0.28, send: 0.3 }); } },
+    combat_heal: { dur: 0.42, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 440, freqEnd: 660, a: 0.03, d: 0.2, r: 0.15, peak: 0.26, send: 0.3, vibrato: { rate: 5.5, depth: 4 }, lp: 3000 }); } },
     combat_debuff: { dur: 0.32, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sawtooth', freq: 300, freqEnd: 190, a: 0.01, d: 0.2, r: 0.1, peak: 0.26 }); } },
     combat_buff: { dur: 0.32, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'triangle', freq: 300, freqEnd: 500, a: 0.01, d: 0.2, r: 0.1, peak: 0.26, send: 0.2 }); } },
     combat_status_tick: { dur: 0.06, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 1500, a: 0.001, d: 0.02, r: 0.02, peak: 0.1 }); } },
     combat_energy_gain: { dur: 0.14, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'triangle', freq: 880, freqEnd: 1170, a: 0.003, d: 0.06, r: 0.04, peak: 0.24 }); } },
     combat_enemy_death: { dur: 0.55, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sawtooth', freq: 400, freqEnd: 80, a: 0.01, d: 0.4, r: 0.12, peak: 0.34, send: 0.2 }); e._noise(b, n, { filterType: 'lowpass', filterFreq: 1200, a: 0.01, d: 0.3, peak: 0.2, send: 0.1 }); } },
-    combat_player_hurt: { dur: 0.32, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 140, freqEnd: 90, a: 0.01, d: 0.2, r: 0.1, peak: 0.32 }); e._noise(b, n, { filterType: 'lowpass', filterFreq: 500, a: 0.01, d: 0.2, peak: 0.16 }); } },
+    combat_player_hurt: { dur: 0.32, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 140, freqEnd: 90, a: 0.01, d: 0.2, r: 0.1, peak: 0.2 }); e._noise(b, n, { filterType: 'lowpass', filterFreq: 500, a: 0.01, d: 0.2, peak: 0.11 }); } },
 
-    enemy_attack_windup: { dur: 0.32, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sawtooth', freq: 200, freqEnd: 420, a: 0.05, d: 0.2, r: 0.06, peak: 0.22, detune: 6 }); } },
+    enemy_attack_windup: { dur: 0.32, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sawtooth', freq: 200, freqEnd: 420, a: 0.05, d: 0.2, r: 0.06, peak: 0.22, detune: 6, lp: 1000 }); } },
     enemy_spawn: { dur: 0.5, bus: 'sfx', build: (e, b, n) => { e._noise(b, n, { filterType: 'bandpass', filterFreq: 600, filterQ: 0.6, a: 0.05, d: 0.35, r: 0.05, peak: 0.22, send: 0.2 }); e._tone(b, n, { type: 'sine', freq: 80, a: 0.02, d: 0.3, r: 0.1, peak: 0.28 }); } },
-    enemy_boss_intro: { dur: 1.2, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sawtooth', freq: 60, freqEnd: 55, a: 0.1, d: 0.8, r: 0.3, peak: 0.42, send: 0.5 }); e._tone(b, n, { type: 'sine', freq: 90, detune: 10, a: 0.1, d: 0.8, r: 0.3, peak: 0.2, send: 0.4 }); } },
-    enemy_boss_roar: { dur: 1.0, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sawtooth', freq: 55, freqEnd: 40, a: 0.02, d: 0.7, r: 0.25, peak: 0.46, send: 0.4, detune: 5 }); e._noise(b, n, { filterType: 'lowpass', filterFreq: 800, a: 0.02, d: 0.6, peak: 0.3, send: 0.3 }); } },
-    enemy_boss_phase_shift: { dur: 0.85, bus: 'sfx', build: (e, b, n) => { [110, 110 * 1.41, 110 * 1.68].forEach(f => e._tone(b, n, { type: 'sawtooth', freq: f, a: 0.01, d: 0.5, r: 0.25, peak: 0.3, send: 0.5, detune: 8 })); e._noise(b, n, { filterType: 'bandpass', filterFreq: 2000, filterQ: 0.8, a: 0.005, d: 0.2, peak: 0.3 }); } },
+    enemy_boss_intro: { dur: 1.2, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sawtooth', freq: 60, freqEnd: 55, a: 0.1, d: 0.8, r: 0.3, peak: 0.42, send: 0.5, lp: 700 }); e._tone(b, n, { type: 'sine', freq: 90, detune: 10, a: 0.1, d: 0.8, r: 0.3, peak: 0.2, send: 0.4 }); } },
+    enemy_boss_roar: { dur: 1.0, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sawtooth', freq: 55, freqEnd: 40, a: 0.02, d: 0.7, r: 0.25, peak: 0.46, send: 0.4, detune: 5, lp: 600 }); e._noise(b, n, { filterType: 'lowpass', filterFreq: 800, a: 0.02, d: 0.6, peak: 0.3, send: 0.3 }); } },
+    enemy_boss_phase_shift: { dur: 0.85, bus: 'sfx', build: (e, b, n) => { [110, 110 * 1.41, 110 * 1.68].forEach(f => e._tone(b, n, { type: 'sawtooth', freq: f, a: 0.01, d: 0.5, r: 0.25, peak: 0.3, send: 0.5, detune: 8, lp: 900 })); e._noise(b, n, { filterType: 'bandpass', filterFreq: 2000, filterQ: 0.8, a: 0.005, d: 0.2, peak: 0.3 }); } },
 
     economy_gold_gain: { dur: 0.2, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 880, a: 0.003, d: 0.05, r: 0.04, peak: 0.28 }); e._tone(b, n, { type: 'sine', freq: 1320, a: 0.003, d: 0.06, r: 0.04, peak: 0.24, t0: e.now() + 0.07 }); } },
     economy_gold_spend: { dur: 0.14, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 680, freqEnd: 440, a: 0.003, d: 0.08, r: 0.04, peak: 0.24 }); } },
@@ -576,7 +608,7 @@ const RECIPES = {
     meta_level_up: { dur: 0.6, bus: 'sfx', build: (e, b, n) => { [660, 990, 1320].forEach((f, i) => e._tone(b, n, { type: 'sine', freq: f, a: 0.005, d: 0.12, r: 0.1, peak: 0.26, t0: e.now() + i * 0.08, send: 0.4 })); } },
     meta_achievement: { dur: 0.7, bus: 'sfx', build: (e, b, n) => { e._tone(b, n, { type: 'sine', freq: 880, a: 0.005, d: 0.3, r: 0.2, peak: 0.26, send: 0.4 }); e._tone(b, n, { type: 'sine', freq: 1320, a: 0.005, d: 0.3, r: 0.2, peak: 0.16, t0: e.now() + 0.06, send: 0.4 }); } },
 
-    screen_transition: { dur: 0.26, bus: 'sfx', build: (e, b, n) => { e._noise(b, n, { filterType: 'bandpass', filterFreq: 300, filterQ: 0.6, a: 0.04, d: 0.18, r: 0.04, peak: 0.1, send: 0.2 }); } }
+    screen_transition: { dur: 0.26, bus: 'sfx', build: (e, b, n) => { e._noise(b, n, { filterType: 'bandpass', filterFreq: 300, filterQ: 0.6, a: 0.04, d: 0.18, r: 0.04, peak: 0.06, send: 0.2 }); } }
 };
 
 // 全局安全分发器：任何地方都能直接调用，音频错误绝不影响玩法
@@ -5626,8 +5658,9 @@ function winBattle() {
     // 战斗胜利后保存进度
     saveGame();
 
-    // 重置 Boss 战卡牌选择标志
+    // 重置 Boss 战卡牌/遗物选择标志
     window.bossCardSelected = false;
+    window.bossRelicSelected = false;
 
     // 计算奖励(精英战奖励翻倍)
     const isBoss = gameState.battle.enemy.pattern === 'boss';
@@ -5726,7 +5759,10 @@ function winBattle() {
             addCardToDeck(cardId);
 
             if (isBoss) {
-                // Boss 战需要选择遗物后才继续
+                // Boss 战需卡牌与遗物均选完才继续;若遗物已选则进入下一层
+                if (window.bossRelicSelected) {
+                    enterNextFloor();
+                }
                 return;
             }
             // 非 Boss 战胜利,返回地图,但不清空路径和节点类型(同一层内保持不变)
@@ -5759,48 +5795,13 @@ function winBattle() {
         `;
         const bannerEl = relicContainer.querySelector('.relic-banner');
         bannerEl.addEventListener('click', () => {
+            if (window.bossRelicSelected) return;   // 已领取,忽略重复点击
+            window.bossRelicSelected = true;
             addRelic(randomRelic);
             alert('获得遗物:' + relicData.name + '!\n\n' + relicData.desc);
-
-            // 进入下一层
-            gameState.map.floor++;
-            if (gameState.mode === 'endless') {
-                gameState.endlessFloor++;
-            }
-
-            // P3: 层间过渡文本
-            const floor = gameState.map.floor;
-            if (FLOOR_TRANSITIONS[floor]) {
-                setTimeout(() => alert(FLOOR_TRANSITIONS[floor]), 300);
-            }
-
-            // 恢复血量(无尽模式只恢复 50%，正常模式满血)
-            if (gameState.mode === 'endless') {
-                gameState.player.hp = Math.min(gameState.player.maxHp, gameState.player.hp + Math.floor(gameState.player.maxHp * 0.5));
-            } else {
-                gameState.player.hp = gameState.player.maxHp;
-            }
-            document.getElementById('player-hp').textContent = `${gameState.player.hp}/${gameState.player.maxHp}`;
-
-            // 清空路径、节点类型和已完成节点数据,让下一层生成新数据
-            gameState.map.paths = [];
-            gameState.map.nodeTypes = null;
-            gameState.map.completedNodes.clear();  // 清空已完成节点,否则新层的第一行会被锁定
-            gameState.map.currentNode = null;
-
-            // 无尽模式逻辑：每 4 层一个 Boss 循环
-            if (gameState.mode === 'endless') {
-                // 无尽模式不结束，继续循环
-                gameState.map.floor = ((gameState.map.floor - 1) % 4) + 1;
-                setEndlessBestFloor(gameState.endlessFloor);
-                saveGame();
-                showScreen('map-screen');
-                generateMap();
-            } else if (gameState.map.floor > 3) {
-                gameOver(true);
-            } else {
-                showScreen('map-screen');
-                generateMap();
+            // 仅当卡牌也已选择时才进入下一层;否则继续等待玩家选择卡牌
+            if (window.bossCardSelected) {
+                enterNextFloor();
             }
         });
     } else if (isElite) {
@@ -5835,6 +5836,49 @@ function winBattle() {
     }
 
     showScreen('reward-screen');
+}
+
+// Boss 战胜利后进入下一层的统一逻辑(需卡牌与遗物均选完才调用)
+function enterNextFloor() {
+    gameState.map.floor++;
+    if (gameState.mode === 'endless') {
+        gameState.endlessFloor++;
+    }
+
+    // P3: 层间过渡文本
+    const floor = gameState.map.floor;
+    if (FLOOR_TRANSITIONS[floor]) {
+        setTimeout(() => alert(FLOOR_TRANSITIONS[floor]), 300);
+    }
+
+    // 恢复血量(无尽模式只恢复 50%，正常模式满血)
+    if (gameState.mode === 'endless') {
+        gameState.player.hp = Math.min(gameState.player.maxHp, gameState.player.hp + Math.floor(gameState.player.maxHp * 0.5));
+    } else {
+        gameState.player.hp = gameState.player.maxHp;
+    }
+    document.getElementById('player-hp').textContent = `${gameState.player.hp}/${gameState.player.maxHp}`;
+
+    // 清空路径、节点类型和已完成节点数据,让下一层生成新数据
+    gameState.map.paths = [];
+    gameState.map.nodeTypes = null;
+    gameState.map.completedNodes.clear();  // 清空已完成节点,否则新层的第一行会被锁定
+    gameState.map.currentNode = null;
+
+    // 无尽模式逻辑：每 4 层一个 Boss 循环
+    if (gameState.mode === 'endless') {
+        // 无尽模式不结束，继续循环
+        gameState.map.floor = ((gameState.map.floor - 1) % 4) + 1;
+        setEndlessBestFloor(gameState.endlessFloor);
+        saveGame();
+        showScreen('map-screen');
+        generateMap();
+    } else if (gameState.map.floor > 3) {
+        gameOver(true);
+    } else {
+        showScreen('map-screen');
+        generateMap();
+    }
 }
 
 function healPlayer(amount) {
@@ -6667,6 +6711,16 @@ function showChangelogPanel() {
 
 const entries = [
     {
+        version: 'v4.0.5',
+        date: '2026-07-13',
+        type: 'fix',
+        title: '🐛 BUG 修复：更新日志排序 + Boss 胜利漏选卡牌',
+        changes: [
+            { type: 'fix', text: '<span class="changelog-highlight">更新日志排序</span>：渲染前按「日期倒序 + 版本倒序」排序，确保最新版本始终置顶，不受数组书写顺序影响' },
+            { type: 'fix', text: '<span class="changelog-highlight">Boss 胜利流程</span>：卡牌与遗物均须选择后才进入下一层，修复「先选遗物即跳层、无法再选卡牌」的问题（抽出统一 enterNextFloor）' }
+        ]
+    },
+    {
         version: 'v4.0.2',
         date: '2026-07-10',
         type: 'add',
@@ -6675,6 +6729,28 @@ const entries = [
             { type: 'add', text: '<span class="changelog-highlight">程序化音乐</span>：Web Audio 实时合成，5 楼层调式（Dorian/Phrygian/Mixolydian/Locrian/Diminished）' },
             { type: 'add', text: '<span class="changelog-highlight">强度分层</span>：探索垫底常驻，战斗渐入低音/琶音/鼓点，Boss 二阶段加张力层' },
             { type: 'add', text: '<span class="changelog-highlight">无缝过渡</span>：CombatIntensity 平滑爬升(≈3s)，tempo 同步无硬切；低血量复用音乐低通' }
+        ]
+    },
+    {
+        version: 'v4.0.3',
+        date: '2026-07-13',
+        type: 'optimize',
+        title: '🎛 音效打磨：降密度 + 去电子化',
+        changes: [
+            { type: 'optimize', text: '<span class="changelog-highlight">UI 降噪</span>：委托式点击音加 70ms 节流（连点只响第一下），面板开关音增益下调，切屏 whoosh 降低' },
+            { type: 'optimize', text: '<span class="changelog-highlight">音乐减法</span>：鼓点只留强拍、琶音稀释到四分音符并加留白，各层增益下调，music 总线 0.7→0.6' },
+            { type: 'optimize', text: '<span class="changelog-highlight">去电子化</span>：master 加柔和饱和 WaveShaper；持续音加颤音/暖低通；攻击加实体噪声瞬态；UI 点击改木质 tick' }
+        ]
+    },
+    {
+        version: 'v4.0.4',
+        date: '2026-07-13',
+        type: 'optimize',
+        title: '🔉 出牌/受击音效降噪',
+        changes: [
+            { type: 'optimize', text: '<span class="changelog-highlight">出牌四型</span>：攻击/防御/技能/诅咒峰值统一下调约 30%（攻击亮噪声与拨弦瞬态砍得更狠，减「吵」感）' },
+            { type: 'optimize', text: '<span class="changelog-highlight">受击音</span>：combat_player_hurt 主音 0.32→0.2、低频噪声 0.16→0.11，被击中不再刺耳' },
+            { type: 'optimize', text: '<span class="changelog-highlight">未动部分</span>：背景音乐、格挡、敌方受击、经济等音效保持不变' }
         ]
     },
     {
@@ -6919,7 +6995,18 @@ const entries = [
 ];
 
     list.innerHTML = '';
-    entries.forEach(entry => {
+    const sortedEntries = [...entries].sort((a, b) => {
+        const da = a.date || '0000-00-00', db = b.date || '0000-00-00';
+        if (da !== db) return db < da ? -1 : 1;
+        const pa = (a.version || 'v0.0.0').replace(/^v/, '').split('.').map(n => parseInt(n, 10) || 0);
+        const pb = (b.version || 'v0.0.0').replace(/^v/, '').split('.').map(n => parseInt(n, 10) || 0);
+        for (let i = 0; i < 3; i++) {
+            const va = pa[i] || 0, vb = pb[i] || 0;
+            if (va !== vb) return vb - va;
+        }
+        return 0;
+    });
+    sortedEntries.forEach(entry => {
         const el = document.createElement('div');
         el.className = 'changelog-entry';
         const changesHtml = entry.changes.map(c => {
